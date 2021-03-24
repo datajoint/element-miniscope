@@ -64,13 +64,14 @@ def get_imaging_root_data_dir() -> str:
 @schema
 class ProcessingMethod(dj.Lookup):
     definition = """
-    processing_method: char(8)
+    processing_method: char(24)
     ---
     processing_method_desc: varchar(1000)
     """
 
     contents = [('suite2p', 'suite2p analysis suite'),
-                ('caiman', 'caiman analysis suite')]
+                ('caiman', 'caiman analysis suite'),
+                ('miniscope_analysis', 'miniscope analysis suite')]
 
 
 @schema
@@ -83,12 +84,14 @@ class ProcessingParamSet(dj.Lookup):
     param_set_hash: uuid
     unique index (param_set_hash)
     params: longblob  # dictionary of all applicable parameters
+    package_version=null: varchar(16)
     """
 
     @classmethod
     def insert_new_params(cls, processing_method: str, paramset_idx: int,
                           paramset_desc: str, params: dict):
         param_dict = {'processing_method': processing_method,
+                      'package_version': package_version,
                       'paramset_idx': paramset_idx,
                       'paramset_desc': paramset_desc,
                       'params': params,
@@ -476,6 +479,23 @@ class MotionCorrection(dj.Imported):
                         'max_image'][...][np.newaxis, ...])]
             self.Summary.insert(summary_images)
 
+        elif method == 'miniscope_analysis':
+            from .readers import miniscope_analysis_loader
+
+            data_dir = pathlib.Path(get_miniscope_analysis_dir(key))
+            loaded_miniscope_analysis = miniscope_analysis_loader.MiniscopeAnalysis(data_dir)
+
+            # TODO: add motion correction and block data
+
+            # -- summary images --
+            mc_key = (scan.ScanInfo.Field * ProcessingTask & key).fetch1('KEY')
+            summary_imgs.append({**mc_key,
+                                 'average_image': loaded_miniscope_analysis.average_image,
+                                 'correlation_image': loaded_miniscope_analysis.correlation_image})
+
+            self.insert1({**key, 'mc_channel': loaded_miniscope_analysis.alignment_channel})
+            self.Summary.insert(summary_imgs)
+
         else:
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
 
@@ -597,18 +617,44 @@ class Segmentation(dj.Computed):
                                                    ignore_extra_fields=True,
                                                    allow_direct_insert=True)
 
+        elif method == 'miniscope_analysis':
+            from .readers import miniscope_analysis_loader
+
+            data_dir = pathlib.Path(get_miniscope_analysis_dir(key))
+            loaded_miniscope_analysis = miniscope_analysis_loader.MiniscopeAnalysis(data_dir)
+
+            # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
+            params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
+            seg_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
+
+            masks = []
+            for mask in loaded_miniscope_analysis.masks:
+                masks.append({**key, 
+                              'seg_channel': seg_channel,
+                              'mask': mask['mask_id'],
+                              'mask_npix': mask['mask_npix'],
+                              'mask_center_x': mask['mask_center_x'],
+                              'mask_center_y': mask['mask_center_y'],
+                              'mask_xpix': mask['mask_xpix'],
+                              'mask_ypix': mask['mask_ypix'],
+                              'mask_weights': mask['mask_weights']})
+
+            self.insert1(key)
+            self.Mask.insert(masks, ignore_extra_fields=True)            
+
         else:
-            raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
+            raise NotImplementedError(f'Unknown/unimplemented method: {method}')
 
 
 @schema
 class MaskClassificationMethod(dj.Lookup):
     definition = """
-    mask_classification_method: varchar(32)
+    mask_classification_method: varchar(48)
     """
 
     contents = zip(['suite2p_default_classifier',
-                    'caiman_default_classifier'])
+                    'caiman_default_classifier',
+                    'miniscope_analysis_default_classifier'])
 
 
 @schema
@@ -694,6 +740,27 @@ class Fluorescence(dj.Computed):
 
             self.insert1(key)
             self.Trace.insert(fluo_traces)
+        
+        elif method == 'miniscope_analysis':
+            from .readers import miniscope_analysis_loader
+
+            data_dir = pathlib.Path(get_miniscope_analysis_dir(key))
+            loaded_miniscope_analysis = miniscope_analysis_loader.MiniscopeAnalysis(data_dir)
+
+            # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
+            params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
+            seg_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
+
+            fluo_traces = []
+            for mask in loaded_miniscope_analysis.masks:
+                fluo_traces.append({**key, 
+                                    'mask': mask['mask_id'], 
+                                    'fluo_channel': seg_channel,
+                                    'fluorescence': mask['raw_trace']})
+
+            self.insert1(key)
+            self.Trace.insert(fluo_traces)
+        
         else:
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
 
@@ -704,7 +771,7 @@ class ActivityExtractionMethod(dj.Lookup):
     extraction_method: varchar(32)
     """
 
-    contents = zip(['suite2p_deconvolution', 'caiman_deconvolution', 'caiman_dff'])
+    contents = zip(['suite2p_deconvolution', 'caiman_deconvolution', 'caiman_dff', 'miniscope_analysis_deconvolution', 'miniscope_analysis_dff'])
 
 
 @schema
@@ -769,6 +836,28 @@ class Activity(dj.Computed):
                         **key, 'mask': mask['mask_id'],
                         'fluo_channel': segmentation_channel,
                         'activity_trace': mask[attr_mapper[key['extraction_method']]]})
+                self.insert1(key)
+                self.Trace.insert(activities)
+
+        elif method == 'miniscope_analysis':
+            if key['extraction_method'] in ('miniscope_analysis_deconvolution', 'miniscope_analysis_dff'):
+                attr_mapper = {'miniscope_analysis_deconvolution': 'spikes', 'miniscope_analysis_dff': 'dff'}
+
+                from .readers import miniscope_analysis_loader
+
+                data_dir = pathlib.Path(get_miniscope_analysis_dir(key))
+                loaded_miniscope_analysis = miniscope_analysis_loader.MiniscopeAnalysis(data_dir)
+
+                # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
+                params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
+                seg_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
+
+                activities = []
+                for mask in loaded_miniscope_analysis.masks:
+                    activities.append({**key, 
+                                       'mask': mask['mask_id'],
+                                       'fluo_channel': seg_channel,
+                                       'activity_trace': mask[attr_mapper[key['extraction_method']]]})
                 self.insert1(key)
                 self.Trace.insert(activities)
 

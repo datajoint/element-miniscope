@@ -1,6 +1,6 @@
-# DataJoint Element - Functional Calcium Imaging
+# DataJoint Element - Miniscope Calcium Imaging
 This repository features DataJoint pipeline design for functional Calcium imaging, 
-with `ScanImage` or `ScanBox` acquisition system and `Suite2p` or `CaImAn` suites for analysis. 
+with `Miniscope DAQ V3` acquisition system and `MiniscopeAnalysis` suite for analysis. 
 
 The element presented here is not a complete workflow by itself,
  but rather a modular design of tables and dependencies specific to the functional Calcium imaging workflow. 
@@ -13,9 +13,9 @@ See [Background](Background.md) for the background information and development t
 
 ## Element architecture
 
-![elements imaging diagram](images/attached_imaging_element.svg)
+![element miniscope diagram](images/attached_miniscope_element.svg)
 
-+ As the diagram depicts, the imaging element starts immediately downstream from `Session`, and also requires some notion of:
++ As the diagram depicts, `elements-miniscope` starts immediately downstream from `Session`, and also requires some notion of:
 
      + `Scanner` for equipment/device
 
@@ -35,9 +35,9 @@ See [Background](Background.md) for the background information and development t
 
      + For mesoscope scanner, with much wider FOV, there may be multiple fields on one plane. 
 
-### Preprocessing - Motion Correction
+### Motion correction
 
-+ `MotionCorrection` - table containing the motion correction information performed on a scan
++ `MotionCorrection` - motion correction information performed on a scan
 
 + `MotionCorrection.RigidMotionCorrection` - details of the rigid motion correction (e.g. shifting in x, y) at a per `ScanInfo.Field` level
 
@@ -45,7 +45,7 @@ See [Background](Background.md) for the background information and development t
 
 + `MotionCorrection.Summary` - summary images for each `ScanInfo.Field` after motion correction (e.g. average image, correlation image)
     
-### Preprocessing - Segmentation
+### Segmentation
 
 + `Segmentation` - table specifies the segmentation step and its outputs, following the motion correction step.
  
@@ -53,7 +53,7 @@ See [Background](Background.md) for the background information and development t
 
 + `MaskClassification` - classification of `Segmentation.Mask` into different type (e.g. soma, axon, dendrite, artifact, etc.)
 
-### Neural activity 
+### Neural activity extraction
 
 + `Fluorescence` - fluorescence traces extracted from each `Segmentation.Mask`
 
@@ -63,5 +63,5 @@ See [Background](Background.md) for the background information and development t
 
 ## Element usage
 
-+ See [workflow-calcium-imaging](https://github.com/datajoint/workflow-calcium-imaging) 
-repository for an example usage of `element-calcium-imaging`.
++ See [workflow-miniscope](https://github.com/datajoint/workflow-miniscope) 
+repository for an example usage of `element-miniscope`.
