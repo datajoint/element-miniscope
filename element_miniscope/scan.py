@@ -24,10 +24,10 @@ def activate(scan_schema_name, *, create_schema=True, create_tables=True, linkin
                 + get_imaging_root_data_dir() -> str
                     Retrieve the full path for the root data directory (e.g. the mounted drive)
                     :return: a string with full path to the root data directory
-                + get_miniscope_daq_file(scan_key: dict) -> str
-                    Retrieve the Miniscope DAQ file (*.json) associated with a given Scan
+                + get_miniscope_daq_v3_file(scan_key: dict) -> str
+                    Retrieve the Miniscope DAQ V3 files associated with a given Scan
                     :param scan_key: key of a Scan
-                    :return: Miniscope DAQ file full file-path
+                    :return: Miniscope DAQ V3 files full file-path
     """
 
     if isinstance(linking_module, str):
@@ -52,15 +52,17 @@ def get_imaging_root_data_dir() -> str:
     """
     return _linking_module.get_imaging_root_data_dir()
 
-def get_miniscope_daq_file(scan_key: dict) -> str:
+def get_miniscope_daq_v3_files(scan_key: dict) -> str:
     """
-    Retrieve the Miniscope DAQ file (*.json) associated with a given Scan
+    Retrieve the Miniscope DAQ V3 files associated with a given Scan
     :param scan_key: key of a Scan
-    :return: Miniscope DAQ file full file-path
+    :return: Miniscope DAQ V3 files full file-path
     """
-    return _linking_module.get_miniscope_daq_file(scan_key)
+    return _linking_module.get_miniscope_daq_v3_files(scan_key)
+
 
 # ----------------------------- Table declarations -----------------------------
+
 
 @schema
 class AcquisitionSoftware(dj.Lookup):
@@ -111,14 +113,11 @@ class ScanInfo(dj.Imported):
     nchannels            : tinyint   # number of channels
     ndepths              : int       # Number of scanning depths (planes)
     nframes              : int       # number of recorded frames
-    nrois                : tinyint   # number of ROIs
-    x                    : float     # (um) 0 point in the motor coordinate system
-    y                    : float     # (um) 0 point in the motor coordinate system
-    z                    : float     # (um) 0 point in the motor coordinate system
-    fps                  : float     # (Hz) frames per second - Volumetric Scan Rate 
-    bidirectional        : boolean   # true = bidirectional scanning
-    usecs_per_line=null  : float     # microseconds per scan line
-    fill_fraction=null   : float     # raster scan temporal fill fraction
+    nrois                : tinyint   # number of regions of interest
+    x=null               : float     # (um) 0 point in the motor coordinate system
+    y=null               : float     # (um) 0 point in the motor coordinate system
+    z=null               : float     # (um) 0 point in the motor coordinate system
+    fps                  : float     # (Hz) frames per second - volumetric scan rate
     """
 
     class Field(dj.Part):
@@ -130,9 +129,9 @@ class ScanInfo(dj.Imported):
         px_width          : smallint  # width in pixels
         um_height=null    : float     # height in microns
         um_width=null     : float     # width in microns
-        field_x           : float     # (um) center of field in the motor coordinate system
-        field_y           : float     # (um) center of field in the motor coordinate system
-        field_z           : float     # (um) relative depth of field
+        field_x=null      : float     # (um) center of field in the motor coordinate system
+        field_y=null      : float     # (um) center of field in the motor coordinate system
+        field_z=null      : float     # (um) relative depth of field
         delay_image=null  : longblob  # (ms) delay between the start of the scan and pixels in this field
         """
 
@@ -147,21 +146,25 @@ class ScanInfo(dj.Imported):
         acq_software = (Scan & key).fetch1('acq_software')
 
         if acq_software == 'Miniscope-DAQ-V3':
+            # Parse image dimension and frame rate
             import cv2
-            scan_filepaths = get_miniscope_daq_file(key)
-            video = cv2.VideoCapture(scan_filepaths)
-            fps = video.get(cv2.CAP_PROP_FPS) # TODO: Verify correct value
-            ret, frame = video.read()
-            print(np.shape(frame))# TODO: Verify correct order
+            scan_filepaths = get_miniscope_daq_v3_files(key)
+            video = cv2.VideoCapture(scan_filepaths[0])
+            fps = video.get(cv2.CAP_PROP_FPS) # TODO: Verify this method extracts correct value
+            _, frame = video.read()
+
+            # Parse number of frames from timestamp.dat file
+            with open(scan_filepaths[1]) as f:
+                next(f)
+                nframes = sum(1 for line in f if int(line[0]) == 0)
 
             # Insert in ScanInfo
             self.insert1(dict(key,
                               nfields=1,
                               nchannels=1,
-                              nframes=, # TODO: extract from timestamps.dat and count how many frames for cam 0.
+                              nframes=nframes,
                               ndepths=1,
                               fps=fps,
-                              bidirectional=False,
                               nrois=0))
 
             # Insert Field(s)
