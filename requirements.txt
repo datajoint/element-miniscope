@@ -4,4 +4,5 @@ pyfftw
 imreg_dft
 sklearn
 h5py
+opencv-python
 scanreader @ git+https://github.com/atlab/scanreader.git
