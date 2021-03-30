@@ -3,12 +3,13 @@ import h5py
 from datetime import datetime
 import os
 import pathlib
-import scipy
+import scipy.ndimage
+from tqdm import tqdm
 
 _required_mat_ms_fields = ['Options',
                            'meanFrame',
                            'CorrProj',
-                           'PeaktoNoiseProj',
+                           'PeakToNoiseProj',
                            'RawTraces',
                            'FiltTraces',
                            'DeconvolvedTraces']
@@ -40,14 +41,14 @@ class MiniscopeAnalysis:
           self.miniscope_fp_sfp = f'{miniscope_analysis_dir}/SFP.mat'
           self.mat_ms = h5py.File(self.miniscope_fp_ms, 'r')
           self.mat_sfp = h5py.File(self.miniscope_fp_sfp, 'r')
-
-          if not all(s in self.mat_ms for s in _required_mat_ms_fields):
+          
+          if not all(s in self.mat_ms['ms'] for s in _required_mat_ms_fields):
                raise ValueError(f'Miniscope Analysis file {self.miniscope_fp_ms} does not have all required fields.')
 
           # ---- Initialize Miniscope Analysis results ----
-          self.params = self.mat_ms['Options']
-          self.average_image = self.mat_ms['meanFrame']
-          self.correlation_image = self.mat_ms['CorrProj']
+          self.params = self.mat_ms['ms']['Options']
+          self.average_image = self.mat_ms['ms']['meanFrame'][...]
+          self.correlation_image = self.mat_ms['ms']['CorrProj'][...]
           self._masks = None
 
           # ---- Metainfo ----
@@ -70,10 +71,10 @@ class MiniscopeAnalysis:
 
      def extract_masks(self):
           masks = []
-          for i in range(int(self.mat_ms['ms']['numNeurons'][0,0])):
-               center_y, center_x = scipy.ndimage.measurements.center_of_mass(self.mat_sfp[i,:,:])
-               xpix, ypix, weights = scipy.sparse.find(self.mat_sfp[i,:,:])
-                
+          for i in tqdm(range(int(self.mat_ms['ms']['numNeurons'][0,0]))):
+               center_y, center_x = scipy.ndimage.measurements.center_of_mass(self.mat_sfp['SFP'][i,:,:])
+               xpix, ypix, weights = scipy.sparse.find(self.mat_sfp['SFP'][i,:,:])
+
                masks.append({'mask_id': i,
                               'mask_npix': len(weights), 
                               'mask_center_x': center_x,

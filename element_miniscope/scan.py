@@ -2,6 +2,7 @@ import datajoint as dj
 import pathlib
 import importlib
 import inspect
+import numpy as np
 
 schema = dj.schema()
 
@@ -152,9 +153,10 @@ class ScanInfo(dj.Imported):
             video = cv2.VideoCapture(scan_filepaths[0])
             fps = video.get(cv2.CAP_PROP_FPS) # TODO: Verify this method extracts correct value
             _, frame = video.read()
+            frame_size = np.shape(frame)
 
             # Parse number of frames from timestamp.dat file
-            with open(scan_filepaths[1]) as f:
+            with open(scan_filepaths[-1]) as f:
                 next(f)
                 nframes = sum(1 for line in f if int(line[0]) == 0)
 
@@ -168,10 +170,11 @@ class ScanInfo(dj.Imported):
                               nrois=0))
 
             # Insert Field(s)
-            self.Field.insert(dict(key,
+            self.Field.insert([dict(key,
                                    field_idx=0, 
-                                   px_height=frame[0], 
-                                   px_width=frame[1]))
+                                   px_height=frame_size[0], 
+                                   px_width=frame_size[1])])
+        
         else:
             raise NotImplementedError(
                 f'Loading routine not implemented for {acq_software} acquisition software')

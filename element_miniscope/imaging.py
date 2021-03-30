@@ -64,7 +64,7 @@ def get_imaging_root_data_dir() -> str:
 @schema
 class ProcessingMethod(dj.Lookup):
     definition = """
-    processing_method: char(24)
+    processing_method: char(32)
     ---
     processing_method_desc: varchar(1000)
     """
@@ -88,8 +88,8 @@ class ProcessingParamSet(dj.Lookup):
     """
 
     @classmethod
-    def insert_new_params(cls, processing_method: str, paramset_idx: int,
-                          paramset_desc: str, params: dict):
+    def insert_new_params(cls, processing_method: str, package_version: str,
+                          paramset_idx: int, paramset_desc: str, params: dict):
         param_dict = {'processing_method': processing_method,
                       'package_version': package_version,
                       'paramset_idx': paramset_idx,
@@ -167,6 +167,9 @@ class Processing(dj.Computed):
             elif method == 'caiman':
                 loaded_caiman = loaded_result
                 key = {**key, 'processing_time': loaded_caiman.creation_time}
+            elif method == 'miniscope_analysis':
+                loaded_miniscope_analysis = loaded_result
+                key = {**key, 'processing_time': loaded_miniscope_analysis.creation_time}
             else:
                 raise NotImplementedError('Unknown method: {}'.format(method))
         elif task_mode == 'trigger':
@@ -207,6 +210,9 @@ class Curation(dj.Manual):
         elif method == 'caiman':
             loaded_caiman = loaded_result
             curation_time = loaded_caiman.creation_time
+        elif method == 'miniscope_analysis':
+            loaded_miniscope_analysis = loaded_result
+            curation_time = loaded_miniscope_analysis.creation_time
         else:
             raise NotImplementedError('Unknown method: {}'.format(method))
 
@@ -279,7 +285,7 @@ class MotionCorrection(dj.Imported):
         -> master
         -> scan.ScanInfo.Field
         ---
-        ref_image               : longblob  # image used as alignment template
+        ref_image=null          : longblob  # image used as alignment template
         average_image           : longblob  # mean of registered frames
         correlation_image=null  : longblob  # correlation map (computed during cell detection)
         max_proj_image=null     : longblob  # max of registered frames
@@ -480,21 +486,18 @@ class MotionCorrection(dj.Imported):
             self.Summary.insert(summary_images)
 
         elif method == 'miniscope_analysis':
-            from .readers import miniscope_analysis_loader
-
-            data_dir = pathlib.Path(get_miniscope_analysis_dir(key))
-            loaded_miniscope_analysis = miniscope_analysis_loader.MiniscopeAnalysis(data_dir)
+            loaded_miniscope_analysis = loaded_result
 
             # TODO: add motion correction and block data
 
             # -- summary images --
             mc_key = (scan.ScanInfo.Field * ProcessingTask & key).fetch1('KEY')
-            summary_imgs.append({**mc_key,
+            summary_images = {**mc_key,
                                  'average_image': loaded_miniscope_analysis.average_image,
-                                 'correlation_image': loaded_miniscope_analysis.correlation_image})
+                                 'correlation_image': loaded_miniscope_analysis.correlation_image}
 
-            self.insert1({**key, 'mc_channel': loaded_miniscope_analysis.alignment_channel})
-            self.Summary.insert(summary_imgs)
+            self.insert1({**key, 'motion_correct_channel': loaded_miniscope_analysis.alignment_channel})
+            self.Summary.insert1(summary_images)
 
         else:
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
@@ -517,20 +520,18 @@ class Segmentation(dj.Computed):
     class Mask(dj.Part):
         definition = """ # A mask produced by segmentation.
         -> master
-        mask            : smallint
+        mask                 : smallint
         ---
         -> scan.Channel.proj(segmentation_channel='channel')  # channel used for segmentation
-        mask_npix       : int       # number of pixels in ROIs
-        mask_center_x   : int       # center x coordinate in pixel
-        mask_center_y   : int       # center y coordinate in pixel
-        mask_center_z   : int       # center z coordinate in pixel
-        mask_xpix       : longblob  # x coordinates in pixels
-        mask_ypix       : longblob  # y coordinates in pixels      
-        mask_zpix       : longblob  # z coordinates in pixels        
-        mask_weights    : longblob  # weights of the mask at the indices above
+        mask_npix            : int       # number of pixels in ROIs
+        mask_center_x=null   : int       # center x coordinate in pixel                         # TODO: determine why some masks don't have information, thus null required
+        mask_center_y=null   : int       # center y coordinate in pixel
+        mask_center_z=null   : int       # center z coordinate in pixel
+        mask_xpix=null       : longblob  # x coordinates in pixels
+        mask_ypix=null       : longblob  # y coordinates in pixels      
+        mask_zpix=null       : longblob  # z coordinates in pixels        
+        mask_weights         : longblob  # weights of the mask at the indices above
         """
-
-
 
     def make(self, key):
         motion_correction_key = (MotionCorrection & key).fetch1('KEY')
@@ -618,19 +619,16 @@ class Segmentation(dj.Computed):
                                                    allow_direct_insert=True)
 
         elif method == 'miniscope_analysis':
-            from .readers import miniscope_analysis_loader
-
-            data_dir = pathlib.Path(get_miniscope_analysis_dir(key))
-            loaded_miniscope_analysis = miniscope_analysis_loader.MiniscopeAnalysis(data_dir)
+            loaded_miniscope_analysis = loaded_result
 
             # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            seg_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
+            segmentation_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
 
             masks = []
             for mask in loaded_miniscope_analysis.masks:
                 masks.append({**key, 
-                              'seg_channel': seg_channel,
+                              'segmentation_channel': segmentation_channel,
                               'mask': mask['mask_id'],
                               'mask_npix': mask['mask_npix'],
                               'mask_center_x': mask['mask_center_x'],
@@ -742,25 +740,22 @@ class Fluorescence(dj.Computed):
             self.Trace.insert(fluo_traces)
         
         elif method == 'miniscope_analysis':
-            from .readers import miniscope_analysis_loader
-
-            data_dir = pathlib.Path(get_miniscope_analysis_dir(key))
-            loaded_miniscope_analysis = miniscope_analysis_loader.MiniscopeAnalysis(data_dir)
+            loaded_miniscope_analysis = loaded_result
 
             # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            seg_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
+            segmentation_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
 
             fluo_traces = []
             for mask in loaded_miniscope_analysis.masks:
                 fluo_traces.append({**key, 
                                     'mask': mask['mask_id'], 
-                                    'fluo_channel': seg_channel,
+                                    'fluo_channel': segmentation_channel,
                                     'fluorescence': mask['raw_trace']})
 
             self.insert1(key)
             self.Trace.insert(fluo_traces)
-        
+
         else:
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
 
@@ -795,11 +790,19 @@ class Activity(dj.Computed):
                               * ProcessingParamSet.proj('processing_method')
                               & 'processing_method = "suite2p"'
                               & 'extraction_method LIKE "suite2p%"')
+
         caiman_key_source = (Fluorescence * ActivityExtractionMethod
                              * ProcessingParamSet.proj('processing_method')
                              & 'processing_method = "caiman"'
                              & 'extraction_method LIKE "caiman%"')
-        return suite2p_key_source.proj() + caiman_key_source.proj()
+
+        miniscope_analysis_key_source = (Fluorescence * ActivityExtractionMethod
+                             * ProcessingParamSet.proj('processing_method')
+                             & 'processing_method = "miniscope_analysis"'
+                             & 'extraction_method LIKE "miniscope_analysis%"')
+
+        # TODO: fix #suite2p_key_source.proj() + caiman_key_source.proj() + miniscope_analysis_key_source.proj()
+        return miniscope_analysis_key_source.proj()
 
     def make(self, key):
         method, loaded_result = get_loader_result(key, Curation)
@@ -843,20 +846,17 @@ class Activity(dj.Computed):
             if key['extraction_method'] in ('miniscope_analysis_deconvolution', 'miniscope_analysis_dff'):
                 attr_mapper = {'miniscope_analysis_deconvolution': 'spikes', 'miniscope_analysis_dff': 'dff'}
 
-                from .readers import miniscope_analysis_loader
-
-                data_dir = pathlib.Path(get_miniscope_analysis_dir(key))
-                loaded_miniscope_analysis = miniscope_analysis_loader.MiniscopeAnalysis(data_dir)
+                loaded_miniscope_analysis = loaded_result
 
                 # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
                 params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-                seg_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
+                segmentation_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
 
                 activities = []
                 for mask in loaded_miniscope_analysis.masks:
                     activities.append({**key, 
                                        'mask': mask['mask_id'],
-                                       'fluo_channel': seg_channel,
+                                       'fluo_channel': segmentation_channel,
                                        'activity_trace': mask[attr_mapper[key['extraction_method']]]})
                 self.insert1(key)
                 self.Trace.insert(activities)
@@ -892,6 +892,9 @@ def get_loader_result(key, table):
     elif method == 'caiman':
         from .readers import caiman_loader
         loaded_output = caiman_loader.CaImAn(output_dir)
+    elif method == 'miniscope_analysis':
+        from .readers import miniscope_analysis_loader
+        loaded_output = miniscope_analysis_loader.MiniscopeAnalysis(output_dir)
     else:
         raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
 
