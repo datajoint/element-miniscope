@@ -83,7 +83,6 @@ class ProcessingParamSet(dj.Lookup):
     param_set_hash: uuid
     unique index (param_set_hash)
     params: longblob  # dictionary of all applicable parameters
-
     """
 
     @classmethod
