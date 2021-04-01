@@ -485,22 +485,21 @@ class Segmentation(dj.Computed):
 
             # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            segmentation_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
-
-            masks = []
-            for mask in loaded_miniscope_analysis.masks:
-                masks.append({**key, 
-                              'segmentation_channel': segmentation_channel,
-                              'mask': mask['mask_id'],
-                              'mask_npix': mask['mask_npix'],
-                              'mask_center_x': mask['mask_center_x'],
-                              'mask_center_y': mask['mask_center_y'],
-                              'mask_xpix': mask['mask_xpix'],
-                              'mask_ypix': mask['mask_ypix'],
-                              'mask_weights': mask['mask_weights']})
+            segmentation_channel = params.get('segmentation_channel', 
+                                              loaded_miniscope_analysis.segmentation_channel)
 
             self.insert1(key)
-            self.Mask.insert(masks, ignore_extra_fields=True)            
+            self.Mask.insert([{**key, 
+                               'segmentation_channel': segmentation_channel,
+                               'mask': mask['mask_id'],
+                               'mask_npix': mask['mask_npix'],
+                               'mask_center_x': mask['mask_center_x'],
+                               'mask_center_y': mask['mask_center_y'],
+                               'mask_xpix': mask['mask_xpix'],
+                               'mask_ypix': mask['mask_ypix'],
+                               'mask_weights': mask['mask_weights']}
+                               for mask in loaded_miniscope_analysis.masks], 
+                               ignore_extra_fields=True)            
 
         else:
             raise NotImplementedError(f'Unknown/unimplemented method: {method}')
@@ -549,7 +548,7 @@ class Fluorescence(dj.Computed):
         definition = """
         -> master
         -> Segmentation.Mask
-        -> scan.Channel.proj(fluo_channel='channel')  # the channel that this trace comes from         
+        -> scan.Channel.proj(fluorescence_channel='channel')  # the channel that this trace comes from         
         ---
         fluorescence                : longblob  # fluorescence trace associated with this mask
         neuropil_fluorescence=null  : longblob  # Neuropil fluorescence trace
@@ -566,31 +565,27 @@ class Fluorescence(dj.Computed):
             segmentation_channel = params.get('segmentation_channel',
                                               loaded_caiman.segmentation_channel)
 
-            fluo_traces = []
-            for mask in loaded_caiman.masks:
-                fluo_traces.append({**key, 'mask': mask['mask_id'],
-                                    'fluo_channel': segmentation_channel,
-                                    'fluorescence': mask['inferred_trace']})
-
             self.insert1(key)
-            self.Trace.insert(fluo_traces)
+            self.Trace.insert([{**key, 
+                                'mask': mask['mask_id'],
+                                'fluorescence_channel': segmentation_channel,
+                                'fluorescence': mask['inferred_trace']}
+                                for mask in loaded_caiman.masks])
         
         elif method == 'miniscope_analysis':
             loaded_miniscope_analysis = loaded_result
 
             # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            segmentation_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
-
-            fluo_traces = []
-            for mask in loaded_miniscope_analysis.masks:
-                fluo_traces.append({**key, 
-                                    'mask': mask['mask_id'], 
-                                    'fluo_channel': segmentation_channel,
-                                    'fluorescence': mask['raw_trace']})
+            segmentation_channel = params.get('segmentation_channel', 
+                                              loaded_miniscope_analysis.segmentation_channel)
 
             self.insert1(key)
-            self.Trace.insert(fluo_traces)
+            self.Trace.insert([{**key, 
+                                'mask': mask['mask_id'], 
+                                'fluorescence_channel': segmentation_channel,
+                                'fluorescence': mask['raw_trace']}
+                                for mask in loaded_miniscope_analysis.masks])
 
         else:
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
@@ -649,14 +644,12 @@ class Activity(dj.Computed):
                 segmentation_channel = params.get('segmentation_channel',
                                                   loaded_caiman.segmentation_channel)
 
-                activities = []
-                for mask in loaded_caiman.masks:
-                    activities.append({
-                        **key, 'mask': mask['mask_id'],
-                        'fluo_channel': segmentation_channel,
-                        'activity_trace': mask[attr_mapper[key['extraction_method']]]})
                 self.insert1(key)
-                self.Trace.insert(activities)
+                self.Trace.insert([{**key, 
+                                    'mask': mask['mask_id'],
+                                    'fluorescence_channel': segmentation_channel,
+                                    'activity_trace': mask[attr_mapper[key['extraction_method']]]}
+                                    for mask in loaded_caiman.masks])
 
         elif method == 'miniscope_analysis':
             if key['extraction_method'] in ('miniscope_analysis_deconvolution', 'miniscope_analysis_dff'):
@@ -666,16 +659,15 @@ class Activity(dj.Computed):
 
                 # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
                 params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-                segmentation_channel = params.get('segmentation_channel', loaded_miniscope_analysis.segmentation_channel)
+                segmentation_channel = params.get('segmentation_channel', 
+                                                  loaded_miniscope_analysis.segmentation_channel)
 
-                activities = []
-                for mask in loaded_miniscope_analysis.masks:
-                    activities.append({**key, 
-                                       'mask': mask['mask_id'],
-                                       'fluo_channel': segmentation_channel,
-                                       'activity_trace': mask[attr_mapper[key['extraction_method']]]})
                 self.insert1(key)
-                self.Trace.insert(activities)
+                self.Trace.insert([{**key, 
+                                    'mask': mask['mask_id'],
+                                    'fluorescence_channel': segmentation_channel,
+                                    'activity_trace': mask[attr_mapper[key['extraction_method']]]}
+                                    for mask in loaded_miniscope_analysis.masks])
 
         else:
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
