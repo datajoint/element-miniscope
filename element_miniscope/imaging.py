@@ -69,8 +69,8 @@ class ProcessingMethod(dj.Lookup):
     processing_method_desc: varchar(1000)
     """
 
-    contents = [('caiman', 'caiman analysis suite'),
-                ('miniscope_analysis', 'miniscope analysis suite')]
+    contents = [('caiman', 'CaImAn Analysis Suite'),
+                ('mcgill_miniscope_analysis', 'MiniscopeAnalysis Suite (https://github.com/etterguillaume/MiniscopeAnalysis)')]
 
 
 @schema
