@@ -4,7 +4,6 @@ from datetime import datetime
 import os
 import pathlib
 import scipy.ndimage
-from tqdm import tqdm
 
 _required_mat_ms_fields = ['Options',
                            'meanFrame',
@@ -71,7 +70,7 @@ class MiniscopeAnalysis:
 
      def extract_masks(self):
           masks = []
-          for i in tqdm(range(int(self.mat_ms['ms']['numNeurons'][0,0]))):
+          for i in range(int(self.mat_ms['ms']['numNeurons'][0,0])):
                center_y, center_x = scipy.ndimage.measurements.center_of_mass(self.mat_sfp['SFP'][i,:,:])
                xpix, ypix, weights = scipy.sparse.find(self.mat_sfp['SFP'][i,:,:])
 
