@@ -170,10 +170,10 @@ class ScanInfo(dj.Imported):
                               nrois=0))
 
             # Insert Field(s)
-            self.Field.insert([dict(key,
-                                   field_idx=0, 
-                                   px_height=frame_size[0], 
-                                   px_width=frame_size[1])])
+            self.Field.insert1(dict(key,
+                                    field_idx=0, 
+                                    px_height=frame_size[0], 
+                                    px_width=frame_size[1]))
         
         else:
             raise NotImplementedError(
