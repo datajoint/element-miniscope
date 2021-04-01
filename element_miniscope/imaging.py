@@ -159,7 +159,7 @@ class Processing(dj.Computed):
             if method == 'caiman':
                 loaded_caiman = loaded_result
                 key = {**key, 'processing_time': loaded_caiman.creation_time}
-            elif method == 'miniscope_analysis':
+            elif method == 'mcgill_miniscope_analysis':
                 loaded_miniscope_analysis = loaded_result
                 key = {**key, 'processing_time': loaded_miniscope_analysis.creation_time}
             else:
@@ -199,7 +199,7 @@ class Curation(dj.Manual):
         if method == 'caiman':
             loaded_caiman = loaded_result
             curation_time = loaded_caiman.creation_time
-        elif method == 'miniscope_analysis':
+        elif method == 'mcgill_miniscope_analysis':
             loaded_miniscope_analysis = loaded_result
             curation_time = loaded_miniscope_analysis.creation_time
         else:
@@ -386,7 +386,7 @@ class MotionCorrection(dj.Imported):
                         'max_image'][...][np.newaxis, ...])]
             self.Summary.insert(summary_images)
 
-        elif method == 'miniscope_analysis':
+        elif method == 'mcgill_miniscope_analysis':
             loaded_miniscope_analysis = loaded_result
 
             # TODO: add motion correction and block data
@@ -479,7 +479,7 @@ class Segmentation(dj.Computed):
                                                    ignore_extra_fields=True,
                                                    allow_direct_insert=True)
 
-        elif method == 'miniscope_analysis':
+        elif method == 'mcgill_miniscope_analysis':
             loaded_miniscope_analysis = loaded_result
 
             # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
@@ -571,7 +571,7 @@ class Fluorescence(dj.Computed):
                                 'fluorescence': mask['inferred_trace']}
                                 for mask in loaded_caiman.masks])
         
-        elif method == 'miniscope_analysis':
+        elif method == 'mcgill_miniscope_analysis':
             loaded_miniscope_analysis = loaded_result
 
             # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
@@ -593,10 +593,13 @@ class Fluorescence(dj.Computed):
 @schema
 class ActivityExtractionMethod(dj.Lookup):
     definition = """
-    extraction_method: varchar(32)
+    extraction_method: varchar(200)
     """
 
-    contents = zip(['caiman_deconvolution', 'caiman_dff', 'miniscope_analysis_deconvolution', 'miniscope_analysis_dff'])
+    contents = zip(['caiman_deconvolution', 
+                    'caiman_dff', 
+                    'mcgill_miniscope_analysis_deconvolution', 
+                    'mcgill_miniscope_analysis_dff'])
 
 
 @schema
@@ -623,8 +626,8 @@ class Activity(dj.Computed):
 
         miniscope_analysis_key_source = (Fluorescence * ActivityExtractionMethod
                              * ProcessingParamSet.proj('processing_method')
-                             & 'processing_method = "miniscope_analysis"'
-                             & 'extraction_method LIKE "miniscope_analysis%"')
+                             & 'processing_method = "mcgill_miniscope_analysis"'
+                             & 'extraction_method LIKE "mcgill_miniscope_analysis%"')
 
         # TODO: fix #caiman_key_source.proj() + miniscope_analysis_key_source.proj()
         return miniscope_analysis_key_source.proj()
@@ -650,9 +653,9 @@ class Activity(dj.Computed):
                                     'activity_trace': mask[attr_mapper[key['extraction_method']]]}
                                     for mask in loaded_caiman.masks])
 
-        elif method == 'miniscope_analysis':
-            if key['extraction_method'] in ('miniscope_analysis_deconvolution', 'miniscope_analysis_dff'):
-                attr_mapper = {'miniscope_analysis_deconvolution': 'spikes', 'miniscope_analysis_dff': 'dff'}
+        elif method == 'mcgill_miniscope_analysis':
+            if key['extraction_method'] in ('mcgill_miniscope_analysis_deconvolution', 'mcgill_miniscope_analysis_dff'):
+                attr_mapper = {'mcgill_miniscope_analysis_deconvolution': 'spikes', 'mcgill_miniscope_analysis_dff': 'dff'}
 
                 loaded_miniscope_analysis = loaded_result
 
@@ -696,7 +699,7 @@ def get_loader_result(key, table):
     if method == 'caiman':
         from .readers import caiman_loader
         loaded_output = caiman_loader.CaImAn(output_dir)
-    elif method == 'miniscope_analysis':
+    elif method == 'mcgill_miniscope_analysis':
         from .readers import miniscope_analysis_loader
         loaded_output = miniscope_analysis_loader.MiniscopeAnalysis(output_dir)
     else:
