@@ -70,7 +70,7 @@ class ProcessingMethod(dj.Lookup):
     """
 
     contents = [('caiman', 'CaImAn Analysis Suite'),
-                ('mcgill_miniscope_analysis', 'MiniscopeAnalysis Suite (https://github.com/etterguillaume/MiniscopeAnalysis)')]
+                ('mcgill_miniscope_analysis', 'MiniscopeAnalysis from McGill University (https://github.com/etterguillaume/MiniscopeAnalysis)')]
 
 
 @schema
