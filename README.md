@@ -1,15 +1,23 @@
 # DataJoint Element - Miniscope Calcium Imaging
-This repository features DataJoint pipeline design for functional Calcium imaging, 
+
++ This repository features DataJoint pipeline design for functional calcium imaging, 
 with `Miniscope DAQ V3` acquisition system and `MiniscopeAnalysis` suite for analysis. 
 
-The element presented here is not a complete workflow by itself,
- but rather a modular design of tables and dependencies specific to the functional Calcium imaging workflow. 
++ The element presented here is not a complete workflow by itself,
+ but rather a modular design of tables and dependencies specific to the functional calcium imaging workflow. 
 
-This modular element can be flexibly attached downstream to 
++ This modular element can be flexibly attached downstream to 
 any particular design of experiment session, thus assembling 
 a fully functional calcium imaging workflow.
 
-See [Background](Background.md) for the background information and development timeline.
++ See [Background](Background.md) for the background information and development timeline.
+
++ See [DataJoint Elements](https://github.com/datajoint/datajoint-elements) for descriptions of the other `elements` and `workflows` developed as part of this initiative.
+
+## Element usage
+
++ See [workflow-miniscope](https://github.com/datajoint/workflow-miniscope) 
+repository for an example usage of `element-miniscope`.
 
 ## Element architecture
 
@@ -61,7 +69,3 @@ See [Background](Background.md) for the background information and development t
 
 + `Activity` - computed neuronal activity trace from fluorescence trace (e.g. spikes)
 
-## Element usage
-
-+ See [workflow-miniscope](https://github.com/datajoint/workflow-miniscope) 
-repository for an example usage of `element-miniscope`.
