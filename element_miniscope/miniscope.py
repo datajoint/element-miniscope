@@ -28,7 +28,7 @@ def activate(imaging_schema_name, scan_schema_name=None, *,
             Upstream tables:
                 + Session: parent table to Scan, typically identifying a recording session
             Functions:
-                + get_imaging_root_data_dir() -> str
+                + get_miniscope_root_data_dir() -> str
                     Retrieve the root data directory - e.g. containing all subject/sessions data
                     :return: a string for full path to the root data directory
     """
@@ -41,7 +41,7 @@ def activate(imaging_schema_name, scan_schema_name=None, *,
     global _linking_module
     _linking_module = linking_module
 
-    scan.activate(scan_schema_name, create_schema=create_schema,	
+    scan.activate(scan_schema_name, create_schema=create_schema,
                   create_tables=create_tables, linking_module=linking_module)
     schema.activate(imaging_schema_name, create_schema=create_schema,
                     create_tables=create_tables, add_objects=_linking_module.__dict__)
@@ -49,16 +49,220 @@ def activate(imaging_schema_name, scan_schema_name=None, *,
 
 # -------------- Functions required by the element-calcium-imaging  --------------
 
-def get_imaging_root_data_dir() -> str:
+def get_miniscope_daq_v3_files(key: dict) -> str:
     """
-    get_imaging_root_data_dir() -> str
+    Retrieve the Miniscope DAQ V3 files associated with a given Scan
+    :param scan_key: key of a Scan
+    :return: Miniscope DAQ V3 files full file-path
+    """
+    return _linking_module.get_miniscope_daq_v3_files(key)
+
+
+def get_miniscope_root_data_dir() -> str:
+    """
+    get_miniscope_root_data_dir() -> str
         Retrieve the root data directory - e.g. containing all subject/sessions data
         :return: a string for full path to the root data directory
     """
-    return _linking_module.get_imaging_root_data_dir()
+    return _linking_module.get_miniscope_root_data_dir()
 
 
 # -------------- Table declarations --------------
+
+@schema
+class AcquisitionSoftware(dj.Lookup):
+    definition = """  # Name of acquisition software
+    acq_software: varchar(24)
+    """
+    contents = zip([
+        'Miniscope-DAQ-V3',
+        'Inscopix nVoke'])
+
+
+@schema
+class Channel(dj.Lookup):
+    definition = """  # Recording channel
+    channel     : tinyint  # 0-based indexing
+    """
+    contents = zip(range(5))
+
+
+@schema
+class Recording(dj.Manual):
+    definition = """
+    -> Session
+    recording_id: int
+    ---
+    -> Equipment
+    -> AcquisitionSoftware
+    recording_notes='' : varchar(4095)         # free-notes
+    """
+
+
+@schema
+class RecordingLocation(dj.Manual):
+    definition = """
+    -> Recording
+    ---
+    -> Location
+    """
+
+
+@schema
+class RecordingInfo(dj.Imported):
+    definition = """ # general data about recording
+    -> Recording
+    ---
+    nchannels            : tinyint   # number of channels
+    nplanes              : int       # number of recording planes
+    nframes              : int       # number of recorded frames
+    x=null               : float     # (um) 0 point in the motor coordinate system
+    y=null               : float     # (um) 0 point in the motor coordinate system
+    z=null               : float     # (um) 0 point in the motor coordinate system
+    fps                  : float     # (Hz) frames per second - volumetric scan rate
+    gain=null            : float     # recording gain
+    spatial_downsample=1 : tinyint   # e.g. 1, 2, 4, 8. 1 for no downsampling
+    temporal_downsample=1: tinyint   # e.g. 1, 2, 4, 8. 1 for no downsampling
+    led_power            : float     # LED power used in the given recording
+    """
+
+    class Plane(dj.Part):
+        definition = """ # field-specific scan information
+        -> master
+        plane_id          : int
+        ---
+        px_height=null    : smallint  # height in pixels
+        px_width=null     : smallint  # width in pixels
+        um_height=null    : float     # height in microns
+        um_width=null     : float     # width in microns
+        plane_z=null      : float     # (um) relative depth of the recording plane
+        """
+
+    class File(dj.Part):
+        definition = """
+        -> master
+        recording_file_path: varchar(255)  # filepath relative to root data directory
+        """
+
+    def make(self, key):
+        """ Read and store some scan meta information."""
+        acq_software = (Recording & key).fetch1('acq_software')
+
+        if acq_software == 'Miniscope-DAQ-V3':
+            # Parse image dimension and frame rate
+            import cv2
+            recording_filepaths = get_miniscope_daq_v3_files(key)
+            video = cv2.VideoCapture(recording_filepaths[0])
+            fps = video.get(cv2.CAP_PROP_FPS) # TODO: Verify this method extracts correct value
+            _, frame = video.read()
+            frame_size = np.shape(frame)
+
+            # Parse number of frames from timestamp.dat file
+            with open(recording_filepaths[-1]) as f:
+                next(f)
+                nframes = sum(1 for line in f if int(line[0]) == 0)
+
+            # Insert in RecordingInfo
+            self.insert1(dict(key,
+                              nchannels=1,
+                              nframes=nframes,
+                              nplanes=1,
+                              fps=fps))
+
+            # Insert Plane(s)
+            self.Plane.insert1(dict(key,
+                                    plane_id=0,
+                                    px_height=frame_size[0],
+                                    px_width=frame_size[1]))
+
+        else:
+            raise NotImplementedError(
+                f'Loading routine not implemented for {acq_software} acquisition software')
+
+        # Insert file(s)
+        root = pathlib.Path(get_miniscope_root_data_dir())
+        recording_files = [pathlib.Path(f).relative_to(root).as_posix() for f in recording_filepaths]
+        self.File.insert([{**key, 'recording_file_path': f} for f in recording_files])
+
+
+@schema
+class PreprocessingMethod(dj.Lookup):
+    definition = """
+    preprocessing_method : varchar(12)
+    ---
+    preprocessing_method_desc='': varchar(255)
+    """
+    contents = [
+        ['inscopix', ''],
+        ['no preprocessing', '']]
+
+
+@schema
+class Preprocessing(dj.Manual):
+    definition = """
+    -> RecordingInfo
+    ---
+    -> PreprocessingMethod
+    """
+
+    class Plane(dj.Part):
+        definition = """
+        -> RecordingInfo.Plane
+        ---
+        trim_initial_frames=0    : boolean
+        cropping_imaging=0       : boolean
+        crop_area_left=0         : smallint            # (pixels)
+        crop_area_top=0          : smallint            # (pixels)
+        crop_area_px_width=null  : smallint            # (pixels)
+        crop_area_px_height=null : smallint            # (pixels)
+        fix_defective_pixels=0   : boolean
+        spatial_downsample=1     : tinyint             # spatial downsample with respect to the raw movie
+        temporal_downsampl=1     : tinyint             # temporal downsample with respect to the raw movie
+        """
+
+    class File(dj.Part):
+        definition = """
+        -> master
+        preprocessing_filepath  : varchar(255)     # filepath of preprocessed video
+        """
+
+    @classmethod
+    def create1_from_recording_info(self, key: dict):
+        """
+        A convenient function to create a new corresponding "Preprocessing" entry for a particular
+        "RecordingInfo" entry.
+        """
+        if key not in RecordingInfo():
+            raise ValueError(f'No corresponding entry in RecordingInfo for: {key}')
+
+        self.insert1(dict(
+            key, preprocessing_method='no preprocessing'))
+
+        if RecordingInfo.Plane & key:
+            self.insert(
+                [dict(key, crop_area_width=plane['px_width'],
+                      crop_area_height=plane['px_height'])
+                 for plane in (RecordingInfo.Plane & key).fetch(as_dict=True)])
+
+        if RecordingInfo.File & key:
+            self.insert(
+                [dict(key, preprocessing_filepath=file['recording_filepath'])
+                 for file in (RecordingInfo.File & key).fetch(as_dict=True)])
+
+
+@schema
+class MotionCorrectionMethod(dj.Lookup):
+    definition = """
+    motion_correction_method: char(32)
+    ---
+    motion_correction_method_desc='': varchar(1000)
+    """
+
+    contents = [
+        ('inscopix', 'Motion correction running through Inscopix software with manual interaction'),
+        ('suite2p', 'Motion correction using auto processed Suite2p')
+        ('caiman', 'Motion correction using auto processed caiman')
+    ]
 
 
 @schema
@@ -78,7 +282,7 @@ class ProcessingParamSet(dj.Lookup):
     definition = """
     paramset_idx:  smallint
     ---
-    -> ProcessingMethod    
+    -> ProcessingMethod
     paramset_desc: varchar(128)
     param_set_hash: uuid
     unique index (param_set_hash)
@@ -86,7 +290,7 @@ class ProcessingParamSet(dj.Lookup):
     """
 
     @classmethod
-    def insert_new_params(cls, processing_method: str, 
+    def insert_new_params(cls, processing_method: str,
                           paramset_idx: int, paramset_desc: str, params: dict):
         param_dict = {'processing_method': processing_method,
                       'paramset_idx': paramset_idx,
@@ -106,30 +310,12 @@ class ProcessingParamSet(dj.Lookup):
             cls.insert1(param_dict)
 
 
-@schema
-class CellCompartment(dj.Lookup):
-    definition = """  # cell compartments that can be imaged
-    cell_compartment         : char(16)
-    """
-
-    contents = zip(['axon', 'soma', 'bouton'])
-
-
-@schema
-class MaskType(dj.Lookup):
-    definition = """ # possible classifications for a segmented mask
-    mask_type        : varchar(16)
-    """
-
-    contents = zip(['soma', 'axon', 'dendrite', 'neuropil', 'artefact', 'unknown'])
-
-
 # -------------- Trigger a processing routine --------------
 
 @schema
 class ProcessingTask(dj.Manual):
     definition = """
-    -> scan.Scan
+    -> Preprocessing
     -> ProcessingParamSet
     ---
     processing_output_dir: varchar(255)         #  output directory of the processed scan relative to root data directory
@@ -179,10 +365,10 @@ class Curation(dj.Manual):
     -> Processing
     curation_id: int
     ---
-    curation_time: datetime             # time of generation of this set of curated results 
+    curation_time: datetime             # time of generation of this set of curated results
     curation_output_dir: varchar(255)   # output directory of the curated results, relative to root data directory
     manual_curation: bool               # has manual curation been performed on this result?
-    curation_note='': varchar(2000)  
+    curation_note='': varchar(2000)
     """
 
     def create1_from_processing_task(self, key, is_curated=False, curation_note=''):
@@ -217,62 +403,29 @@ class Curation(dj.Manual):
 
 @schema
 class MotionCorrection(dj.Imported):
-    definition = """ 
+    definition = """
     -> Processing
     ---
-    -> scan.Channel.proj(motion_correct_channel='channel') # channel used for motion correction in this processing task
+    -> Channel.proj(motion_correct_channel='channel') # channel used for motion correction in this processing task
     """
 
     class RigidMotionCorrection(dj.Part):
-        definition = """ 
+        definition = """
         -> master
         ---
         outlier_frames=null : longblob  # mask with true for frames with outlier shifts (already corrected)
         y_shifts            : longblob  # (pixels) y motion correction shifts
         x_shifts            : longblob  # (pixels) x motion correction shifts
-        z_shifts=null       : longblob  # (pixels) z motion correction shifts (z-drift) 
+        z_shifts=null       : longblob  # (pixels) z motion correction shifts (z-drift)
         y_std               : float     # (pixels) standard deviation of y shifts across all frames
         x_std               : float     # (pixels) standard deviation of x shifts across all frames
         z_std=null          : float     # (pixels) standard deviation of z shifts across all frames
         """
 
-    class NonRigidMotionCorrection(dj.Part):
-        """
-        Piece-wise rigid motion correction
-        - tile the FOV into multiple 3D blocks/patches
-        """
-        definition = """ 
-        -> master
-        ---
-        outlier_frames=null             : longblob      # mask with true for frames with outlier shifts (already corrected)
-        block_height                    : int           # (pixels)
-        block_width                     : int           # (pixels)
-        block_depth                     : int           # (pixels)
-        block_count_y                   : int           # number of blocks tiled in the y direction
-        block_count_x                   : int           # number of blocks tiled in the x direction
-        block_count_z                   : int           # number of blocks tiled in the z direction
-        """
-
-    class Block(dj.Part):
-        definition = """  # FOV-tiled blocks used for non-rigid motion correction
-        -> master.NonRigidMotionCorrection
-        block_id        : int
-        ---
-        block_y         : longblob  # (y_start, y_end) in pixel of this block
-        block_x         : longblob  # (x_start, x_end) in pixel of this block
-        block_z         : longblob  # (z_start, z_end) in pixel of this block
-        y_shifts        : longblob  # (pixels) y motion correction shifts for every frame
-        x_shifts        : longblob  # (pixels) x motion correction shifts for every frame
-        z_shifts=null   : longblob  # (pixels) x motion correction shifts for every frame
-        y_std           : float     # (pixels) standard deviation of y shifts across all frames
-        x_std           : float     # (pixels) standard deviation of x shifts across all frames
-        z_std=null      : float     # (pixels) standard deviation of z shifts across all frames
-        """
-
     class Summary(dj.Part):
         definition = """ # summary images for each field and channel after corrections
         -> master
-        -> scan.ScanInfo.Field
+        -> RecordingInfo.Plane
         ---
         ref_image=null          : longblob  # image used as alignment template
         average_image           : longblob  # mean of registered frames
@@ -409,28 +562,22 @@ class MotionCorrection(dj.Imported):
 @schema
 class Segmentation(dj.Computed):
     definition = """ # Different mask segmentations.
-    -> Curation
-    ---
-    -> MotionCorrection    
+    -> MotionCorrection
     """
-
-    @property
-    def key_source(self):
-        return Curation & MotionCorrection
 
     class Mask(dj.Part):
         definition = """ # A mask produced by segmentation.
         -> master
         mask                 : smallint
         ---
-        -> scan.Channel.proj(segmentation_channel='channel')  # channel used for segmentation
+        -> Channel.proj(segmentation_channel='channel')  # channel used for segmentation
         mask_npix            : int       # number of pixels in ROIs
         mask_center_x=null   : int       # center x coordinate in pixel                         # TODO: determine why some masks don't have information, thus null required
         mask_center_y=null   : int       # center y coordinate in pixel
         mask_center_z=null   : int       # center z coordinate in pixel
         mask_xpix=null       : longblob  # x coordinates in pixels
-        mask_ypix=null       : longblob  # y coordinates in pixels      
-        mask_zpix=null       : longblob  # z coordinates in pixels        
+        mask_ypix=null       : longblob  # y coordinates in pixels
+        mask_zpix=null       : longblob  # z coordinates in pixels
         mask_weights         : longblob  # weights of the mask at the indices above
         """
 
@@ -484,11 +631,11 @@ class Segmentation(dj.Computed):
 
             # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            segmentation_channel = params.get('segmentation_channel', 
+            segmentation_channel = params.get('segmentation_channel',
                                               loaded_miniscope_analysis.segmentation_channel)
 
             self.insert1(key)
-            self.Mask.insert([{**key, 
+            self.Mask.insert([{**key,
                                'segmentation_channel': segmentation_channel,
                                'mask': mask['mask_id'],
                                'mask_npix': mask['mask_npix'],
@@ -497,8 +644,8 @@ class Segmentation(dj.Computed):
                                'mask_xpix': mask['mask_xpix'],
                                'mask_ypix': mask['mask_ypix'],
                                'mask_weights': mask['mask_weights']}
-                               for mask in loaded_miniscope_analysis.masks], 
-                               ignore_extra_fields=True)            
+                               for mask in loaded_miniscope_analysis.masks],
+                               ignore_extra_fields=True)
 
         else:
             raise NotImplementedError(f'Unknown/unimplemented method: {method}')
@@ -547,7 +694,7 @@ class Fluorescence(dj.Computed):
         definition = """
         -> master
         -> Segmentation.Mask
-        -> scan.Channel.proj(fluorescence_channel='channel')  # the channel that this trace comes from         
+        -> Channel.proj(fluorescence_channel='channel')  # the channel that this trace comes from
         ---
         fluorescence                : longblob  # fluorescence trace associated with this mask
         neuropil_fluorescence=null  : longblob  # Neuropil fluorescence trace
@@ -565,23 +712,23 @@ class Fluorescence(dj.Computed):
                                               loaded_caiman.segmentation_channel)
 
             self.insert1(key)
-            self.Trace.insert([{**key, 
+            self.Trace.insert([{**key,
                                 'mask': mask['mask_id'],
                                 'fluorescence_channel': segmentation_channel,
                                 'fluorescence': mask['inferred_trace']}
                                 for mask in loaded_caiman.masks])
-        
+
         elif method == 'mcgill_miniscope_analysis':
             loaded_miniscope_analysis = loaded_result
 
             # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            segmentation_channel = params.get('segmentation_channel', 
+            segmentation_channel = params.get('segmentation_channel',
                                               loaded_miniscope_analysis.segmentation_channel)
 
             self.insert1(key)
-            self.Trace.insert([{**key, 
-                                'mask': mask['mask_id'], 
+            self.Trace.insert([{**key,
+                                'mask': mask['mask_id'],
                                 'fluorescence_channel': segmentation_channel,
                                 'fluorescence': mask['raw_trace']}
                                 for mask in loaded_miniscope_analysis.masks])
@@ -596,9 +743,9 @@ class ActivityExtractionMethod(dj.Lookup):
     extraction_method: varchar(200)
     """
 
-    contents = zip(['caiman_deconvolution', 
-                    'caiman_dff', 
-                    'mcgill_miniscope_analysis_deconvolution', 
+    contents = zip(['caiman_deconvolution',
+                    'caiman_dff',
+                    'mcgill_miniscope_analysis_deconvolution',
                     'mcgill_miniscope_analysis_dff'])
 
 
@@ -614,7 +761,7 @@ class Activity(dj.Computed):
         -> master
         -> Fluorescence.Trace
         ---
-        activity_trace: longblob  # 
+        activity_trace: longblob  #
         """
 
     @property
@@ -647,7 +794,7 @@ class Activity(dj.Computed):
                                                   loaded_caiman.segmentation_channel)
 
                 self.insert1(key)
-                self.Trace.insert([{**key, 
+                self.Trace.insert([{**key,
                                     'mask': mask['mask_id'],
                                     'fluorescence_channel': segmentation_channel,
                                     'activity_trace': mask[attr_mapper[key['extraction_method']]]}
@@ -661,11 +808,11 @@ class Activity(dj.Computed):
 
                 # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
                 params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-                segmentation_channel = params.get('segmentation_channel', 
+                segmentation_channel = params.get('segmentation_channel',
                                                   loaded_miniscope_analysis.segmentation_channel)
 
                 self.insert1(key)
-                self.Trace.insert([{**key, 
+                self.Trace.insert([{**key,
                                     'mask': mask['mask_id'],
                                     'fluorescence_channel': segmentation_channel,
                                     'activity_trace': mask[attr_mapper[key['extraction_method']]]}
@@ -693,7 +840,7 @@ def get_loader_result(key, table):
     method, output_dir = (ProcessingParamSet * table & key).fetch1(
         'processing_method', _table_attribute_mapper[table.__name__])
 
-    root_dir = pathlib.Path(get_imaging_root_data_dir())
+    root_dir = pathlib.Path(get_miniscope_root_data_dir())
     output_dir = root_dir / output_dir
 
     if method == 'caiman':
