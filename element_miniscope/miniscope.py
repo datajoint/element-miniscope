@@ -114,11 +114,11 @@ class RecordingInfo(dj.Imported):
     -> Recording
     ---
     nchannels            : tinyint   # number of channels
-    nplanes              : int       # number of recording planes
     nframes              : int       # number of recorded frames
-    x=null               : float     # (um) 0 point in the motor coordinate system
-    y=null               : float     # (um) 0 point in the motor coordinate system
-    z=null               : float     # (um) 0 point in the motor coordinate system
+    px_height=null    : smallint  # height in pixels
+    px_width=null     : smallint  # width in pixels
+    um_height=null    : float     # height in microns
+    um_width=null     : float     # width in microns
     fps                  : float     # (Hz) frames per second - volumetric scan rate
     gain=null            : float     # recording gain
     spatial_downsample=1 : tinyint   # e.g. 1, 2, 4, 8. 1 for no downsampling
@@ -126,21 +126,11 @@ class RecordingInfo(dj.Imported):
     led_power            : float     # LED power used in the given recording
     """
 
-    class Plane(dj.Part):
-        definition = """ # field-specific scan information
-        -> master
-        plane_id          : int
-        ---
-        px_height=null    : smallint  # height in pixels
-        px_width=null     : smallint  # width in pixels
-        um_height=null    : float     # height in microns
-        um_width=null     : float     # width in microns
-        plane_z=null      : float     # (um) relative depth of the recording plane
-        """
-
     class File(dj.Part):
         definition = """
         -> master
+        recording_file_id : smallint unsigned
+        ---
         recording_file_path: varchar(255)  # filepath relative to root data directory
         """
 
@@ -166,14 +156,9 @@ class RecordingInfo(dj.Imported):
             self.insert1(dict(key,
                               nchannels=1,
                               nframes=nframes,
-                              nplanes=1,
-                              fps=fps))
-
-            # Insert Plane(s)
-            self.Plane.insert1(dict(key,
-                                    plane_id=0,
-                                    px_height=frame_size[0],
-                                    px_width=frame_size[1]))
+                              fps=fps,
+                              px_height=frame_size[0],
+                              px_width=frame_size[1]))
 
         else:
             raise NotImplementedError(
@@ -186,121 +171,88 @@ class RecordingInfo(dj.Imported):
 
 
 @schema
-class PreprocessingMethod(dj.Lookup):
-    definition = """
-    preprocessing_method : varchar(12)
-    ---
-    preprocessing_method_desc='': varchar(255)
-    """
-    contents = [
-        ['inscopix', ''],
-        ['no preprocessing', '']]
-
-
-@schema
-class Preprocessing(dj.Manual):
-    definition = """
-    -> RecordingInfo
-    ---
-    -> PreprocessingMethod
-    """
-
-    class Plane(dj.Part):
-        definition = """
-        -> RecordingInfo.Plane
-        ---
-        trim_initial_frames=0    : boolean
-        cropping_imaging=0       : boolean
-        crop_area_left=0         : smallint            # (pixels)
-        crop_area_top=0          : smallint            # (pixels)
-        crop_area_px_width=null  : smallint            # (pixels)
-        crop_area_px_height=null : smallint            # (pixels)
-        fix_defective_pixels=0   : boolean
-        spatial_downsample=1     : tinyint             # spatial downsample with respect to the raw movie
-        temporal_downsampl=1     : tinyint             # temporal downsample with respect to the raw movie
-        """
-
-    class File(dj.Part):
-        definition = """
-        -> master
-        preprocessing_filepath  : varchar(255)     # filepath of preprocessed video
-        """
-
-    @classmethod
-    def create1_from_recording_info(self, key: dict):
-        """
-        A convenient function to create a new corresponding "Preprocessing" entry for a particular
-        "RecordingInfo" entry.
-        """
-        if key not in RecordingInfo():
-            raise ValueError(f'No corresponding entry in RecordingInfo for: {key}')
-
-        self.insert1(dict(
-            key, preprocessing_method='no preprocessing'))
-
-        if RecordingInfo.Plane & key:
-            self.insert(
-                [dict(key, crop_area_width=plane['px_width'],
-                      crop_area_height=plane['px_height'])
-                 for plane in (RecordingInfo.Plane & key).fetch(as_dict=True)])
-
-        if RecordingInfo.File & key:
-            self.insert(
-                [dict(key, preprocessing_filepath=file['recording_filepath'])
-                 for file in (RecordingInfo.File & key).fetch(as_dict=True)])
-
-
-@schema
 class MotionCorrectionMethod(dj.Lookup):
     definition = """
     motion_correction_method: char(32)
     ---
     motion_correction_method_desc='': varchar(1000)
     """
-
-    contents = [
-        ('inscopix', 'Motion correction running through Inscopix software with manual interaction'),
-        ('suite2p', 'Motion correction using auto processed Suite2p')
-        ('caiman', 'Motion correction using auto processed caiman')
-    ]
+    contents = zip(['mcgill_miniscope_analysis', ''])
 
 
 @schema
-class ProcessingMethod(dj.Lookup):
+class MotionCorretionParamSet(dj.Lookup):
     definition = """
-    processing_method: char(32)
+    motion_correction_paramset_idx      : smallint
     ---
-    processing_method_desc: varchar(1000)
-    """
-
-    contents = [('caiman', 'CaImAn Analysis Suite'),
-                ('mcgill_miniscope_analysis', 'MiniscopeAnalysis from McGill University (https://github.com/etterguillaume/MiniscopeAnalysis)')]
-
-
-@schema
-class ProcessingParamSet(dj.Lookup):
-    definition = """
-    paramset_idx:  smallint
-    ---
-    -> ProcessingMethod
-    paramset_desc: varchar(128)
-    param_set_hash: uuid
-    unique index (param_set_hash)
-    params: longblob  # dictionary of all applicable parameters
+    -> MotionCorrectionMethod
+    motion_correction_paramset_desc=''  : varchar(128)
+    motion_correction_paramset_hash     : uuid
+    unique index (motion_correction_paramset_hash)
+    motion_correction_params            : longblob  # dictionary of all motion correction parameters
     """
 
     @classmethod
-    def insert_new_params(cls, processing_method: str,
-                          paramset_idx: int, paramset_desc: str, params: dict):
-        param_dict = {'processing_method': processing_method,
-                      'paramset_idx': paramset_idx,
-                      'paramset_desc': paramset_desc,
-                      'params': params,
-                      'param_set_hash': dict_to_uuid(params)}
-        q_param = cls & {'param_set_hash': param_dict['param_set_hash']}
+    def insert_new_params(cls, motion_correction_method: str,
+                          motion_correction_parameterset_idx: int,
+                          motion_correction_paramset_desc: str,
+                          motion_correction_params: dict):
+        param_dict = {'motion_correction_method': motion_correction_method,
+                      'motion_correction_paramset_idx': motion_correction_paramset_idx,
+                      'motion_correction_paramset_desc': motion_correction_paramset_desc,
+                      'motion_correction_params': motion_correction_params,
+                      'motion_correction_paramset_hash': dict_to_uuid(motion_correction_params)}
+        q_param = cls & {'motion_correction_param_set_hash':
+                         motion_correction_param_dict['motion_correction_paramset_hash']}
 
         if q_param:  # If the specified param-set already exists
-            pname = q_param.fetch1('paramset_idx')
+            pname = q_param.fetch1('motion_correction_paramset_idx')
+            if pname == motion_correction_paramset_idx:  # If the existed set has the same name: job done
+                return
+            else:  # If not same name: human error, trying to add the same paramset with a different name
+                raise dj.DataJointError(
+                    'The specified param-set already exists - name: {}'.format(pname))
+        else:
+            cls.insert1(param_dict)
+
+
+@schema
+class SegmentationMethod(dj.Lookup):
+    definition = """
+    segmentation_method        : char(32)
+    ---
+    segmentation_method_desc='': varchar(128)
+    """
+    contents = zip(['mcgill_miniscope_analysis', ''])
+
+
+@schema
+class SegmentationParamSet(dj.Lookup):
+    definition = """
+    segmentation_paramset_idx      : smallint
+    ---
+    -> SegmentationMethod
+    segmentation_paramset_desc=''  : varchar(128)
+    segmentation_paramset_hash     : uuid
+    unique index (segmentation_paramset_hash)
+    segmentation_params            : longblob  # dictionary of all motion correction parameters
+    """
+
+    @classmethod
+    def insert_new_params(cls, segmentation_method: str,
+                          segmentation_idx: int,
+                          segmentation_paramset_desc: str,
+                          segmentation_params: dict):
+        param_dict = {'segmentation_processing_method': segmentation_processing_method,
+                      'segmentation_paramset_idx': segmentation_paramset_idx,
+                      'segmentation_paramset_desc': segmentation_paramset_desc,
+                      'segmentation_params': segmentation_params,
+                      'segmentation_paramset_hash': dict_to_uuid(segmentation_params)}
+        q_param = cls & {'segmentation_param_set_hash':
+                         param_dict['segmentation_paramset_hash']}
+
+        if q_param:  # If the specified param-set already exists
+            pname = q_param.fetch1('segmentation_paramset_idx')
             if pname == paramset_idx:  # If the existed set has the same name: job done
                 return
             else:  # If not same name: human error, trying to add the same paramset with different name
@@ -315,11 +267,16 @@ class ProcessingParamSet(dj.Lookup):
 @schema
 class ProcessingTask(dj.Manual):
     definition = """
-    -> Preprocessing
-    -> ProcessingParamSet
+    # Manual table marking a processing task to be triggered or manually processed
+    -> RecordingInfo
+    processing_task_idx     : smallint     # processing task
     ---
-    processing_output_dir: varchar(255)         #  output directory of the processed scan relative to root data directory
-    task_mode='load': enum('load', 'trigger')   # 'load': load computed analysis results, 'trigger': trigger computation
+    -> MotionCorrectionParamSet
+    -> RoiExtractionParamSet
+    processing_output_motion_correction_dir: varchar(255)         # relative directory of motion relative to the root data directory
+    processing_segmentation_output_dir: varchar(255)            # relative directory of roi extraction result respect to root directory
+    motion_correction_task_mode='load': enum('load', 'trigger')   # 'load': load existing motion correction results, 'trigger': trigger motion correction procedure
+    segmentation_task_mode='load': enum('load', 'trigger')      # 'load': load existing roi extraction results, 'trigger': trigger
     """
 
 
@@ -331,11 +288,6 @@ class Processing(dj.Computed):
     processing_time     : datetime  # time of generation of this set of processed, segmented results
     package_version=''  : varchar(16)
     """
-
-    # Run processing only on Scan with ScanInfo inserted
-    @property
-    def key_source(self):
-        return ProcessingTask & scan.ScanInfo
 
     def make(self, key):
         task_mode = (ProcessingTask & key).fetch1('task_mode')
@@ -366,7 +318,8 @@ class Curation(dj.Manual):
     curation_id: int
     ---
     curation_time: datetime             # time of generation of this set of curated results
-    curation_output_dir: varchar(255)   # output directory of the curated results, relative to root data directory
+    curation_output_motion_correction_dir: varchar(255)       # relative directory of motion relative to the root data directory
+    curation_segmentation_output_dir: varchar(255)            # relative directory of roi extraction result respect to root directory
     manual_curation: bool               # has manual curation been performed on this result?
     curation_note='': varchar(2000)
     """
@@ -404,7 +357,7 @@ class Curation(dj.Manual):
 @schema
 class MotionCorrection(dj.Imported):
     definition = """
-    -> Processing
+    -> Curation
     ---
     -> Channel.proj(motion_correct_channel='channel') # channel used for motion correction in this processing task
     """
@@ -425,7 +378,6 @@ class MotionCorrection(dj.Imported):
     class Summary(dj.Part):
         definition = """ # summary images for each field and channel after corrections
         -> master
-        -> RecordingInfo.Plane
         ---
         ref_image=null          : longblob  # image used as alignment template
         average_image           : longblob  # mean of registered frames
