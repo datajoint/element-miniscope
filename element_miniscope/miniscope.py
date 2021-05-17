@@ -167,7 +167,7 @@ class RecordingInfo(dj.Imported):
         # Insert file(s)
         root = pathlib.Path(get_miniscope_root_data_dir())
         recording_files = [pathlib.Path(f).relative_to(root).as_posix() for f in recording_filepaths]
-        self.File.insert([{**key, 'recording_file_path': f} for f in recording_files])
+        self.File.insert([{**key, 'recording_file_id': i, 'recording_file_path': f} for i, f in enumerate(recording_files)])
 
 
 @schema
