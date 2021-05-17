@@ -181,7 +181,7 @@ class MotionCorrectionMethod(dj.Lookup):
 
 
 @schema
-class MotionCorretionParamSet(dj.Lookup):
+class MotionCorrectionParamSet(dj.Lookup):
     definition = """
     motion_correction_paramset_idx      : smallint
     ---
@@ -194,7 +194,7 @@ class MotionCorretionParamSet(dj.Lookup):
 
     @classmethod
     def insert_new_params(cls, motion_correction_method: str,
-                          motion_correction_parameterset_idx: int,
+                          motion_correction_paramset_idx: int,
                           motion_correction_paramset_desc: str,
                           motion_correction_params: dict):
         param_dict = {'motion_correction_method': motion_correction_method,
@@ -243,7 +243,7 @@ class SegmentationParamSet(dj.Lookup):
                           segmentation_idx: int,
                           segmentation_paramset_desc: str,
                           segmentation_params: dict):
-        param_dict = {'segmentation_processing_method': segmentation_processing_method,
+        param_dict = {'segmentation_method': segmentation_method,
                       'segmentation_paramset_idx': segmentation_paramset_idx,
                       'segmentation_paramset_desc': segmentation_paramset_desc,
                       'segmentation_params': segmentation_params,
