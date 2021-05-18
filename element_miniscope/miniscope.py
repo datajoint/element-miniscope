@@ -7,26 +7,24 @@ import hashlib
 import importlib
 import inspect
 
-from . import scan
-
 schema = dj.schema()
 
 _linking_module = None
 
 
-def activate(imaging_schema_name, scan_schema_name=None, *,
+def activate(miniscope_schema_name, *,
              create_schema=True, create_tables=True, linking_module=None):
     """
-    activate(imaging_schema_name, *, scan_schema_name=None, create_schema=True, create_tables=True, linking_module=None)
-        :param imaging_schema_name: schema name on the database server to activate the `imaging` module
-        :param scan_schema_name: schema name on the database server to activate the `scan` module
-         - may be omitted if the `scan` module is already activated
+    activate(miniscope_schema_name, *, create_schema=True, create_tables=True, linking_module=None)
+        :param miniscope_schema_name: schema name on the database server to activate the `miniscope` module
         :param create_schema: when True (default), create schema in the database if it does not yet exist.
         :param create_tables: when True (default), create tables in the database if they do not yet exist.
         :param linking_module: a module name or a module containing the
-         required dependencies to activate the `imaging` module:
+         required dependencies to activate the `miniscope` module:
             Upstream tables:
-                + Session: parent table to Scan, typically identifying a recording session
+                + Session: parent table to Recording, typically identifying a recording session
+                + Equipment: Reference table for Recording, specifying the equipment used for the acquisition of this miniscope recording
+                + Location: Reference table for RecordingLocation, specifying the brain location where this miniscope recording is acquired
             Functions:
                 + get_miniscope_root_data_dir() -> str
                     Retrieve the root data directory - e.g. containing all subject/sessions data
@@ -41,21 +39,19 @@ def activate(imaging_schema_name, scan_schema_name=None, *,
     global _linking_module
     _linking_module = linking_module
 
-    scan.activate(scan_schema_name, create_schema=create_schema,
-                  create_tables=create_tables, linking_module=linking_module)
     schema.activate(imaging_schema_name, create_schema=create_schema,
                     create_tables=create_tables, add_objects=_linking_module.__dict__)
 
 
 # -------------- Functions required by the element-calcium-imaging  --------------
 
-def get_miniscope_daq_v3_files(key: dict) -> str:
+def get_miniscope_daq_v3_files(recording_key: dict) -> str:
     """
-    Retrieve the Miniscope DAQ V3 files associated with a given Scan
-    :param scan_key: key of a Scan
+    Retrieve the Miniscope DAQ V3 files associated with a given Recording
+    :param recording_key: key of a Recording
     :return: Miniscope DAQ V3 files full file-path
     """
-    return _linking_module.get_miniscope_daq_v3_files(key)
+    return _linking_module.get_miniscope_daq_v3_files(recording_key)
 
 
 def get_miniscope_root_data_dir() -> str:
@@ -119,10 +115,9 @@ class RecordingInfo(dj.Imported):
     px_width=null     : smallint  # width in pixels
     um_height=null    : float     # height in microns
     um_width=null     : float     # width in microns
-    fps                  : float     # (Hz) frames per second - volumetric scan rate
+    fps                  : float     # (Hz) frames per second
     gain=null            : float     # recording gain
     spatial_downsample=1 : tinyint   # e.g. 1, 2, 4, 8. 1 for no downsampling
-    temporal_downsample=1: tinyint   # e.g. 1, 2, 4, 8. 1 for no downsampling
     led_power            : float     # LED power used in the given recording
     """
 
@@ -135,7 +130,7 @@ class RecordingInfo(dj.Imported):
         """
 
     def make(self, key):
-        """ Read and store some scan meta information."""
+        """ Read and store some meta information."""
         acq_software = (Recording & key).fetch1('acq_software')
 
         if acq_software == 'Miniscope-DAQ-V3':
@@ -240,7 +235,7 @@ class SegmentationParamSet(dj.Lookup):
 
     @classmethod
     def insert_new_params(cls, segmentation_method: str,
-                          segmentation_idx: int,
+                          segmentation_paramset_idx: int,
                           segmentation_paramset_desc: str,
                           segmentation_params: dict):
         param_dict = {'segmentation_method': segmentation_method,
@@ -526,10 +521,8 @@ class Segmentation(dj.Computed):
         mask_npix            : int       # number of pixels in ROIs
         mask_center_x=null   : int       # center x coordinate in pixel                         # TODO: determine why some masks don't have information, thus null required
         mask_center_y=null   : int       # center y coordinate in pixel
-        mask_center_z=null   : int       # center z coordinate in pixel
         mask_xpix=null       : longblob  # x coordinates in pixels
         mask_ypix=null       : longblob  # y coordinates in pixels
-        mask_zpix=null       : longblob  # z coordinates in pixels
         mask_weights         : longblob  # weights of the mask at the indices above
         """
 
