@@ -313,7 +313,7 @@ class Curation(dj.Manual):
     curation_id: int
     ---
     curation_time: datetime             # time of generation of this set of curated results
-    curation_output_motion_correction_dir: varchar(255)       # relative directory of motion relative to the root data directory
+    curation_motion_correction_output_dir: varchar(255)       # relative directory of motion relative to the root data directory
     curation_segmentation_output_dir: varchar(255)            # relative directory of roi extraction result respect to root directory
     manual_curation: bool               # has manual curation been performed on this result?
     curation_note='': varchar(2000)
