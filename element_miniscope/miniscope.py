@@ -269,9 +269,9 @@ class ProcessingTask(dj.Manual):
     -> MotionCorrectionParamSet
     -> SegmentationParamSet
     processing_motion_correction_output_dir: varchar(255)         # relative directory of motion relative to the root data directory
-    processing_segmentation_output_dir: varchar(255)            # relative directory of roi extraction result respect to root directory
+    processing_segmentation_output_dir: varchar(255)            # relative directory of segmentation result respect to root directory
     motion_correction_task_mode='load': enum('load', 'trigger')   # 'load': load existing motion correction results, 'trigger': trigger motion correction procedure
-    segmentation_task_mode='load': enum('load', 'trigger')      # 'load': load existing roi extraction results, 'trigger': trigger
+    segmentation_task_mode='load': enum('load', 'trigger')      # 'load': load existing segmentation results, 'trigger': trigger
     """
 
 
@@ -314,7 +314,7 @@ class Curation(dj.Manual):
     ---
     curation_time: datetime             # time of generation of this set of curated results
     curation_motion_correction_output_dir: varchar(255)       # relative directory of motion relative to the root data directory
-    curation_segmentation_output_dir: varchar(255)            # relative directory of roi extraction result respect to root directory
+    curation_segmentation_output_dir: varchar(255)            # relative directory of segmentation result respect to root directory
     manual_curation: bool               # has manual curation been performed on this result?
     curation_note='': varchar(2000)
     """
@@ -534,7 +534,7 @@ class Segmentation(dj.Computed):
         mask                 : smallint
         ---
         -> Channel.proj(segmentation_channel='channel')  # channel used for segmentation
-        mask_npix            : int       # number of pixels in ROIs
+        mask_npix            : int       # number of pixels in this mask
         mask_center_x=null   : int       # center x coordinate in pixel                         # TODO: determine why some masks don't have information, thus null required
         mask_center_y=null   : int       # center y coordinate in pixel
         mask_xpix=null       : longblob  # x coordinates in pixels
