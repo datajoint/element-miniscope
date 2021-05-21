@@ -267,8 +267,8 @@ class ProcessingTask(dj.Manual):
     processing_task_idx     : smallint     # processing task
     ---
     -> MotionCorrectionParamSet
-    -> RoiExtractionParamSet
-    processing_output_motion_correction_dir: varchar(255)         # relative directory of motion relative to the root data directory
+    -> SegmentationParamSet
+    processing_motion_correction_output_dir: varchar(255)         # relative directory of motion relative to the root data directory
     processing_segmentation_output_dir: varchar(255)            # relative directory of roi extraction result respect to root directory
     motion_correction_task_mode='load': enum('load', 'trigger')   # 'load': load existing motion correction results, 'trigger': trigger motion correction procedure
     segmentation_task_mode='load': enum('load', 'trigger')      # 'load': load existing roi extraction results, 'trigger': trigger
@@ -313,7 +313,7 @@ class Curation(dj.Manual):
     curation_id: int
     ---
     curation_time: datetime             # time of generation of this set of curated results
-    curation_output_motion_correction_dir: varchar(255)       # relative directory of motion relative to the root data directory
+    curation_motion_correction_output_dir: varchar(255)       # relative directory of motion relative to the root data directory
     curation_segmentation_output_dir: varchar(255)            # relative directory of roi extraction result respect to root directory
     manual_curation: bool               # has manual curation been performed on this result?
     curation_note='': varchar(2000)
