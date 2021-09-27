@@ -821,10 +821,10 @@ def get_loader_result(key, table):
     output_dir = root_dir / output_dir
 
     if method == 'caiman':
-        from .readers import caiman_loader
+        from element_data_loader import caiman_loader
         loaded_output = caiman_loader.CaImAn(output_dir)
     elif method == 'mcgill_miniscope_analysis':
-        from .readers import miniscope_analysis_loader
+        from element_data_loader import miniscope_analysis_loader
         loaded_output = miniscope_analysis_loader.MiniscopeAnalysis(output_dir)
     else:
         raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
