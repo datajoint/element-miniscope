@@ -7,28 +7,26 @@ import hashlib
 import importlib
 import inspect
 
-from . import scan
-
 schema = dj.schema()
 
 _linking_module = None
 
 
-def activate(imaging_schema_name, scan_schema_name=None, *,
+def activate(miniscope_schema_name, *,
              create_schema=True, create_tables=True, linking_module=None):
     """
-    activate(imaging_schema_name, *, scan_schema_name=None, create_schema=True, create_tables=True, linking_module=None)
-        :param imaging_schema_name: schema name on the database server to activate the `imaging` module
-        :param scan_schema_name: schema name on the database server to activate the `scan` module
-         - may be omitted if the `scan` module is already activated
+    activate(miniscope_schema_name, *, create_schema=True, create_tables=True, linking_module=None)
+        :param miniscope_schema_name: schema name on the database server to activate the `miniscope` module
         :param create_schema: when True (default), create schema in the database if it does not yet exist.
         :param create_tables: when True (default), create tables in the database if they do not yet exist.
         :param linking_module: a module name or a module containing the
-         required dependencies to activate the `imaging` module:
+         required dependencies to activate the `miniscope` module:
             Upstream tables:
-                + Session: parent table to Scan, typically identifying a recording session
+                + Session: parent table to Recording, typically identifying a recording session
+                + Equipment: Reference table for Recording, specifying the equipment used for the acquisition of this miniscope recording
+                + Location: Reference table for RecordingLocation, specifying the brain location where this miniscope recording is acquired
             Functions:
-                + get_imaging_root_data_dir() -> str
+                + get_miniscope_root_data_dir() -> str
                     Retrieve the root data directory - e.g. containing all subject/sessions data
                     :return: a string for full path to the root data directory
     """
@@ -41,62 +39,215 @@ def activate(imaging_schema_name, scan_schema_name=None, *,
     global _linking_module
     _linking_module = linking_module
 
-    scan.activate(scan_schema_name, create_schema=create_schema,	
-                  create_tables=create_tables, linking_module=linking_module)
     schema.activate(imaging_schema_name, create_schema=create_schema,
                     create_tables=create_tables, add_objects=_linking_module.__dict__)
 
 
 # -------------- Functions required by the element-calcium-imaging  --------------
 
-def get_imaging_root_data_dir() -> str:
+def get_miniscope_daq_v3_files(recording_key: dict) -> str:
     """
-    get_imaging_root_data_dir() -> str
+    Retrieve the Miniscope DAQ V3 files associated with a given Recording
+    :param recording_key: key of a Recording
+    :return: Miniscope DAQ V3 files full file-path
+    """
+    return _linking_module.get_miniscope_daq_v3_files(recording_key)
+
+
+def get_miniscope_root_data_dir() -> str:
+    """
+    get_miniscope_root_data_dir() -> str
         Retrieve the root data directory - e.g. containing all subject/sessions data
         :return: a string for full path to the root data directory
     """
-    return _linking_module.get_imaging_root_data_dir()
+    return _linking_module.get_miniscope_root_data_dir()
 
 
 # -------------- Table declarations --------------
 
+@schema
+class AcquisitionSoftware(dj.Lookup):
+    definition = """  # Name of acquisition software
+    acq_software: varchar(24)
+    """
+    contents = zip([
+        'Miniscope-DAQ-V3',
+        'Inscopix nVoke'])
+
 
 @schema
-class ProcessingMethod(dj.Lookup):
+class Channel(dj.Lookup):
+    definition = """  # Recording channel
+    channel     : tinyint  # 0-based indexing
+    """
+    contents = zip(range(5))
+
+
+@schema
+class Recording(dj.Manual):
     definition = """
-    processing_method: char(32)
+    -> Session
+    recording_id: int
     ---
-    processing_method_desc: varchar(1000)
+    -> Equipment
+    -> AcquisitionSoftware
+    recording_notes='' : varchar(4095)         # free-notes
     """
 
-    contents = [('caiman', 'CaImAn Analysis Suite'),
-                ('mcgill_miniscope_analysis', 'MiniscopeAnalysis from McGill University (https://github.com/etterguillaume/MiniscopeAnalysis)')]
+
+@schema
+class RecordingLocation(dj.Manual):
+    definition = """
+    -> Recording
+    ---
+    -> Location
+    """
 
 
 @schema
-class ProcessingParamSet(dj.Lookup):
-    definition = """
-    paramset_idx:  smallint
+class RecordingInfo(dj.Imported):
+    definition = """ # general data about recording
+    -> Recording
     ---
-    -> ProcessingMethod    
-    paramset_desc: varchar(128)
-    param_set_hash: uuid
-    unique index (param_set_hash)
-    params: longblob  # dictionary of all applicable parameters
+    nchannels            : tinyint   # number of channels
+    nframes              : int       # number of recorded frames
+    px_height=null    : smallint  # height in pixels
+    px_width=null     : smallint  # width in pixels
+    um_height=null    : float     # height in microns
+    um_width=null     : float     # width in microns
+    fps                  : float     # (Hz) frames per second
+    gain=null            : float     # recording gain
+    spatial_downsample=1 : tinyint   # e.g. 1, 2, 4, 8. 1 for no downsampling
+    led_power            : float     # LED power used in the given recording
+    """
+
+    class File(dj.Part):
+        definition = """
+        -> master
+        recording_file_id : smallint unsigned
+        ---
+        recording_file_path: varchar(255)  # filepath relative to root data directory
+        """
+
+    def make(self, key):
+        """ Read and store some meta information."""
+        acq_software = (Recording & key).fetch1('acq_software')
+
+        if acq_software == 'Miniscope-DAQ-V3':
+            # Parse image dimension and frame rate
+            import cv2
+            recording_filepaths = get_miniscope_daq_v3_files(key)
+            video = cv2.VideoCapture(recording_filepaths[0])
+            fps = video.get(cv2.CAP_PROP_FPS) # TODO: Verify this method extracts correct value
+            _, frame = video.read()
+            frame_size = np.shape(frame)
+
+            # Parse number of frames from timestamp.dat file
+            with open(recording_filepaths[-1]) as f:
+                next(f)
+                nframes = sum(1 for line in f if int(line[0]) == 0)
+
+            # Insert in RecordingInfo
+            self.insert1(dict(key,
+                              nchannels=1,
+                              nframes=nframes,
+                              fps=fps,
+                              px_height=frame_size[0],
+                              px_width=frame_size[1]))
+
+        else:
+            raise NotImplementedError(
+                f'Loading routine not implemented for {acq_software} acquisition software')
+
+        # Insert file(s)
+        root = pathlib.Path(get_miniscope_root_data_dir())
+        recording_files = [pathlib.Path(f).relative_to(root).as_posix() for f in recording_filepaths]
+        self.File.insert([{**key, 'recording_file_id': i, 'recording_file_path': f} for i, f in enumerate(recording_files)])
+
+
+@schema
+class MotionCorrectionMethod(dj.Lookup):
+    definition = """
+    motion_correction_method: char(32)
+    ---
+    motion_correction_method_desc='': varchar(1000)
+    """
+    contents = zip(['mcgill_miniscope_analysis', ''])
+
+
+@schema
+class MotionCorrectionParamSet(dj.Lookup):
+    definition = """
+    motion_correction_paramset_idx      : smallint
+    ---
+    -> MotionCorrectionMethod
+    motion_correction_paramset_desc=''  : varchar(128)
+    motion_correction_paramset_hash     : uuid
+    unique index (motion_correction_paramset_hash)
+    motion_correction_params            : longblob  # dictionary of all motion correction parameters
     """
 
     @classmethod
-    def insert_new_params(cls, processing_method: str, 
-                          paramset_idx: int, paramset_desc: str, params: dict):
-        param_dict = {'processing_method': processing_method,
-                      'paramset_idx': paramset_idx,
-                      'paramset_desc': paramset_desc,
-                      'params': params,
-                      'param_set_hash': dict_to_uuid(params)}
-        q_param = cls & {'param_set_hash': param_dict['param_set_hash']}
+    def insert_new_params(cls, motion_correction_method: str,
+                          motion_correction_paramset_idx: int,
+                          motion_correction_paramset_desc: str,
+                          motion_correction_params: dict):
+        param_dict = {'motion_correction_method': motion_correction_method,
+                      'motion_correction_paramset_idx': motion_correction_paramset_idx,
+                      'motion_correction_paramset_desc': motion_correction_paramset_desc,
+                      'motion_correction_params': motion_correction_params,
+                      'motion_correction_paramset_hash': dict_to_uuid(motion_correction_params)}
+        q_param = cls & {'motion_correction_param_set_hash':
+                         motion_correction_param_dict['motion_correction_paramset_hash']}
 
         if q_param:  # If the specified param-set already exists
-            pname = q_param.fetch1('paramset_idx')
+            pname = q_param.fetch1('motion_correction_paramset_idx')
+            if pname == motion_correction_paramset_idx:  # If the existed set has the same name: job done
+                return
+            else:  # If not same name: human error, trying to add the same paramset with a different name
+                raise dj.DataJointError(
+                    'The specified param-set already exists - name: {}'.format(pname))
+        else:
+            cls.insert1(param_dict)
+
+
+@schema
+class SegmentationMethod(dj.Lookup):
+    definition = """
+    segmentation_method        : char(32)
+    ---
+    segmentation_method_desc='': varchar(128)
+    """
+    contents = zip(['mcgill_miniscope_analysis', ''])
+
+
+@schema
+class SegmentationParamSet(dj.Lookup):
+    definition = """
+    segmentation_paramset_idx      : smallint
+    ---
+    -> SegmentationMethod
+    segmentation_paramset_desc=''  : varchar(128)
+    segmentation_paramset_hash     : uuid
+    unique index (segmentation_paramset_hash)
+    segmentation_params            : longblob  # dictionary of all motion correction parameters
+    """
+
+    @classmethod
+    def insert_new_params(cls, segmentation_method: str,
+                          segmentation_paramset_idx: int,
+                          segmentation_paramset_desc: str,
+                          segmentation_params: dict):
+        param_dict = {'segmentation_method': segmentation_method,
+                      'segmentation_paramset_idx': segmentation_paramset_idx,
+                      'segmentation_paramset_desc': segmentation_paramset_desc,
+                      'segmentation_params': segmentation_params,
+                      'segmentation_paramset_hash': dict_to_uuid(segmentation_params)}
+        q_param = cls & {'segmentation_param_set_hash':
+                         param_dict['segmentation_paramset_hash']}
+
+        if q_param:  # If the specified param-set already exists
+            pname = q_param.fetch1('segmentation_paramset_idx')
             if pname == paramset_idx:  # If the existed set has the same name: job done
                 return
             else:  # If not same name: human error, trying to add the same paramset with different name
@@ -106,34 +257,21 @@ class ProcessingParamSet(dj.Lookup):
             cls.insert1(param_dict)
 
 
-@schema
-class CellCompartment(dj.Lookup):
-    definition = """  # cell compartments that can be imaged
-    cell_compartment         : char(16)
-    """
-
-    contents = zip(['axon', 'soma', 'bouton'])
-
-
-@schema
-class MaskType(dj.Lookup):
-    definition = """ # possible classifications for a segmented mask
-    mask_type        : varchar(16)
-    """
-
-    contents = zip(['soma', 'axon', 'dendrite', 'neuropil', 'artefact', 'unknown'])
-
-
 # -------------- Trigger a processing routine --------------
 
 @schema
 class ProcessingTask(dj.Manual):
     definition = """
-    -> scan.Scan
-    -> ProcessingParamSet
+    # Manual table marking a processing task to be triggered or manually processed
+    -> RecordingInfo
+    processing_task_idx     : smallint     # processing task
     ---
-    processing_output_dir: varchar(255)         #  output directory of the processed scan relative to root data directory
-    task_mode='load': enum('load', 'trigger')   # 'load': load computed analysis results, 'trigger': trigger computation
+    -> MotionCorrectionParamSet
+    -> SegmentationParamSet
+    processing_motion_correction_output_dir: varchar(255)         # relative directory of motion relative to the root data directory
+    processing_segmentation_output_dir: varchar(255)            # relative directory of segmentation result respect to root directory
+    motion_correction_task_mode='load': enum('load', 'trigger')   # 'load': load existing motion correction results, 'trigger': trigger motion correction procedure
+    segmentation_task_mode='load': enum('load', 'trigger')      # 'load': load existing segmentation results, 'trigger': trigger
     """
 
 
@@ -145,11 +283,6 @@ class Processing(dj.Computed):
     processing_time     : datetime  # time of generation of this set of processed, segmented results
     package_version=''  : varchar(16)
     """
-
-    # Run processing only on Scan with ScanInfo inserted
-    @property
-    def key_source(self):
-        return ProcessingTask & scan.ScanInfo
 
     def make(self, key):
         task_mode = (ProcessingTask & key).fetch1('task_mode')
@@ -179,10 +312,11 @@ class Curation(dj.Manual):
     -> Processing
     curation_id: int
     ---
-    curation_time: datetime             # time of generation of this set of curated results 
-    curation_output_dir: varchar(255)   # output directory of the curated results, relative to root data directory
+    curation_time: datetime             # time of generation of this set of curated results
+    curation_motion_correction_output_dir: varchar(255)       # relative directory of motion relative to the root data directory
+    curation_segmentation_output_dir: varchar(255)            # relative directory of segmentation result respect to root directory
     manual_curation: bool               # has manual curation been performed on this result?
-    curation_note='': varchar(2000)  
+    curation_note='': varchar(2000)
     """
 
     def create1_from_processing_task(self, key, is_curated=False, curation_note=''):
@@ -217,20 +351,20 @@ class Curation(dj.Manual):
 
 @schema
 class MotionCorrection(dj.Imported):
-    definition = """ 
-    -> Processing
+    definition = """
+    -> Curation
     ---
-    -> scan.Channel.proj(motion_correct_channel='channel') # channel used for motion correction in this processing task
+    -> Channel.proj(motion_correct_channel='channel') # channel used for motion correction in this processing task
     """
 
     class RigidMotionCorrection(dj.Part):
-        definition = """ 
+        definition = """
         -> master
         ---
         outlier_frames=null : longblob  # mask with true for frames with outlier shifts (already corrected)
         y_shifts            : longblob  # (pixels) y motion correction shifts
         x_shifts            : longblob  # (pixels) x motion correction shifts
-        z_shifts=null       : longblob  # (pixels) z motion correction shifts (z-drift) 
+        z_shifts=null       : longblob  # (pixels) z motion correction shifts (z-drift)
         y_std               : float     # (pixels) standard deviation of y shifts across all frames
         x_std               : float     # (pixels) standard deviation of x shifts across all frames
         z_std=null          : float     # (pixels) standard deviation of z shifts across all frames
@@ -239,9 +373,8 @@ class MotionCorrection(dj.Imported):
     class NonRigidMotionCorrection(dj.Part):
         """
         Piece-wise rigid motion correction
-        - tile the FOV into multiple 3D blocks/patches
         """
-        definition = """ 
+        definition = """
         -> master
         ---
         outlier_frames=null             : longblob      # mask with true for frames with outlier shifts (already corrected)
@@ -272,7 +405,6 @@ class MotionCorrection(dj.Imported):
     class Summary(dj.Part):
         definition = """ # summary images for each field and channel after corrections
         -> master
-        -> scan.ScanInfo.Field
         ---
         ref_image=null          : longblob  # image used as alignment template
         average_image           : longblob  # mean of registered frames
@@ -409,28 +541,20 @@ class MotionCorrection(dj.Imported):
 @schema
 class Segmentation(dj.Computed):
     definition = """ # Different mask segmentations.
-    -> Curation
-    ---
-    -> MotionCorrection    
+    -> MotionCorrection
     """
-
-    @property
-    def key_source(self):
-        return Curation & MotionCorrection
 
     class Mask(dj.Part):
         definition = """ # A mask produced by segmentation.
         -> master
         mask                 : smallint
         ---
-        -> scan.Channel.proj(segmentation_channel='channel')  # channel used for segmentation
-        mask_npix            : int       # number of pixels in ROIs
+        -> Channel.proj(segmentation_channel='channel')  # channel used for segmentation
+        mask_npix            : int       # number of pixels in this mask
         mask_center_x=null   : int       # center x coordinate in pixel                         # TODO: determine why some masks don't have information, thus null required
         mask_center_y=null   : int       # center y coordinate in pixel
-        mask_center_z=null   : int       # center z coordinate in pixel
         mask_xpix=null       : longblob  # x coordinates in pixels
-        mask_ypix=null       : longblob  # y coordinates in pixels      
-        mask_zpix=null       : longblob  # z coordinates in pixels        
+        mask_ypix=null       : longblob  # y coordinates in pixels
         mask_weights         : longblob  # weights of the mask at the indices above
         """
 
@@ -484,11 +608,11 @@ class Segmentation(dj.Computed):
 
             # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            segmentation_channel = params.get('segmentation_channel', 
+            segmentation_channel = params.get('segmentation_channel',
                                               loaded_miniscope_analysis.segmentation_channel)
 
             self.insert1(key)
-            self.Mask.insert([{**key, 
+            self.Mask.insert([{**key,
                                'segmentation_channel': segmentation_channel,
                                'mask': mask['mask_id'],
                                'mask_npix': mask['mask_npix'],
@@ -497,8 +621,8 @@ class Segmentation(dj.Computed):
                                'mask_xpix': mask['mask_xpix'],
                                'mask_ypix': mask['mask_ypix'],
                                'mask_weights': mask['mask_weights']}
-                               for mask in loaded_miniscope_analysis.masks], 
-                               ignore_extra_fields=True)            
+                               for mask in loaded_miniscope_analysis.masks],
+                               ignore_extra_fields=True)
 
         else:
             raise NotImplementedError(f'Unknown/unimplemented method: {method}')
@@ -547,7 +671,7 @@ class Fluorescence(dj.Computed):
         definition = """
         -> master
         -> Segmentation.Mask
-        -> scan.Channel.proj(fluorescence_channel='channel')  # the channel that this trace comes from         
+        -> Channel.proj(fluorescence_channel='channel')  # the channel that this trace comes from
         ---
         fluorescence                : longblob  # fluorescence trace associated with this mask
         neuropil_fluorescence=null  : longblob  # Neuropil fluorescence trace
@@ -565,23 +689,23 @@ class Fluorescence(dj.Computed):
                                               loaded_caiman.segmentation_channel)
 
             self.insert1(key)
-            self.Trace.insert([{**key, 
+            self.Trace.insert([{**key,
                                 'mask': mask['mask_id'],
                                 'fluorescence_channel': segmentation_channel,
                                 'fluorescence': mask['inferred_trace']}
                                 for mask in loaded_caiman.masks])
-        
+
         elif method == 'mcgill_miniscope_analysis':
             loaded_miniscope_analysis = loaded_result
 
             # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            segmentation_channel = params.get('segmentation_channel', 
+            segmentation_channel = params.get('segmentation_channel',
                                               loaded_miniscope_analysis.segmentation_channel)
 
             self.insert1(key)
-            self.Trace.insert([{**key, 
-                                'mask': mask['mask_id'], 
+            self.Trace.insert([{**key,
+                                'mask': mask['mask_id'],
                                 'fluorescence_channel': segmentation_channel,
                                 'fluorescence': mask['raw_trace']}
                                 for mask in loaded_miniscope_analysis.masks])
@@ -596,9 +720,9 @@ class ActivityExtractionMethod(dj.Lookup):
     extraction_method: varchar(200)
     """
 
-    contents = zip(['caiman_deconvolution', 
-                    'caiman_dff', 
-                    'mcgill_miniscope_analysis_deconvolution', 
+    contents = zip(['caiman_deconvolution',
+                    'caiman_dff',
+                    'mcgill_miniscope_analysis_deconvolution',
                     'mcgill_miniscope_analysis_dff'])
 
 
@@ -614,7 +738,7 @@ class Activity(dj.Computed):
         -> master
         -> Fluorescence.Trace
         ---
-        activity_trace: longblob  # 
+        activity_trace: longblob  #
         """
 
     @property
@@ -647,7 +771,7 @@ class Activity(dj.Computed):
                                                   loaded_caiman.segmentation_channel)
 
                 self.insert1(key)
-                self.Trace.insert([{**key, 
+                self.Trace.insert([{**key,
                                     'mask': mask['mask_id'],
                                     'fluorescence_channel': segmentation_channel,
                                     'activity_trace': mask[attr_mapper[key['extraction_method']]]}
@@ -661,11 +785,11 @@ class Activity(dj.Computed):
 
                 # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
                 params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-                segmentation_channel = params.get('segmentation_channel', 
+                segmentation_channel = params.get('segmentation_channel',
                                                   loaded_miniscope_analysis.segmentation_channel)
 
                 self.insert1(key)
-                self.Trace.insert([{**key, 
+                self.Trace.insert([{**key,
                                     'mask': mask['mask_id'],
                                     'fluorescence_channel': segmentation_channel,
                                     'activity_trace': mask[attr_mapper[key['extraction_method']]]}
@@ -693,7 +817,7 @@ def get_loader_result(key, table):
     method, output_dir = (ProcessingParamSet * table & key).fetch1(
         'processing_method', _table_attribute_mapper[table.__name__])
 
-    root_dir = pathlib.Path(get_imaging_root_data_dir())
+    root_dir = pathlib.Path(get_miniscope_root_data_dir())
     output_dir = root_dir / output_dir
 
     if method == 'caiman':
