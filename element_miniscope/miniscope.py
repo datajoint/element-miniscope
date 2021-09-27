@@ -39,7 +39,7 @@ def activate(miniscope_schema_name, *,
     global _linking_module
     _linking_module = linking_module
 
-    schema.activate(imaging_schema_name, create_schema=create_schema,
+    schema.activate(miniscope_schema_name, create_schema=create_schema,
                     create_tables=create_tables, add_objects=_linking_module.__dict__)
 
 
@@ -72,6 +72,7 @@ class AcquisitionSoftware(dj.Lookup):
     """
     contents = zip([
         'Miniscope-DAQ-V3',
+        'Miniscope-DAQ-V4',
         'Inscopix nVoke'])
 
 
@@ -111,14 +112,15 @@ class RecordingInfo(dj.Imported):
     ---
     nchannels            : tinyint   # number of channels
     nframes              : int       # number of recorded frames
-    px_height=null    : smallint  # height in pixels
-    px_width=null     : smallint  # width in pixels
-    um_height=null    : float     # height in microns
-    um_width=null     : float     # width in microns
+    px_height=null       : smallint  # height in pixels
+    px_width=null        : smallint  # width in pixels
+    um_height=null       : float     # height in microns
+    um_width=null        : float     # width in microns
     fps                  : float     # (Hz) frames per second
     gain=null            : float     # recording gain
     spatial_downsample=1 : tinyint   # e.g. 1, 2, 4, 8. 1 for no downsampling
     led_power            : float     # LED power used in the given recording
+    time_stamps          : longblob  # time stamps of each frame
     """
 
     class File(dj.Part):
@@ -151,9 +153,9 @@ class RecordingInfo(dj.Imported):
             self.insert1(dict(key,
                               nchannels=1,
                               nframes=nframes,
-                              fps=fps,
                               px_height=frame_size[0],
-                              px_width=frame_size[1]))
+                              px_width=frame_size[1],
+                              fps=fps))
 
         else:
             raise NotImplementedError(
@@ -268,10 +270,10 @@ class ProcessingTask(dj.Manual):
     ---
     -> MotionCorrectionParamSet
     -> SegmentationParamSet
-    processing_motion_correction_output_dir: varchar(255)         # relative directory of motion relative to the root data directory
-    processing_segmentation_output_dir: varchar(255)            # relative directory of segmentation result respect to root directory
-    motion_correction_task_mode='load': enum('load', 'trigger')   # 'load': load existing motion correction results, 'trigger': trigger motion correction procedure
-    segmentation_task_mode='load': enum('load', 'trigger')      # 'load': load existing segmentation results, 'trigger': trigger
+    processing_motion_correction_output_dir : varchar(255)            # relative directory of motion relative to the root data directory
+    processing_segmentation_output_dir      : varchar(255)            # relative directory of segmentation result respect to root directory
+    motion_correction_task_mode='load'      : enum('load', 'trigger') # 'load': load existing motion correction results, 'trigger': trigger motion correction procedure
+    segmentation_task_mode='load'           : enum('load', 'trigger') # 'load': load existing segmentation results, 'trigger': trigger
     """
 
 
@@ -312,11 +314,11 @@ class Curation(dj.Manual):
     -> Processing
     curation_id: int
     ---
-    curation_time: datetime             # time of generation of this set of curated results
-    curation_motion_correction_output_dir: varchar(255)       # relative directory of motion relative to the root data directory
-    curation_segmentation_output_dir: varchar(255)            # relative directory of segmentation result respect to root directory
-    manual_curation: bool               # has manual curation been performed on this result?
-    curation_note='': varchar(2000)
+    curation_time                           : datetime                # time of generation of this set of curated results
+    curation_motion_correction_output_dir   : varchar(255)            # relative directory of motion relative to the root data directory
+    curation_segmentation_output_dir        : varchar(255)            # relative directory of segmentation result respect to root directory
+    manual_curation                         : bool                    # has manual curation been performed on this result?
+    curation_note=''                        : varchar(2000)
     """
 
     def create1_from_processing_task(self, key, is_curated=False, curation_note=''):
