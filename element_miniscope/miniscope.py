@@ -833,13 +833,20 @@ def get_loader_result(key, table):
 
     return method, loaded_output
 
+def populate_all(display_progress=True):
 
-def dict_to_uuid(key):
-    """
-    Given a dictionary `key`, returns a hash string as UUID
-    """
-    hashed = hashlib.md5()
-    for k, v in sorted(key.items()):
-        hashed.update(str(k).encode())
-        hashed.update(str(v).encode())
-    return uuid.UUID(hex=hashed.hexdigest())
+    populate_settings = {'display_progress': display_progress, 'reserve_jobs': False, 'suppress_errors': False}
+
+    RecordingInfo.populate(**populate_settings)
+
+    Processing.populate(**populate_settings)
+
+    MotionCorrection.populate(**populate_settings)
+
+    Segmentation.populate(**populate_settings)
+
+    MaskClassification.populate(**populate_settings)
+
+    Fluorescence.populate(**populate_settings)
+
+    Activity.populate(**populate_settings)
