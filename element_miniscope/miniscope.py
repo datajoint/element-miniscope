@@ -143,50 +143,60 @@ class RecordingInfo(dj.Imported):
 
         recording_filepaths = [file_path.as_posix() for file_path 
                                             in recording_path.glob('*.avi')]
-        recording_metadata = list(recording_path.glob('*.json'))[0]
-        recording_timestamps = list(recording_path.glob('*.csv'))[0]
 
         if not recording_filepaths:
-            raise FileNotFoundError(f'No .avi files found in {recording_directory}')
-        elif not recording_metadata.exists():
-            raise FileNotFoundError(f'No .json file found in {recording_directory}')
-        elif not recording_timestamps.exists():
-            raise FileNotFoundError(f'No .csv file found in {recording_directory}')
-        
+            raise FileNotFoundError(f'No .avi files found in '
+                                    f'{recording_directory}')
+
         if acquisition_software == 'Miniscope-DAQ-V3':
-            # Parse image dimension and frame rate
-            video = cv2.VideoCapture(recording_filepaths[0])
-            fps = video.get(cv2.CAP_PROP_FPS) # TODO: Verify this method extracts correct value
-            _, frame = video.read()
-            frame_size = np.shape(frame)
+            recording_timestamps = recording_path / 'timestamp.dat'
+            if not recording_timestamps.exists():
+                raise FileNotFoundError(f'No timestamp file found in '
+                                        f'{recording_directory}')
+
+            nchannels=1
 
             # Parse number of frames from timestamp.dat file
             with open(recording_filepaths[-1]) as f:
                 next(f)
                 nframes = sum(1 for line in f if int(line[0]) == 0)
 
-            nchannels=1
+            # Parse image dimension and frame rate
+            video = cv2.VideoCapture(recording_filepaths[0])
+            _, frame = video.read()
+            frame_size = np.shape(frame)
             px_height=frame_size[0]
             px_width=frame_size[1]
 
+            fps = video.get(cv2.CAP_PROP_FPS) # TODO: Verify this method extracts correct value
+
         elif acquisition_software == 'Miniscope-DAQ-V4':
+            recording_metadata = list(recording_path.glob('*.json'))[0]
+            recording_timestamps = list(recording_path.glob('*.csv'))[0]
+
+            if not recording_metadata.exists():
+                raise FileNotFoundError(f'No .json file found in '
+                                        f'{recording_directory}')
+            if not recording_timestamps.exists():
+                raise FileNotFoundError(f'No timestamp (*.csv) file found in '
+                                        f'{recording_directory}')
+
             with open(recording_metadata.as_posix()) as f:
                 metadata = json.loads(f.read())
-        
+
             with open(recording_timestamps, newline= '') as f:
                 time_stamps = list(csv.reader(f, delimiter=','))
 
-            time_stamps = np.array([list(map(int, time_stamps[i]))
-                                       for i in range(1,len(time_stamps))])
             nchannels = 1
             nframes = len(time_stamps)
             px_height = metadata['ROI']['height']
             px_width = metadata['ROI']['width']
             fps = int(metadata['frameRate'].replace('FPS',''))
             gain = metadata['gain']
-            spatial_downsample = 1
+            spatial_downsample = 1 # TODO verify
             led_power = metadata['led0']
-
+            time_stamps = np.array([list(map(int, time_stamps[i]))
+                                       for i in range(1,len(time_stamps))])
         else:
             raise NotImplementedError(
                 f'Loading routine not implemented for {acquisition_software}'
@@ -199,8 +209,6 @@ class RecordingInfo(dj.Imported):
                           px_height=px_height,
                           px_width=px_width,
                           fps=fps,
-                        #   um_height=0,
-                        #   um_width=0,
                           gain=gain,
                           spatial_downsample=spatial_downsample,
                           led_power=led_power,
