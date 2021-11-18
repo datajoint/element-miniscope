@@ -1,2 +1,8 @@
-datajoint>=0.13
+datajoint
+datajoint
+scipy
+imreg_dft
+sklearn
+h5py
 opencv-python
+
