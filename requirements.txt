@@ -1,2 +1,1 @@
 datajoint>=0.13
-cv2

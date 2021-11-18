@@ -4,7 +4,7 @@ import pathlib
 from datetime import datetime
 import importlib
 import inspect
-import cv2
+#import cv2
 import json
 import csv
 from element_data_loader.utils import dict_to_uuid, find_full_path, find_root_directory
