@@ -1,8 +1,7 @@
 datajoint
-datajoint
 scipy
 imreg_dft
 sklearn
 h5py
-opencv-python
+opencv-contrib-python
 
