@@ -67,9 +67,8 @@ class AcquisitionSoftware(dj.Lookup):
     definition = """
     acquisition_software: varchar(24)
     """
-    contents = zip([
-        'Miniscope-DAQ-V3',
-        'Miniscope-DAQ-V4'])
+    contents = zip(['Miniscope-DAQ-V3',
+                    'Miniscope-DAQ-V4'])
 
 
 @schema
@@ -260,9 +259,6 @@ class Processing(dj.Computed):
             if method == 'caiman':
                 loaded_caiman = loaded_result
                 key = {**key, 'processing_time': loaded_caiman.creation_time}
-            elif method == 'mcgill_miniscope_analysis':
-                loaded_miniscope_analysis = loaded_result
-                key = {**key, 'processing_time': loaded_miniscope_analysis.creation_time}
             else:
                 raise NotImplementedError('Unknown method: {}'.format(method))
         elif task_mode == 'trigger':
@@ -445,20 +441,6 @@ class MotionCorrection(dj.Imported):
                         'max_image'][...][np.newaxis, ...])]
             self.Summary.insert(summary_images)
 
-        elif method == 'mcgill_miniscope_analysis':
-            loaded_miniscope_analysis = loaded_result
-
-            # TODO: add motion correction and block data
-
-            # -- summary images --
-            mc_key = (scan.ScanInfo.Field * ProcessingTask & key).fetch1('KEY')
-            summary_images = {**mc_key,
-                                 'average_image': loaded_miniscope_analysis.average_image,
-                                 'correlation_image': loaded_miniscope_analysis.correlation_image}
-
-            self.insert1({**key, 'motion_correct_channel': loaded_miniscope_analysis.alignment_channel})
-            self.Summary.insert1(summary_images)
-
         else:
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
 
@@ -530,27 +512,6 @@ class Segmentation(dj.Computed):
                                                    ignore_extra_fields=True,
                                                    allow_direct_insert=True)
 
-        elif method == 'mcgill_miniscope_analysis':
-            loaded_miniscope_analysis = loaded_result
-
-            # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
-            params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            segmentation_channel = params.get('segmentation_channel',
-                                              loaded_miniscope_analysis.segmentation_channel)
-
-            self.insert1(key)
-            self.Mask.insert([{**key,
-                               'segmentation_channel': segmentation_channel,
-                               'mask': mask['mask_id'],
-                               'mask_npix': mask['mask_npix'],
-                               'mask_center_x': mask['mask_center_x'],
-                               'mask_center_y': mask['mask_center_y'],
-                               'mask_xpix': mask['mask_xpix'],
-                               'mask_ypix': mask['mask_ypix'],
-                               'mask_weights': mask['mask_weights']}
-                               for mask in loaded_miniscope_analysis.masks],
-                               ignore_extra_fields=True)
-
         else:
             raise NotImplementedError(f'Unknown/unimplemented method: {method}')
 
@@ -561,8 +522,7 @@ class MaskClassificationMethod(dj.Lookup):
     mask_classification_method: varchar(48)
     """
 
-    contents = zip(['caiman_default_classifier',
-                    'miniscope_analysis_default_classifier'])
+    contents = zip(['caiman_default_classifier'])
 
 
 @schema
@@ -621,20 +581,6 @@ class Fluorescence(dj.Computed):
                                 'fluorescence': mask['inferred_trace']}
                                 for mask in loaded_caiman.masks])
 
-        elif method == 'mcgill_miniscope_analysis':
-            loaded_miniscope_analysis = loaded_result
-
-            # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
-            params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            segmentation_channel = params.get('segmentation_channel',
-                                              loaded_miniscope_analysis.segmentation_channel)
-
-            self.insert1(key)
-            self.Trace.insert([{**key,
-                                'mask': mask['mask_id'],
-                                'fluorescence_channel': segmentation_channel,
-                                'fluorescence': mask['raw_trace']}
-                                for mask in loaded_miniscope_analysis.masks])
 
         else:
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
@@ -647,9 +593,7 @@ class ActivityExtractionMethod(dj.Lookup):
     """
 
     contents = zip(['caiman_deconvolution',
-                    'caiman_dff',
-                    'mcgill_miniscope_analysis_deconvolution',
-                    'mcgill_miniscope_analysis_dff'])
+                    'caiman_dff'])
 
 
 @schema
@@ -674,13 +618,7 @@ class Activity(dj.Computed):
                              & 'processing_method = "caiman"'
                              & 'extraction_method LIKE "caiman%"')
 
-        miniscope_analysis_key_source = (Fluorescence * ActivityExtractionMethod
-                             * ProcessingParamSet.proj('processing_method')
-                             & 'processing_method = "mcgill_miniscope_analysis"'
-                             & 'extraction_method LIKE "mcgill_miniscope_analysis%"')
-
-        # TODO: fix #caiman_key_source.proj() + miniscope_analysis_key_source.proj()
-        return miniscope_analysis_key_source.proj()
+        return caiman_key_source.proj()
 
     def make(self, key):
         method, loaded_result = get_loader_result(key, Curation)
@@ -703,23 +641,6 @@ class Activity(dj.Computed):
                                     'activity_trace': mask[attr_mapper[key['extraction_method']]]}
                                     for mask in loaded_caiman.masks])
 
-        elif method == 'mcgill_miniscope_analysis':
-            if key['extraction_method'] in ('mcgill_miniscope_analysis_deconvolution', 'mcgill_miniscope_analysis_dff'):
-                attr_mapper = {'mcgill_miniscope_analysis_deconvolution': 'spikes', 'mcgill_miniscope_analysis_dff': 'dff'}
-
-                loaded_miniscope_analysis = loaded_result
-
-                # infer "segmentation_channel" - from params if available, else from miniscope analysis loader
-                params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-                segmentation_channel = params.get('segmentation_channel',
-                                                  loaded_miniscope_analysis.segmentation_channel)
-
-                self.insert1(key)
-                self.Trace.insert([{**key,
-                                    'mask': mask['mask_id'],
-                                    'fluorescence_channel': segmentation_channel,
-                                    'activity_trace': mask[attr_mapper[key['extraction_method']]]}
-                                    for mask in loaded_miniscope_analysis.masks])
 
         else:
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
@@ -749,12 +670,6 @@ def get_loader_result(key, table):
     if method == 'caiman':
         from element_interface import caiman_loader
         loaded_output = caiman_loader.CaImAn(output_dir)
-    elif method == 'mcgill_miniscope_analysis':
-        from element_interface import miniscope_analysis_loader
-        loaded_output = miniscope_analysis_loader.MiniscopeAnalysis(output_dir)
-    elif method == 'minian':
-        from element_interface import minian_loader
-        loaded_output = minian_loader.MiniAn(output_dir)
     else:
         raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
 
