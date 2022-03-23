@@ -7,7 +7,7 @@ import inspect
 import cv2
 import json
 import csv
-from element_data_loader.utils import dict_to_uuid, find_full_path, find_root_directory
+from element_interface.utils import dict_to_uuid, find_full_path, find_root_directory
 
 schema = dj.schema()
 
@@ -69,8 +69,7 @@ class AcquisitionSoftware(dj.Lookup):
     """
     contents = zip([
         'Miniscope-DAQ-V3',
-        'Miniscope-DAQ-V4',
-        'Inscopix nVoke'])
+        'Miniscope-DAQ-V4'])
 
 
 @schema
@@ -748,13 +747,13 @@ def get_loader_result(key, table):
     output_dir = root_dir / output_dir
 
     if method == 'caiman':
-        from element_data_loader import caiman_loader
+        from element_interface import caiman_loader
         loaded_output = caiman_loader.CaImAn(output_dir)
     elif method == 'mcgill_miniscope_analysis':
-        from element_data_loader import miniscope_analysis_loader
+        from element_interface import miniscope_analysis_loader
         loaded_output = miniscope_analysis_loader.MiniscopeAnalysis(output_dir)
     elif method == 'minian':
-        from element_data_loader import minian_loader
+        from element_interface import minian_loader
         loaded_output = minian_loader.MiniAn(output_dir)
     else:
         raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
@@ -781,4 +780,3 @@ def populate_all(display_progress=True):
     Fluorescence.populate(**populate_settings)
 
     Activity.populate(**populate_settings)
-
