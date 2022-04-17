@@ -10,14 +10,9 @@ with `Miniscope DAQ V3` acquisition system and `MiniscopeAnalysis` suite for ana
 any particular design of experiment session, thus assembling 
 a fully functional calcium imaging workflow.
 
-+ See [Background](Background.md) for the background information and development timeline.
++ See the [Element Miniscope documentation](https://elements.datajoint.org/description/miniscope/) for the background information and development timeline.
 
-+ See [DataJoint Elements](https://github.com/datajoint/datajoint-elements) for descriptions of the other `elements` and `workflows` developed as part of this initiative.
-
-## Element usage
-
-+ See [workflow-miniscope](https://github.com/datajoint/workflow-miniscope) 
-repository for an example usage of `element-miniscope`.
++ For more information on the DataJoint Elements project, please visit https://elements.datajoint.org.  This work is supported by the National Institutes of Health.
 
 ## Element architecture
 
