@@ -401,7 +401,7 @@ class Curation(dj.Manual):
                       'curation_note': curation_note})
 
 
-# Motion Correction ------------------------------------------------------------
+# Motion Correction --------------------------------------------------------------------
 
 @schema
 class MotionCorrection(dj.Imported):
@@ -575,8 +575,7 @@ class MotionCorrection(dj.Imported):
         else:
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
 
-# -------------- Segmentation --------------
-
+# Segmentation -------------------------------------------------------------------------
 
 @schema
 class Segmentation(dj.Computed):
@@ -676,7 +675,7 @@ class MaskClassification(dj.Computed):
         pass
 
 
-# Activity Trace ---------------------------------------------------------------
+# Fluorescence & Activity Traces -------------------------------------------------------
 
 @schema
 class Fluorescence(dj.Computed):
@@ -729,17 +728,18 @@ class ActivityExtractionMethod(dj.Lookup):
 
 @schema
 class Activity(dj.Computed):
-    definition = """  # inferred neural activity from fluorescence trace - e.g. dff, spikes
+    definition = """
+    # inferred neural activity from fluorescence trace - e.g. dff, spikes
     -> Fluorescence
     -> ActivityExtractionMethod
     """
 
     class Trace(dj.Part):
-        definition = """  #
+        definition = """
         -> master
         -> Fluorescence.Trace
         ---
-        activity_trace: longblob  #
+        activity_trace: longblob
         """
 
     @property
@@ -777,7 +777,7 @@ class Activity(dj.Computed):
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
 
 
-# Helper Functions -------------------------------------------------------------
+# Helper Functions ---------------------------------------------------------------------
 
 _table_attribute_mapper = {'ProcessingTask': 'processing_output_dir',
                            'Curation': 'curation_output_dir'}
