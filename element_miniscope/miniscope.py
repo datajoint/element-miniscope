@@ -228,6 +228,52 @@ class RecordingInfo(dj.Imported):
 # Trigger a processing routine -------------------------------------------------
 
 @schema
+class ProcessingMethod(dj.Lookup):
+    definition = """
+    # Method, package, analysis software used for processing of miniscope data 
+    # (e.g. CaImAn, etc.)
+    processing_method: char(8)
+    ---
+    processing_method_desc: varchar(1000)
+    """
+
+    contents = [('caiman', 'caiman analysis suite')]
+
+
+@schema
+class ProcessingParamSet(dj.Lookup):
+    definition = """
+    # Parameter set used for processing of miniscope data
+    paramset_id:  smallint
+    ---
+    -> ProcessingMethod
+    paramset_desc: varchar(128)
+    param_set_hash: uuid
+    unique index (param_set_hash)
+    params: longblob  # dictionary of all applicable parameters
+    """
+
+    @classmethod
+    def insert_new_params(cls, processing_method: str, paramset_id: int,
+                          paramset_desc: str, params: dict):
+        param_dict = {'processing_method': processing_method,
+                      'paramset_id': paramset_id,
+                      'paramset_desc': paramset_desc,
+                      'params': params,
+                      'param_set_hash': dict_to_uuid(params)}
+        q_param = cls & {'param_set_hash': param_dict['param_set_hash']}
+
+        if q_param:  # If the specified param-set already exists
+            pname = q_param.fetch1('paramset_id')
+            if pname == paramset_id:  # If the existed set has the same name: job done
+                return
+            else:  # If not same name: human error, trying to add the same paramset with different name
+                raise dj.DataJointError(
+                    'The specified param-set already exists - name: {}'.format(pname))
+        else:
+            cls.insert1(param_dict)
+
+@schema
 class ProcessingTask(dj.Manual):
     definition = """
     # Manual table marking a processing task to be triggered or manually processed
@@ -266,6 +312,47 @@ class Processing(dj.Computed):
             raise ValueError(f'Unknown task mode: {task_mode}')
 
         self.insert1(key)
+
+@schema
+class Curation(dj.Manual):
+    definition = """
+    # Different rounds of curation performed on the processing results of the data 
+    # (no-curation can also be included here)
+    -> Processing
+    curation_id: int
+    ---
+    curation_time: datetime             # time of generation of these curated results 
+    curation_output_dir: varchar(255)   # output directory of the curated results, 
+                                        # relative to root data directory
+    manual_curation: bool               # has manual curation been performed?
+    curation_note='': varchar(2000)  
+    """
+
+    def create1_from_processing_task(self, key, is_curated=False, curation_note=''):
+        """
+        A convenient function to create a new corresponding "Curation" for a particular "ProcessingTask"
+        """
+        if key not in Processing():
+            raise ValueError(f'No corresponding entry in Processing available for: '
+                             f'{key}; run `Processing.populate(key)`')
+
+        output_dir = (ProcessingTask & key).fetch1('processing_output_dir')
+        method, imaging_dataset = get_loader_result(key, ProcessingTask)
+
+        if method == 'caiman':
+            caiman_dataset = imaging_dataset
+            curation_time = caiman_dataset.creation_time
+        else:
+            raise NotImplementedError('Unknown method: {}'.format(method))
+
+        # Synthesize curation_id
+        curation_id = dj.U().aggr(self & key, n='ifnull(max(curation_id)+1,1)').fetch1('n')
+        self.insert1({**key, 
+                      'curation_id': curation_id,
+                      'curation_time': curation_time, 
+                      'curation_output_dir': output_dir,
+                      'manual_curation': is_curated,
+                      'curation_note': curation_note})
 
 
 # Motion Correction ------------------------------------------------------------
