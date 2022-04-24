@@ -232,14 +232,12 @@ class ProcessingTask(dj.Manual):
     definition = """
     # Manual table marking a processing task to be triggered or manually processed
     -> RecordingInfo
-    processing_task_idx     : smallint     # processing task
+    processing_task_id     : smallint       # processing task
     ---
-    -> MotionCorrectionParamSet
-    -> SegmentationParamSet
-    processing_motion_correction_output_dir : varchar(255)            # relative directory of motion relative to the root data directory
-    processing_segmentation_output_dir      : varchar(255)            # relative directory of segmentation result respect to root directory
-    motion_correction_task_mode='load'      : enum('load', 'trigger') # 'load': load existing motion correction results, 'trigger': trigger motion correction procedure
-    segmentation_task_mode='load'           : enum('load', 'trigger') # 'load': load existing segmentation results, 'trigger': trigger
+    -> ProcessingParamSet
+    processing_output_dir : varchar(255)    # relative to the root data directory
+    task_mode='load'      : enum('load', 'trigger') # 'load': load existing results
+                                                    # 'trigger': trigger procedure
     """
 
 @schema
