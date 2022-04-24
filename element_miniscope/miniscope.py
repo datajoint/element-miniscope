@@ -215,8 +215,8 @@ class RecordingInfo(dj.Imported):
             fps = video.get(cv2.CAP_PROP_FPS) # TODO: Verify this method extracts correct value
 
         elif acquisition_software == 'Miniscope-DAQ-V4':
-            recording_metadata = list(recording_path.glob('*.json'))[0]
-            recording_timestamps = list(recording_path.glob('*.csv'))[0]
+            recording_metadata = list(recording_path.glob('metaData.json'))[0]
+            recording_timestamps = list(recording_path.glob('timeStamps.csv'))[0]
 
             if not recording_metadata.exists():
                 raise FileNotFoundError(f'No .json file found in '
@@ -231,13 +231,13 @@ class RecordingInfo(dj.Imported):
             with open(recording_timestamps, newline= '') as f:
                 time_stamps = list(csv.reader(f, delimiter=','))
 
-            nchannels = 1
-            nframes = len(time_stamps)
+            nchannels = 1 # Assumes a single channel
+            nframes = len(time_stamps)-1
             px_height = metadata['ROI']['height']
             px_width = metadata['ROI']['width']
             fps = int(metadata['frameRate'].replace('FPS',''))
             gain = metadata['gain']
-            spatial_downsample = 1 # TODO verify
+            spatial_downsample = 1 # Assumes no spatial downsampling
             led_power = metadata['led0']
             time_stamps = np.array([list(map(int, time_stamps[i]))
                                        for i in range(1,len(time_stamps))])
