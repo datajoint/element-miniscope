@@ -344,16 +344,42 @@ class Processing(dj.Computed):
     def make(self, key):
         task_mode = (ProcessingTask & key).fetch1('task_mode')
         method, loaded_result = get_loader_result(key, ProcessingTask)
+        
+        output_dir = (ProcessingTask & key).fetch1('processing_output_dir')
+        output_dir = find_full_path(get_miniscope_root_data_dir(), output_dir).as_posix()
 
         if task_mode == 'load':
             if method == 'caiman':
                 loaded_caiman = loaded_result
                 key = {**key, 'processing_time': loaded_caiman.creation_time}
             else:
-                raise NotImplementedError('Unknown method: {}'.format(method))
+                raise NotImplementedError(f'Loading of {method} data is not yet' 
+                                          f'supported')
         elif task_mode == 'trigger':
-            raise NotImplementedError(f'Automatic triggering of {method} analysis'
-                                      f' is not yet supported')
+            if method == 'caiman':
+                import caiman
+                from element_interface.run_caiman import run_caiman
+
+                avi_files = (ProcessingTask * Recording * RecordingInfo * RecordingInfo.File & key).fetch('file_path')
+                avi_files = [find_full_path(get_miniscope_root_data_dir(), 
+                                    avi_file).as_posix() for avi_file in avi_files]
+
+                params = (ProcessingTask * ProcessingParamSet & key).fetch1('params')
+                sampling_rate = (ProcessingTask * Recording * RecordingInfo & key).fetch1('fps')
+
+                run_caiman(file_paths=avi_files, 
+                           parameters=params, 
+                           sampling_rate=sampling_rate, 
+                           output_dir=output_dir, 
+                           is3D=False)
+
+                _, imaging_dataset = get_loader_result(key, ProcessingTask)
+                caiman_dataset = imaging_dataset
+                key['processing_time'] = caiman_dataset.creation_time
+                key['package_version'] = caiman.__version__
+            else:
+                raise NotImplementedError(f'Automatic triggering of {method} analysis'
+                                          f' is not yet supported')
         else:
             raise ValueError(f'Unknown task mode: {task_mode}')
 
