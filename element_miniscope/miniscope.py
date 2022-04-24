@@ -9,7 +9,7 @@ import json
 import csv
 from element_interface.utils import dict_to_uuid, find_full_path, find_root_directory
 
-schema = dj.schema()
+schema = dj.Schema()
 
 _linking_module = None
 
@@ -33,6 +33,14 @@ def activate(miniscope_schema_name, *,
                     Retrieve the root data directory
                     Contains all subject/sessions data
                     :return: a string for full path to the root data directory
+                + get_session_directory(session_key: dict) -> str
+                    Retrieve the session directory containing the recorded data for a 
+                    given session
+                    :param session_key: a dictionary of one session `key`
+                    :return: a string for full path to the session directory
+                + get_processed_root_data_dir() -> str:
+                    Retrieves the root directory for all processed data
+                    :return: a string for full path to the root directory for processed data
     """
 
     if isinstance(linking_module, str):
@@ -47,17 +55,55 @@ def activate(miniscope_schema_name, *,
                     create_tables=create_tables, add_objects=_linking_module.__dict__)
 
 
-# Functions required by the element-miniscope  ---------------------------------
+# Functions required by the element-miniscope  -----------------------------------------
 
 def get_miniscope_root_data_dir() -> list:
     """
+    All data paths, directories in DataJoint Elements are recommended to be stored as
+    relative paths (posix format), with respect to some user-configured "root" 
+    directory, which varies from machine to machine (e.g. different mounted drive 
+    locations).
+
     get_miniscope_root_data_dir() -> list
-        Retrieve the root data directory
-        Containing the raw ephys recording files for all subject/sessions.
+        This user-provided function retrieves the possible root data directories
+         containing the miniscope data for all subjects and sessions
+         (e.g. acquired Miniscope-DAQ-V4 raw files,
+         output files from processing routines, etc.).
+
         :return: a string for full path to the root data directory,
-                 or list of strings for possible root data directories
+         or list of strings for possible root data directories
     """
-    return _linking_module.get_miniscope_root_data_dir()
+
+    root_directories = _linking_module.get_miniscope_root_data_dir()
+    if isinstance(root_directories, (str, pathlib.Path)):
+        root_directories = [root_directories]
+
+    if hasattr(_linking_module, 'get_processed_root_data_dir'):
+        root_directories.append(_linking_module.get_processed_root_data_dir())
+
+    return root_directories
+
+def get_session_directory(session_key: dict) -> str:
+    """
+    get_session_directory(session_key: dict) -> str
+        Retrieve the session directory containing the
+         recorded data for a given session
+        :param session_key: a dictionary of one session `key`
+        :return: a string for relative or full path to the session directory
+    """
+    return _linking_module.get_session_directory(session_key)
+
+def get_processed_root_data_dir() -> str:
+    """
+    get_processed_root_data_dir() -> str:
+        Retrieves the root directory for all processed data
+        :return: a string for full path to the root directory for processed data
+    """
+
+    if hasattr(_linking_module, 'get_processed_root_data_dir'):
+        return _linking_module.get_processed_root_data_dir()
+    else:
+        return get_miniscope_root_data_dir()[0]
 
 
 # Experiment and analysis meta information -------------------------------------
