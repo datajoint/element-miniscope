@@ -7,6 +7,7 @@ import inspect
 import cv2
 import json
 import csv
+import os
 from element_interface.utils import dict_to_uuid, find_full_path, find_root_directory
 
 schema = dj.Schema()
@@ -278,7 +279,7 @@ class ProcessingMethod(dj.Lookup):
     definition = """
     # Method, package, analysis software used for processing of miniscope data 
     # (e.g. CaImAn, etc.)
-    processing_method: char(8)
+    processing_method: char(16)
     ---
     processing_method_desc: varchar(1000)
     """
@@ -343,12 +344,12 @@ class Processing(dj.Computed):
 
     def make(self, key):
         task_mode = (ProcessingTask & key).fetch1('task_mode')
-        method, loaded_result = get_loader_result(key, ProcessingTask)
         
         output_dir = (ProcessingTask & key).fetch1('processing_output_dir')
-        output_dir = find_full_path(get_miniscope_root_data_dir(), output_dir).as_posix()
+        output_dir = find_full_path(get_miniscope_root_data_dir(), output_dir)
 
         if task_mode == 'load':
+            method, loaded_result = get_loader_result(key, ProcessingTask)
             if method == 'caiman':
                 loaded_caiman = loaded_result
                 key = {**key, 'processing_time': loaded_caiman.creation_time}
@@ -356,22 +357,33 @@ class Processing(dj.Computed):
                 raise NotImplementedError(f'Loading of {method} data is not yet' 
                                           f'supported')
         elif task_mode == 'trigger':
+            method = (ProcessingTask * ProcessingParamSet * ProcessingMethod * \
+                        Recording & key).fetch1('processing_method')
+
             if method == 'caiman':
                 import caiman
                 from element_interface.run_caiman import run_caiman
 
-                avi_files = (ProcessingTask * Recording * RecordingInfo * RecordingInfo.File & key).fetch('file_path')
+                avi_files = (Recording * RecordingInfo * RecordingInfo.File \
+                                & key).fetch('recording_file_path')
                 avi_files = [find_full_path(get_miniscope_root_data_dir(), 
                                     avi_file).as_posix() for avi_file in avi_files]
 
                 params = (ProcessingTask * ProcessingParamSet & key).fetch1('params')
-                sampling_rate = (ProcessingTask * Recording * RecordingInfo & key).fetch1('fps')
+                sampling_rate = (ProcessingTask * Recording * RecordingInfo \
+                                    & key).fetch1('fps')
 
-                run_caiman(file_paths=avi_files, 
-                           parameters=params, 
-                           sampling_rate=sampling_rate, 
-                           output_dir=output_dir, 
-                           is3D=False)
+                filename_hash = '.' + str(dict_to_uuid(dict(**key, **params)))
+
+                if not os.path.isfile(output_dir / filename_hash):
+                    run_caiman(file_paths=avi_files, 
+                               parameters=params, 
+                               sampling_rate=sampling_rate, 
+                               output_dir=output_dir.as_posix(), 
+                               is3D=False)
+
+                    with open(output_dir / filename_hash, 'w') as fp:
+                        pass
 
                 _, imaging_dataset = get_loader_result(key, ProcessingTask)
                 caiman_dataset = imaging_dataset
@@ -821,8 +833,7 @@ def get_loader_result(key, table):
     method, output_dir = (ProcessingParamSet * table & key).fetch1(
         'processing_method', _table_attribute_mapper[table.__name__])
 
-    root_dir = pathlib.Path(get_miniscope_root_data_dir())
-    output_dir = root_dir / output_dir
+    output_dir = find_full_path(get_miniscope_root_data_dir(), output_dir)
 
     if method == 'caiman':
         from element_interface import caiman_loader
