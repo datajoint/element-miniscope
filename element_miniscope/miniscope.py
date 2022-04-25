@@ -446,20 +446,22 @@ class MotionCorrection(dj.Imported):
     definition = """
     -> Processing
     ---
-    -> Channel.proj(motion_correct_channel='channel') # channel used for motion correction in this processing task
+    -> Channel.proj(motion_correct_channel='channel') # channel used for 
+                                                      # motion correction
     """
 
     class RigidMotionCorrection(dj.Part):
         definition = """
         -> master
         ---
-        outlier_frames=null : longblob  # mask with true for frames with outlier shifts (already corrected)
+        outlier_frames=null : longblob  # mask with true for frames with outlier shifts 
+                                        # (already corrected)
         y_shifts            : longblob  # (pixels) y motion correction shifts
         x_shifts            : longblob  # (pixels) x motion correction shifts
-        z_shifts=null       : longblob  # (pixels) z motion correction shifts (z-drift)
-        y_std               : float     # (pixels) standard deviation of y shifts across all frames
-        x_std               : float     # (pixels) standard deviation of x shifts across all frames
-        z_std=null          : float     # (pixels) standard deviation of z shifts across all frames
+        y_std               : float     # (pixels) standard deviation of 
+                                        # y shifts across all frames
+        x_std               : float     # (pixels) standard deviation of 
+                                        # x shifts across all frames
         """
 
     class NonRigidMotionCorrection(dj.Part):
@@ -469,13 +471,14 @@ class MotionCorrection(dj.Imported):
         definition = """
         -> master
         ---
-        outlier_frames=null             : longblob      # mask with true for frames with outlier shifts (already corrected)
-        block_height                    : int           # (pixels)
-        block_width                     : int           # (pixels)
-        block_depth                     : int           # (pixels)
-        block_count_y                   : int           # number of blocks tiled in the y direction
-        block_count_x                   : int           # number of blocks tiled in the x direction
-        block_count_z                   : int           # number of blocks tiled in the z direction
+        outlier_frames=null             : longblob  # mask with true for frames with 
+                                                    # outlier shifts (already corrected)
+        block_height                    : int       # (pixels)
+        block_width                     : int       # (pixels)
+        block_count_y                   : int       # number of blocks tiled in the 
+                                                    # y direction
+        block_count_x                   : int       # number of blocks tiled in the 
+                                                    # x direction
         """
 
     class Block(dj.Part):
@@ -485,13 +488,14 @@ class MotionCorrection(dj.Imported):
         ---
         block_y         : longblob  # (y_start, y_end) in pixel of this block
         block_x         : longblob  # (x_start, x_end) in pixel of this block
-        block_z         : longblob  # (z_start, z_end) in pixel of this block
-        y_shifts        : longblob  # (pixels) y motion correction shifts for every frame
-        x_shifts        : longblob  # (pixels) x motion correction shifts for every frame
-        z_shifts=null   : longblob  # (pixels) x motion correction shifts for every frame
-        y_std           : float     # (pixels) standard deviation of y shifts across all frames
-        x_std           : float     # (pixels) standard deviation of x shifts across all frames
-        z_std=null      : float     # (pixels) standard deviation of z shifts across all frames
+        y_shifts        : longblob  # (pixels) y motion correction shifts for 
+                                    # every frame
+        x_shifts        : longblob  # (pixels) x motion correction shifts for 
+                                    # every frame
+        y_std           : float     # (pixels) standard deviation of y shifts 
+                                    # across all frames
+        x_std           : float     # (pixels) standard deviation of x shifts 
+                                    # across all frames
         """
 
     class Summary(dj.Part):
@@ -500,7 +504,8 @@ class MotionCorrection(dj.Imported):
         ---
         ref_image=null          : longblob  # image used as alignment template
         average_image           : longblob  # mean of registered frames
-        correlation_image=null  : longblob  # correlation map (computed during cell detection)
+        correlation_image=null  : longblob  # correlation map 
+                                            # (computed during cell detection)
         max_proj_image=null     : longblob  # max of registered frames
         """
 
@@ -510,24 +515,19 @@ class MotionCorrection(dj.Imported):
         if method == 'caiman':
             loaded_caiman = loaded_result
 
-            self.insert1({**key, 'motion_correct_channel': loaded_caiman.alignment_channel})
+            self.insert1({**key, 
+                          'motion_correct_channel': loaded_caiman.alignment_channel})
 
-            is3D = loaded_caiman.params.motion['is3D']
             # -- rigid motion correction --
             if not loaded_caiman.params.motion['pw_rigid']:
                 rigid_correction = {
                     **key,
                     'x_shifts': loaded_caiman.motion_correction['shifts_rig'][:, 0],
                     'y_shifts': loaded_caiman.motion_correction['shifts_rig'][:, 1],
-                    'z_shifts': (loaded_caiman.motion_correction['shifts_rig'][:, 2]
-                                 if is3D
-                                 else np.full_like(
-                        loaded_caiman.motion_correction['shifts_rig'][:, 0], 0)),
-                    'x_std': np.nanstd(loaded_caiman.motion_correction['shifts_rig'][:, 0]),
-                    'y_std': np.nanstd(loaded_caiman.motion_correction['shifts_rig'][:, 1]),
-                    'z_std': (np.nanstd(loaded_caiman.motion_correction['shifts_rig'][:, 2])
-                              if is3D
-                              else np.nan),
+                    'x_std': np.nanstd(loaded_caiman.motion_correction[
+                                                                'shifts_rig'][:, 0]),
+                    'y_std': np.nanstd(loaded_caiman.motion_correction[
+                                                                'shifts_rig'][:, 1]),
                     'outlier_frames': None}
 
                 self.RigidMotionCorrection.insert1(rigid_correction)
@@ -540,16 +540,10 @@ class MotionCorrection(dj.Imported):
                                      + loaded_caiman.params.motion['overlaps'][0]),
                     'block_width': (loaded_caiman.params.motion['strides'][1]
                                     + loaded_caiman.params.motion['overlaps'][1]),
-                    'block_depth': (loaded_caiman.params.motion['strides'][2]
-                                    + loaded_caiman.params.motion['overlaps'][2]
-                                    if is3D else 1),
                     'block_count_x': len(
                         set(loaded_caiman.motion_correction['coord_shifts_els'][:, 0])),
                     'block_count_y': len(
                         set(loaded_caiman.motion_correction['coord_shifts_els'][:, 2])),
-                    'block_count_z': (len(
-                        set(loaded_caiman.motion_correction['coord_shifts_els'][:, 4]))
-                                      if is3D else 1),
                     'outlier_frames': None}
 
                 nonrigid_blocks = []
@@ -560,55 +554,30 @@ class MotionCorrection(dj.Imported):
                                                    'coord_shifts_els'][b_id, 0:2]),
                          'block_y': np.arange(*loaded_caiman.motion_correction[
                                                    'coord_shifts_els'][b_id, 2:4]),
-                         'block_z': (np.arange(*loaded_caiman.motion_correction[
-                                                    'coord_shifts_els'][b_id, 4:6])
-                                     if is3D
-                                     else np.full_like(
-                             np.arange(*loaded_caiman.motion_correction[
-                                            'coord_shifts_els'][b_id, 0:2]), 0)),
                          'x_shifts': loaded_caiman.motion_correction[
                                          'x_shifts_els'][:, b_id],
                          'y_shifts': loaded_caiman.motion_correction[
                                          'y_shifts_els'][:, b_id],
-                         'z_shifts': (loaded_caiman.motion_correction[
-                                          'z_shifts_els'][:, b_id]
-                                      if is3D
-                                      else np.full_like(
-                             loaded_caiman.motion_correction['x_shifts_els'][:, b_id], 0)),
                          'x_std': np.nanstd(loaded_caiman.motion_correction[
                                                 'x_shifts_els'][:, b_id]),
                          'y_std': np.nanstd(loaded_caiman.motion_correction[
-                                                'y_shifts_els'][:, b_id]),
-                         'z_std': (np.nanstd(loaded_caiman.motion_correction[
-                                                 'z_shifts_els'][:, b_id])
-                                   if is3D
-                                   else np.nan)})
+                                                'y_shifts_els'][:, b_id])})
 
                 self.NonRigidMotionCorrection.insert1(nonrigid_correction)
                 self.Block.insert(nonrigid_blocks)
 
             # -- summary images --
-            field_keys = (scan.ScanInfo.Field & key).fetch('KEY', order_by='field_z')
-            summary_images = [
-                {**key, **fkey, 'ref_image': ref_image,
-                 'average_image': ave_img,
-                 'correlation_image': corr_img,
-                 'max_proj_image': max_img}
-                for fkey, ref_image, ave_img, corr_img, max_img in zip(
-                    field_keys,
-                    loaded_caiman.motion_correction['reference_image'].transpose(2, 0, 1)
-                    if is3D else loaded_caiman.motion_correction[
-                        'reference_image'][...][np.newaxis, ...],
-                    loaded_caiman.motion_correction['average_image'].transpose(2, 0, 1)
-                    if is3D else loaded_caiman.motion_correction[
-                        'average_image'][...][np.newaxis, ...],
-                    loaded_caiman.motion_correction['correlation_image'].transpose(2, 0, 1)
-                    if is3D else loaded_caiman.motion_correction[
-                        'correlation_image'][...][np.newaxis, ...],
-                    loaded_caiman.motion_correction['max_image'].transpose(2, 0, 1)
-                    if is3D else loaded_caiman.motion_correction[
-                        'max_image'][...][np.newaxis, ...])]
-            self.Summary.insert(summary_images)
+            summary_images = {**key,
+                 'ref_image': loaded_caiman.motion_correction[
+                                            'reference_image'][...][np.newaxis, ...],
+                 'average_image': loaded_caiman.motion_correction[
+                                            'average_image'][...][np.newaxis, ...],
+                 'correlation_image': loaded_caiman.motion_correction[
+                                            'correlation_image'][...][np.newaxis, ...],
+                 'max_proj_image': loaded_caiman.motion_correction[
+                                            'max_image'][...][np.newaxis, ...]}
+
+            self.Summary.insert1(summary_images)
 
         else:
             raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
