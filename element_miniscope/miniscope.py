@@ -703,9 +703,10 @@ class Fluorescence(dj.Computed):
         definition = """
         -> master
         -> Segmentation.Mask
-        -> Channel.proj(fluorescence_channel='channel')  # the channel that this trace comes from
+        -> Channel.proj(fluorescence_channel='channel')  # channel used for this trace
         ---
-        fluorescence                : longblob  # fluorescence trace associated with this mask
+        fluorescence                : longblob  # fluorescence trace associated 
+                                                # with this mask
         neuropil_fluorescence=null  : longblob  # Neuropil fluorescence trace
         """
 
@@ -715,14 +716,15 @@ class Fluorescence(dj.Computed):
         if method == 'caiman':
             loaded_caiman = loaded_result
 
-            # infer "segmentation_channel" - from params if available, else from caiman loader
+            # infer `segmentation_channel` from `params`` if available, 
+            # else from caiman loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
             segmentation_channel = params.get('segmentation_channel',
                                               loaded_caiman.segmentation_channel)
 
             self.insert1(key)
             self.Trace.insert([{**key,
-                                'mask': mask['mask_id'],
+                                'mask_id': mask['mask_id'],
                                 'fluorescence_channel': segmentation_channel,
                                 'fluorescence': mask['inferred_trace']}
                                 for mask in loaded_caiman.masks])
