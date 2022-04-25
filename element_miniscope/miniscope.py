@@ -593,26 +593,26 @@ class Segmentation(dj.Computed):
     class Mask(dj.Part):
         definition = """ # A mask produced by segmentation.
         -> master
-        mask                 : smallint
+        mask_id              : smallint
         ---
         -> Channel.proj(segmentation_channel='channel')  # channel used for segmentation
         mask_npix            : int       # number of pixels in this mask
-        mask_center_x=null   : int       # center x coordinate in pixel                         # TODO: determine why some masks don't have information, thus null required
-        mask_center_y=null   : int       # center y coordinate in pixel
-        mask_xpix=null       : longblob  # x coordinates in pixels
-        mask_ypix=null       : longblob  # y coordinates in pixels
+        mask_center_x=null   : int       # (pixels) center x coordinate
+        # TODO: determine why some masks don't have information, thus null required
+        mask_center_y=null   : int       # (pixels) center y coordinate
+        mask_xpix=null       : longblob  # (pixels) x coordinates
+        mask_ypix=null       : longblob  # (pixels) y coordinates
         mask_weights         : longblob  # weights of the mask at the indices above
         """
 
     def make(self, key):
-        motion_correction_key = (MotionCorrection & key).fetch1('KEY')
-
         method, loaded_result = get_loader_result(key, Curation)
 
         if method == 'caiman':
             loaded_caiman = loaded_result
 
-            # infer "segmentation_channel" - from params if available, else from caiman loader
+            # infer `segmentation_channel` from `params`` if available, 
+            # else from caiman loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
             segmentation_channel = params.get('segmentation_channel',
                                               loaded_caiman.segmentation_channel)
@@ -621,23 +621,23 @@ class Segmentation(dj.Computed):
             for mask in loaded_caiman.masks:
                 masks.append({**key,
                               'segmentation_channel': segmentation_channel,
-                              'mask': mask['mask_id'],
+                              'mask_id': mask['mask_id'],
                               'mask_npix': mask['mask_npix'],
                               'mask_center_x': mask['mask_center_x'],
                               'mask_center_y': mask['mask_center_y'],
-                              'mask_center_z': mask['mask_center_z'],
                               'mask_xpix': mask['mask_xpix'],
                               'mask_ypix': mask['mask_ypix'],
-                              'mask_zpix': mask['mask_zpix'],
                               'mask_weights': mask['mask_weights']})
+
                 if loaded_caiman.cnmf.estimates.idx_components is not None:
                     if mask['mask_id'] in loaded_caiman.cnmf.estimates.idx_components:
                         cells.append({
                             **key,
                             'mask_classification_method': 'caiman_default_classifier',
-                            'mask': mask['mask_id'], 'mask_type': 'soma'})
+                            'mask_id': mask['mask_id'], 
+                            'mask_type': 'soma'})
 
-            self.insert1({**key, **motion_correction_key})
+            self.insert1(key)
             self.Mask.insert(masks, ignore_extra_fields=True)
 
             if cells:
@@ -651,6 +651,15 @@ class Segmentation(dj.Computed):
 
         else:
             raise NotImplementedError(f'Unknown/unimplemented method: {method}')
+
+
+@schema
+class MaskType(dj.Lookup):
+    definition = """ # Possible classifications for a segmented mask
+    mask_type        : varchar(16)
+    """
+
+    contents = zip(['soma', 'axon', 'dendrite', 'neuropil', 'artefact', 'unknown'])
 
 
 @schema
