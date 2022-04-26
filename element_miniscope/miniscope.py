@@ -325,9 +325,8 @@ class ProcessingTask(dj.Manual):
     definition = """
     # Manual table marking a processing task to be triggered or manually processed
     -> RecordingInfo
-    processing_task_id     : smallint       # processing task
-    ---
     -> ProcessingParamSet
+    ---
     processing_output_dir : varchar(255)    # relative to the root data directory
     task_mode='load'      : enum('load', 'trigger') # 'load': load existing results
                                                     # 'trigger': trigger procedure
