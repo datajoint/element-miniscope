@@ -27,7 +27,7 @@ Health.
 
     + `Equipment` for equipment/device
 
-    + `Location` as a dependency for `RecordingLocation`
+    + `AnatomicalLocation` as a dependency for `RecordingLocation`
 
 ## Table definitions
 
