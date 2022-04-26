@@ -29,6 +29,8 @@ def activate(miniscope_schema_name, *,
                            typically identifying a recording session
                 + Equipment: Reference table for Recording, 
                              specifying the equipment used for the acquisition
+                + AnatomicalLocation: Reference table for RecordingLocation, specifying 
+                the brain location where the recording is acquired
             Functions:
                 + get_miniscope_root_data_dir() -> list
                     Retrieve the root data directory
@@ -145,7 +147,7 @@ class RecordingLocation(dj.Manual):
     # Brain location where this miniscope recording is acquired
     -> Recording
     ---
-    -> Location
+    -> AnatomicalLocation
     """
 
 

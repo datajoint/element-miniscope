@@ -140,6 +140,8 @@ To activate `element-miniscope`, ones need to provide:
 2. Upstream tables
     + Session table: A set of keys identifying a recording session (see [Element-Session](https://github.com/datajoint/element-session)).
     + Equipment table: A reference table for Recording, specifying the equipment used for the acquisition (see [example pipeline](https://github.com/datajoint/workflow-miniscope/blob/main/workflow_miniscope/pipeline.py)).
+    + AnatomicalLocation table: A reference table for RecordingLocation, specifying 
+     the brain location where the recording is acquired
 
 3. Utility functions. See [example definitions here](https://github.com/datajoint/workflow-miniscope/blob/main/workflow_miniscope/paths.py).
     + get_miniscope_root_data_dir(): Returns your root data directory.
