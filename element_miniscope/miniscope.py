@@ -199,7 +199,7 @@ class RecordingInfo(dj.Imported):
                 raise FileNotFoundError(f'No timestamp file found in '
                                         f'{recording_directory}')
 
-            nchannels=1
+            nchannels = 1 # Assumes a single channel
 
             # Parse number of frames from timestamp.dat file
             with open(recording_filepaths[-1]) as f:
@@ -210,8 +210,8 @@ class RecordingInfo(dj.Imported):
             video = cv2.VideoCapture(recording_filepaths[0])
             _, frame = video.read()
             frame_size = np.shape(frame)
-            px_height=frame_size[0]
-            px_width=frame_size[1]
+            px_height = frame_size[0]
+            px_width = frame_size[1]
 
             fps = video.get(cv2.CAP_PROP_FPS) # TODO: Verify this method extracts correct value
 
