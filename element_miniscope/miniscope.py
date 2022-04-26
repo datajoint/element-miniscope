@@ -610,7 +610,7 @@ class Segmentation(dj.Computed):
         if method == 'caiman':
             loaded_caiman = loaded_result
 
-            # infer `segmentation_channel` from `params`` if available, 
+            # infer `segmentation_channel` from `params` if available, 
             # else from caiman loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
             segmentation_channel = params.get('segmentation_channel',
@@ -715,7 +715,7 @@ class Fluorescence(dj.Computed):
         if method == 'caiman':
             loaded_caiman = loaded_result
 
-            # infer `segmentation_channel` from `params`` if available, 
+            # infer `segmentation_channel` from `params` if available, 
             # else from caiman loader
             params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
             segmentation_channel = params.get('segmentation_channel',
@@ -777,14 +777,15 @@ class Activity(dj.Computed):
             if key['extraction_method'] in ('caiman_deconvolution', 'caiman_dff'):
                 attr_mapper = {'caiman_deconvolution': 'spikes', 'caiman_dff': 'dff'}
 
-                # infer "segmentation_channel" - from params if available, else from caiman loader
+                # infer `segmentation_channel` from `params` if available, 
+                # else from caiman loader
                 params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
                 segmentation_channel = params.get('segmentation_channel',
                                                   loaded_caiman.segmentation_channel)
 
                 self.insert1(key)
                 self.Trace.insert([{**key,
-                                    'mask': mask['mask_id'],
+                                    'mask_id': mask['mask_id'],
                                     'fluorescence_channel': segmentation_channel,
                                     'activity_trace': mask[attr_mapper[key['extraction_method']]]}
                                     for mask in loaded_caiman.masks])
