@@ -445,7 +445,7 @@ class Curation(dj.Manual):
 @schema
 class MotionCorrection(dj.Imported):
     definition = """
-    -> Processing
+    -> Curation
     ---
     -> Channel.proj(motion_correct_channel='channel') # channel used for 
                                                       # motion correction
@@ -588,7 +588,7 @@ class MotionCorrection(dj.Imported):
 @schema
 class Segmentation(dj.Computed):
     definition = """ # Different mask segmentations.
-    -> MotionCorrection
+    -> Curation
     """
 
     class Mask(dj.Part):
