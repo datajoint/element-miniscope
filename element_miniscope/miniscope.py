@@ -283,7 +283,7 @@ class ProcessingMethod(dj.Lookup):
     # (e.g. CaImAn, etc.)
     processing_method: char(16)
     ---
-    processing_method_desc: varchar(1000)
+    processing_method_desc='': varchar(1000)
     """
 
     contents = [('caiman', 'caiman analysis suite')]
