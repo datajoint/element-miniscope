@@ -305,6 +305,8 @@ class ProcessingParamSet(dj.Lookup):
     @classmethod
     def insert_new_params(cls, processing_method: str, paramset_id: int,
                           paramset_desc: str, params: dict):
+        ProcessingMethod.insert1({'processing_method': processing_method}, 
+                                                      skip_duplicates=True)
         param_dict = {'processing_method': processing_method,
                       'paramset_id': paramset_id,
                       'paramset_desc': paramset_desc,
