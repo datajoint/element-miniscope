@@ -271,8 +271,8 @@ class RecordingInfo(dj.Imported):
                                 for f in recording_filepaths]
 
         self.File.insert([{**key, 
-                           'recording_file_id': i, 
-                           'recording_file_path': f} 
+                           'file_id': i, 
+                           'file_path': f} 
                                 for i, f in enumerate(recording_files)])
 
 
