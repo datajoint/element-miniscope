@@ -173,9 +173,9 @@ class RecordingInfo(dj.Imported):
     class File(dj.Part):
         definition = """
         -> master
-        recording_file_id : smallint unsigned
+        file_id : smallint unsigned
         ---
-        recording_file_path: varchar(255)      # relative to root data directory
+        file_path: varchar(255)      # relative to root data directory
         """
 
     def make(self, key):
