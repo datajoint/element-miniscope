@@ -828,11 +828,11 @@ def get_loader_result(key, table):
     return method, loaded_output
 
 
-def populate_all(display_progress=True):
+def populate_all(display_progress=True, reserve_jobs=False, suppress_errors=False):
 
     populate_settings = {'display_progress': display_progress, 
-                         'reserve_jobs': False, 
-                         'suppress_errors': False}
+                         'reserve_jobs': reserve_jobs, 
+                         'suppress_errors': suppress_errors}
 
     RecordingInfo.populate(**populate_settings)
 
