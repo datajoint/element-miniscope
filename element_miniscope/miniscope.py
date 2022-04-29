@@ -168,6 +168,8 @@ class RecordingInfo(dj.Imported):
     spatial_downsample=1 : tinyint   # e.g. 1, 2, 4, 8. 1 for no downsampling
     led_power            : float     # LED power used in the given recording
     time_stamps          : longblob  # time stamps of each frame
+    recording_datetime=null   : datetime  # datetime of the recording
+    recording_duration=null   : float     # (seconds) duration of the recording
     """
 
     class File(dj.Part):
