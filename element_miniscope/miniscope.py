@@ -383,7 +383,7 @@ class Processing(dj.Computed):
                 input_hash = dict_to_uuid(dict(**key, **params))
                 input_hash_fp = output_dir / f'.{input_hash }.json'
                 
-                if not input_hash_fp.exist():
+                if not input_hash_fp.exists():
                     start_time = datetime.utcnow()
                     run_caiman(file_paths=avi_files, 
                                parameters=params, 
