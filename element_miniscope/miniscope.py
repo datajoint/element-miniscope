@@ -370,7 +370,7 @@ class Processing(dj.Computed):
                 from element_interface.run_caiman import run_caiman
 
                 avi_files = (Recording * RecordingInfo * RecordingInfo.File \
-                                & key).fetch('recording_file_path')
+                                & key).fetch('file_path')
                 avi_files = [find_full_path(get_miniscope_root_data_dir(), 
                                     avi_file).as_posix() for avi_file in avi_files]
 
