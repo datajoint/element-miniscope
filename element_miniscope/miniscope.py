@@ -261,7 +261,8 @@ class RecordingInfo(dj.Imported):
                           gain=gain,
                           spatial_downsample=spatial_downsample,
                           led_power=led_power,
-                          time_stamps=time_stamps))
+                          time_stamps=time_stamps,
+                          recording_duration=nframes / fps))
 
         # Insert file(s)
         recording_files = [pathlib.Path(f).relative_to(
