@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 from os import path
-import sys
 
-pkg_name = 'element_miniscope'
+pkg_name = next(p for p in find_packages() if '.' not in p)
 here = path.abspath(path.dirname(__file__))
 
-long_description = """"
-DataJoint Element for miniscope calcium imaging data.
-"""
+with open(path.join(here, 'README.md'), 'r') as f:
+    long_description = f.read()
 
 with open(path.join(here, 'requirements.txt')) as f:
     requirements = f.read().splitlines()
@@ -17,15 +15,17 @@ with open(path.join(here, pkg_name, 'version.py')) as f:
     exec(f.read())
 
 setup(
-    name='element-miniscope',
+    name=pkg_name.replace('_', '-'),
     version=__version__,
     description="Miniscope DataJoint Element",
     long_description=long_description,
-    author='DataJoint NEURO',
-    author_email='info@vathes.com',
+    long_description_content_type='text/markdown',
+    author='DataJoint',
+    author_email='info@datajoint.com',
     license='MIT',
-    url='https://github.com/datajoint/element-miniscope',
+    url=f'https://github.com/datajoint/{pkg_name.replace("_", "-")}',
     keywords='neuroscience calcium-imaging science datajoint miniscope',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+    scripts=[],
     install_requires=requirements,
 )

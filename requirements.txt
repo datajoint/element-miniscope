@@ -1,7 +1,1 @@
-datajoint
-scipy
-imreg_dft
-scikit-learn
-h5py
-opencv-contrib-python-headless
-scanreader @ git+https://github.com/atlab/scanreader.git
+datajoint>=0.13.0
