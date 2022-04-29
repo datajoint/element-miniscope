@@ -206,7 +206,7 @@ class RecordingInfo(dj.Imported):
             nchannels = 1 # Assumes a single channel
 
             # Parse number of frames from timestamp.dat file
-            with open(recording_filepaths[-1]) as f:
+            with open(recording_timestamps) as f:
                 next(f)
                 nframes = sum(1 for line in f if int(line[0]) == 0)
 
