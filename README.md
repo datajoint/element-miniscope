@@ -23,7 +23,8 @@ Health.
 
 ![element miniscope diagram](images/attached_miniscope_element.svg)
 
-+ As the diagram depicts, `elements-miniscope` starts immediately downstream from `Session`, and also requires some notion of:
++ As the diagram depicts, `elements-miniscope` starts immediately downstream from 
+`Session`, and also requires some notion of:
 
     + `Equipment` for equipment/device
 
@@ -113,12 +114,14 @@ used to describe the non-rigid motion correction.
 
      + `element-interface` contains data loading utilities for `element-miniscope`.
 
-     + `element-interface` is a dependency of `element-miniscope`, however it is not contained within `requirements.txt`, therefore, must be installed in addition to the installation of the `element-miniscope`.
-        ```bash
-        pip install "element-interface @ git+https://github.com/datajoint/element-interface"
-        ```
+     + `element-interface` is a dependency of `element-miniscope`, however it is not
+       contained within `requirements.txt`, therefore, must be installed in addition to
+       the installation of the `element-miniscope`. ```bash pip
+       install "element-interface @ git+https://github.com/datajoint/element-interface"
+       ```
 
-     + `element-interface` can also be used to install packages used for reading acquired data and running analysis (e.g. `CaImAn`).
+     + `element-interface` can also be used to install packages used for reading
+       acquired data and running analysis (e.g. `CaImAn`).
 
      + If your workflow uses these packages, you should install them when you install `element-interface`.
 
@@ -138,8 +141,11 @@ To activate `element-miniscope`, ones need to provide:
     + schema name for the miniscope module
 
 2. Upstream tables
-    + Session table: A set of keys identifying a recording session (see [Element-Session](https://github.com/datajoint/element-session)).
-    + Equipment table: A reference table for Recording, specifying the equipment used for the acquisition (see [example pipeline](https://github.com/datajoint/workflow-miniscope/blob/main/workflow_miniscope/pipeline.py)).
+    + Session table: A set of keys identifying a recording session (see 
+        [Element-Session](https://github.com/datajoint/element-session)).
+    + Equipment table: A reference table for Recording, specifying the equipment used
+      for the acquisition (see 
+        [example pipeline](https://github.com/datajoint/workflow-miniscope/blob/main/workflow_miniscope/pipeline.py)).
     + AnatomicalLocation table: A reference table for RecordingLocation, specifying 
      the brain location where the recording is acquired
 
@@ -162,14 +168,25 @@ repository for an example usage of `element-miniscope`.
 
 ## Citation
 
-+ If your work uses DataJoint and DataJoint Elements, please cite the respective Research Resource Identifiers (RRIDs) and manuscripts.
++ If your work uses DataJoint and DataJoint Elements, please cite the respective
+  Research Resource Identifiers (RRIDs) and manuscripts.
 
 + DataJoint for Python or MATLAB
-    + Yatsenko D, Reimer J, Ecker AS, Walker EY, Sinz F, Berens P, Hoenselaar A, Cotton RJ, Siapas AS, Tolias AS. DataJoint: managing big scientific data using MATLAB or Python. bioRxiv. 2015 Jan 1:031658. doi: https://doi.org/10.1101/031658
+    + Yatsenko D, Reimer J, Ecker AS, Walker EY, Sinz F, Berens P, Hoenselaar A, Cotton
+      RJ, Siapas AS, Tolias AS. DataJoint: managing big scientific data using MATLAB or
+      Python. bioRxiv. 2015 Jan 1:031658. doi: https://doi.org/10.1101/031658
 
-    + DataJoint ([RRID:SCR_014543](https://scicrunch.org/resolver/SCR_014543)) - DataJoint for `<Select Python or MATLAB >` (version `<Enter version number>`)
+    + DataJoint (
+      [RRID:SCR_014543](https://scicrunch.org/resolver/SCR_014543)
+      ) - DataJoint for `<Select Python or
+      MATLAB >` (version `<Enter version number>`)
 
 + DataJoint Elements
-    + Yatsenko D, Nguyen T, Shen S, Gunalan K, Turner CA, Guzman R, Sasaki M, Sitonic D, Reimer J, Walker EY, Tolias AS. DataJoint Elements: Data Workflows for Neurophysiology. bioRxiv. 2021 Jan 1. doi: https://doi.org/10.1101/2021.03.30.437358
+    + Yatsenko D, Nguyen T, Shen S, Gunalan K, Turner CA, Guzman R, Sasaki M, Sitonic D,
+      Reimer J, Walker EY, Tolias AS. DataJoint Elements: Data Workflows for
+      Neurophysiology. bioRxiv. 2021 Jan 1. doi:
+      https://doi.org/10.1101/2021.03.30.437358
 
-    + DataJoint Elements ([RRID:SCR_021894](https://scicrunch.org/resolver/SCR_021894)) - Element Miniscope (version `<Enter version number>`)
+    + DataJoint Elements (
+      [RRID:SCR_021894](https://scicrunch.org/resolver/SCR_021894)
+      ) - Element Miniscope (version `<Enter version number>`)
