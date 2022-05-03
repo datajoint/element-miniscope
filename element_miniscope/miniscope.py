@@ -622,7 +622,6 @@ class Segmentation(dj.Computed):
         -> Channel.proj(segmentation_channel='channel')  # channel used for segmentation
         mask_npix            : int       # number of pixels in this mask
         mask_center_x=null   : int       # (pixels) center x coordinate
-        # TODO: determine why some masks don't have information, thus null required
         mask_center_y=null   : int       # (pixels) center y coordinate
         mask_xpix=null       : longblob  # (pixels) x coordinates
         mask_ypix=null       : longblob  # (pixels) y coordinates
