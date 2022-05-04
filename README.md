@@ -116,14 +116,16 @@ used to describe the non-rigid motion correction.
 
      + `element-interface` is a dependency of `element-miniscope`, however it is not
        contained within `requirements.txt`, therefore, must be installed in addition to
-       the installation of the `element-miniscope`. ```bash pip
+       the installation of the `element-miniscope`. 
+       ```bash pip
        install "element-interface @ git+https://github.com/datajoint/element-interface"
        ```
 
      + `element-interface` can also be used to install packages used for reading
        acquired data and running analysis (e.g. `CaImAn`).
 
-     + If your workflow uses these packages, you should install them when you install `element-interface`.
+     + If your workflow uses these packages, you should install them when you install 
+     `element-interface`.
 
 ## Usage
 
@@ -165,6 +167,9 @@ For more details, check the docstring of `element-miniscope`:
 
 + See the [workflow-miniscope](https://github.com/datajoint/workflow-miniscope) 
 repository for an example usage of `element-miniscope`.
+
++ Our [YouTube tutorial](https://www.youtube.com/watch?v=nWUcPFZOSVw) walks through all 
+  the key details of this Element.
 
 ## Citation
 
