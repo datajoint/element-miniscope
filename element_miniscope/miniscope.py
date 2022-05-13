@@ -14,8 +14,13 @@ schema = dj.Schema()
 _linking_module = None
 
 
-def activate(miniscope_schema_name, *,
-             create_schema=True, create_tables=True, linking_module=None):
+def activate(
+    miniscope_schema_name,
+    *,
+    create_schema=True,
+    create_tables=True,
+    linking_module=None,
+):
     """
     activate(miniscope_schema_name, *, create_schema=True, create_tables=True,
              linking_module=None)
@@ -28,11 +33,11 @@ def activate(miniscope_schema_name, *,
         :param linking_module: a module name or a module containing the
          required dependencies to activate the `miniscope` module:
             Upstream tables:
-                + Session: parent table to Recording, 
+                + Session: parent table to Recording,
                            typically identifying a recording session
-                + Equipment: Reference table for Recording, 
+                + Equipment: Reference table for Recording,
                              specifying the equipment used for the acquisition
-                + AnatomicalLocation: Reference table for RecordingLocation, specifying 
+                + AnatomicalLocation: Reference table for RecordingLocation, specifying
                 the brain location where the recording is acquired
             Functions:
                 + get_miniscope_root_data_dir() -> list
@@ -40,7 +45,7 @@ def activate(miniscope_schema_name, *,
                     Contains all subject/sessions data
                     :return: a string for full path to the root data directory
                 + get_session_directory(session_key: dict) -> str
-                    Retrieve the session directory containing the recorded data for a 
+                    Retrieve the session directory containing the recorded data for a
                     given session
                     :param session_key: a dictionary of one session `key`
                     :return: a string for full path to the session directory
@@ -51,23 +56,29 @@ def activate(miniscope_schema_name, *,
 
     if isinstance(linking_module, str):
         linking_module = importlib.import_module(linking_module)
-    assert inspect.ismodule(linking_module),\
-        "The argument 'dependency' must be a module's name or a module"
+    assert inspect.ismodule(
+        linking_module
+    ), "The argument 'dependency' must be a module's name or a module"
 
     global _linking_module
     _linking_module = linking_module
 
-    schema.activate(miniscope_schema_name, create_schema=create_schema,
-                    create_tables=create_tables, add_objects=_linking_module.__dict__)
+    schema.activate(
+        miniscope_schema_name,
+        create_schema=create_schema,
+        create_tables=create_tables,
+        add_objects=_linking_module.__dict__,
+    )
 
 
 # Functions required by the element-miniscope  -----------------------------------------
 
+
 def get_miniscope_root_data_dir() -> list:
     """
     All data paths, directories in DataJoint Elements are recommended to be stored as
-    relative paths (posix format), with respect to some user-configured "root" 
-    directory, which varies from machine to machine (e.g. different mounted drive 
+    relative paths (posix format), with respect to some user-configured "root"
+    directory, which varies from machine to machine (e.g. different mounted drive
     locations).
 
     get_miniscope_root_data_dir() -> list
@@ -84,7 +95,7 @@ def get_miniscope_root_data_dir() -> list:
     if isinstance(root_directories, (str, pathlib.Path)):
         root_directories = [root_directories]
 
-    if hasattr(_linking_module, 'get_processed_root_data_dir'):
+    if hasattr(_linking_module, "get_processed_root_data_dir"):
         root_directories.append(_linking_module.get_processed_root_data_dir())
 
     return root_directories
@@ -108,7 +119,7 @@ def get_processed_root_data_dir() -> str:
         :return: a string for full path to the root directory for processed data
     """
 
-    if hasattr(_linking_module, 'get_processed_root_data_dir'):
+    if hasattr(_linking_module, "get_processed_root_data_dir"):
         return _linking_module.get_processed_root_data_dir()
     else:
         return get_miniscope_root_data_dir()[0]
@@ -116,13 +127,13 @@ def get_processed_root_data_dir() -> str:
 
 # Experiment and analysis meta information -------------------------------------
 
+
 @schema
 class AcquisitionSoftware(dj.Lookup):
     definition = """
     acquisition_software: varchar(24)
     """
-    contents = zip(['Miniscope-DAQ-V3',
-                    'Miniscope-DAQ-V4'])
+    contents = zip(["Miniscope-DAQ-V3", "Miniscope-DAQ-V4"])
 
 
 @schema
@@ -188,25 +199,27 @@ class RecordingInfo(dj.Imported):
     def make(self, key):
 
         # Search recording directory for miniscope raw files
-        acquisition_software, recording_directory = \
-            (Recording & key).fetch1('acquisition_software',
-                                     'recording_directory')
-        
-        recording_path = find_full_path(get_miniscope_root_data_dir(),
-                                        recording_directory)
+        acquisition_software, recording_directory = (Recording & key).fetch1(
+            "acquisition_software", "recording_directory"
+        )
 
-        recording_filepaths = [file_path.as_posix() for file_path 
-                               in recording_path.glob('*.avi')]
+        recording_path = find_full_path(
+            get_miniscope_root_data_dir(), recording_directory
+        )
+
+        recording_filepaths = [
+            file_path.as_posix() for file_path in recording_path.glob("*.avi")
+        ]
 
         if not recording_filepaths:
-            raise FileNotFoundError(f'No .avi files found in '
-                                    f'{recording_directory}')
+            raise FileNotFoundError(f"No .avi files found in " f"{recording_directory}")
 
-        if acquisition_software == 'Miniscope-DAQ-V3':
-            recording_timestamps = recording_path / 'timestamp.dat'
+        if acquisition_software == "Miniscope-DAQ-V3":
+            recording_timestamps = recording_path / "timestamp.dat"
             if not recording_timestamps.exists():
-                raise FileNotFoundError(f'No timestamp file found in '
-                                        f'{recording_directory}')
+                raise FileNotFoundError(
+                    f"No timestamp file found in " f"{recording_directory}"
+                )
 
             nchannels = 1  # Assumes a single channel
 
@@ -224,65 +237,77 @@ class RecordingInfo(dj.Imported):
 
             fps = video.get(cv2.CAP_PROP_FPS)
 
-        elif acquisition_software == 'Miniscope-DAQ-V4':
-            recording_metadata = list(recording_path.glob('metaData.json'))[0]
-            recording_timestamps = list(recording_path.glob('timeStamps.csv'))[0]
+        elif acquisition_software == "Miniscope-DAQ-V4":
+            recording_metadata = list(recording_path.glob("metaData.json"))[0]
+            recording_timestamps = list(recording_path.glob("timeStamps.csv"))[0]
 
             if not recording_metadata.exists():
-                raise FileNotFoundError(f'No .json file found in '
-                                        f'{recording_directory}')
+                raise FileNotFoundError(
+                    f"No .json file found in " f"{recording_directory}"
+                )
             if not recording_timestamps.exists():
-                raise FileNotFoundError(f'No timestamp (*.csv) file found in '
-                                        f'{recording_directory}')
+                raise FileNotFoundError(
+                    f"No timestamp (*.csv) file found in " f"{recording_directory}"
+                )
 
             with open(recording_metadata.as_posix()) as f:
                 metadata = json.loads(f.read())
 
-            with open(recording_timestamps, newline='') as f:
-                time_stamps = list(csv.reader(f, delimiter=','))
+            with open(recording_timestamps, newline="") as f:
+                time_stamps = list(csv.reader(f, delimiter=","))
 
             nchannels = 1  # Assumes a single channel
-            nframes = len(time_stamps)-1
-            px_height = metadata['ROI']['height']
-            px_width = metadata['ROI']['width']
-            fps = int(metadata['frameRate'].replace('FPS', ''))
-            gain = metadata['gain']
+            nframes = len(time_stamps) - 1
+            px_height = metadata["ROI"]["height"]
+            px_width = metadata["ROI"]["width"]
+            fps = int(metadata["frameRate"].replace("FPS", ""))
+            gain = metadata["gain"]
             spatial_downsample = 1  # Assumes no spatial downsampling
-            led_power = metadata['led0']
-            time_stamps = np.array([list(map(int, time_stamps[i]))
-                                    for i in range(1, len(time_stamps))])
+            led_power = metadata["led0"]
+            time_stamps = np.array(
+                [list(map(int, time_stamps[i])) for i in range(1, len(time_stamps))]
+            )
         else:
             raise NotImplementedError(
-                f'Loading routine not implemented for {acquisition_software}'
-                ' acquisition software')
+                f"Loading routine not implemented for {acquisition_software}"
+                " acquisition software"
+            )
 
         # Insert in RecordingInfo
-        self.insert1(dict(key,
-                          nchannels=nchannels,
-                          nframes=nframes,
-                          px_height=px_height,
-                          px_width=px_width,
-                          fps=fps,
-                          gain=gain,
-                          spatial_downsample=spatial_downsample,
-                          led_power=led_power,
-                          time_stamps=time_stamps,
-                          recording_duration=nframes / fps))
+        self.insert1(
+            dict(
+                key,
+                nchannels=nchannels,
+                nframes=nframes,
+                px_height=px_height,
+                px_width=px_width,
+                fps=fps,
+                gain=gain,
+                spatial_downsample=spatial_downsample,
+                led_power=led_power,
+                time_stamps=time_stamps,
+                recording_duration=nframes / fps,
+            )
+        )
 
         # Insert file(s)
-        recording_files = [pathlib.Path(f).relative_to(
-                                            find_root_directory(
-                                                get_miniscope_root_data_dir(),
-                                                f)).as_posix() 
-                           for f in recording_filepaths]
+        recording_files = [
+            pathlib.Path(f)
+            .relative_to(find_root_directory(get_miniscope_root_data_dir(), f))
+            .as_posix()
+            for f in recording_filepaths
+        ]
 
-        self.File.insert([{**key, 
-                           'file_id': i, 
-                           'file_path': f} 
-                          for i, f in enumerate(recording_files)])
+        self.File.insert(
+            [
+                {**key, "file_id": i, "file_path": f}
+                for i, f in enumerate(recording_files)
+            ]
+        )
 
 
 # Trigger a processing routine -------------------------------------------------
+
 
 @schema
 class ProcessingMethod(dj.Lookup):
@@ -294,7 +319,7 @@ class ProcessingMethod(dj.Lookup):
     processing_method_desc='': varchar(1000)
     """
 
-    contents = [('caiman', 'caiman analysis suite')]
+    contents = [("caiman", "caiman analysis suite")]
 
 
 @schema
@@ -311,25 +336,34 @@ class ProcessingParamSet(dj.Lookup):
     """
 
     @classmethod
-    def insert_new_params(cls, processing_method: str, paramset_id: int,
-                          paramset_desc: str, params: dict,
-                          processing_method_desc: str = ''):
-        ProcessingMethod.insert1({'processing_method': processing_method}, 
-                                 skip_duplicates=True)
-        param_dict = {'processing_method': processing_method,
-                      'paramset_id': paramset_id,
-                      'paramset_desc': paramset_desc,
-                      'params': params,
-                      'param_set_hash': dict_to_uuid(params)}
-        q_param = cls & {'param_set_hash': param_dict['param_set_hash']}
+    def insert_new_params(
+        cls,
+        processing_method: str,
+        paramset_id: int,
+        paramset_desc: str,
+        params: dict,
+        processing_method_desc: str = "",
+    ):
+        ProcessingMethod.insert1(
+            {"processing_method": processing_method}, skip_duplicates=True
+        )
+        param_dict = {
+            "processing_method": processing_method,
+            "paramset_id": paramset_id,
+            "paramset_desc": paramset_desc,
+            "params": params,
+            "param_set_hash": dict_to_uuid(params),
+        }
+        q_param = cls & {"param_set_hash": param_dict["param_set_hash"]}
 
         if q_param:  # If the specified param-set already exists
-            pname = q_param.fetch1('paramset_id')
+            pname = q_param.fetch1("paramset_id")
             if pname == paramset_id:  # If the existed set has the same name: job done
                 return
             else:  # If not same name: human error, try adding with different name
                 raise dj.DataJointError(
-                    'The specified param-set already exists - name: {}'.format(pname))
+                    "The specified param-set already exists - name: {}".format(pname)
+                )
         else:
             cls.insert1(param_dict)
 
@@ -357,63 +391,79 @@ class Processing(dj.Computed):
     """
 
     def make(self, key):
-        task_mode = (ProcessingTask & key).fetch1('task_mode')
-        
-        output_dir = (ProcessingTask & key).fetch1('processing_output_dir')
+        task_mode = (ProcessingTask & key).fetch1("task_mode")
+
+        output_dir = (ProcessingTask & key).fetch1("processing_output_dir")
         output_dir = find_full_path(get_miniscope_root_data_dir(), output_dir)
 
-        if task_mode == 'load':
+        if task_mode == "load":
             method, loaded_result = get_loader_result(key, ProcessingTask)
-            if method == 'caiman':
+            if method == "caiman":
                 loaded_caiman = loaded_result
-                key = {**key, 'processing_time': loaded_caiman.creation_time}
+                key = {**key, "processing_time": loaded_caiman.creation_time}
             else:
-                raise NotImplementedError(f'Loading of {method} data is not yet' 
-                                          f'supported')
-        elif task_mode == 'trigger':
-            method = (ProcessingTask * ProcessingParamSet * ProcessingMethod
-                      * Recording & key).fetch1('processing_method')
+                raise NotImplementedError(
+                    f"Loading of {method} data is not yet" f"supported"
+                )
+        elif task_mode == "trigger":
+            method = (
+                ProcessingTask * ProcessingParamSet * ProcessingMethod * Recording & key
+            ).fetch1("processing_method")
 
-            if method == 'caiman':
+            if method == "caiman":
                 import caiman
                 from element_interface.run_caiman import run_caiman
 
-                avi_files = (Recording * RecordingInfo * RecordingInfo.File
-                             & key).fetch('file_path')
-                avi_files = [find_full_path(get_miniscope_root_data_dir(), 
-                             avi_file).as_posix() for avi_file in avi_files]
+                avi_files = (
+                    Recording * RecordingInfo * RecordingInfo.File & key
+                ).fetch("file_path")
+                avi_files = [
+                    find_full_path(get_miniscope_root_data_dir(), avi_file).as_posix()
+                    for avi_file in avi_files
+                ]
 
-                params = (ProcessingTask * ProcessingParamSet & key).fetch1('params')
-                sampling_rate = (ProcessingTask * Recording * RecordingInfo
-                                 & key).fetch1('fps')
+                params = (ProcessingTask * ProcessingParamSet & key).fetch1("params")
+                sampling_rate = (
+                    ProcessingTask * Recording * RecordingInfo & key
+                ).fetch1("fps")
 
                 input_hash = dict_to_uuid(dict(**key, **params))
-                input_hash_fp = output_dir / f'.{input_hash }.json'
-                
+                input_hash_fp = output_dir / f".{input_hash }.json"
+
                 if not input_hash_fp.exists():
                     start_time = datetime.utcnow()
-                    run_caiman(file_paths=avi_files, 
-                               parameters=params, 
-                               sampling_rate=sampling_rate, 
-                               output_dir=output_dir.as_posix(), 
-                               is3D=False)
+                    run_caiman(
+                        file_paths=avi_files,
+                        parameters=params,
+                        sampling_rate=sampling_rate,
+                        output_dir=output_dir.as_posix(),
+                        is3D=False,
+                    )
                     completion_time = datetime.utcnow()
-                    with open(input_hash_fp, 'w') as f:
-                        json.dump({'start_time': start_time,
-                                   'completion_time': completion_time,
-                                   'duration': (completion_time - start_time
-                                                ).total_seconds()
-                                   }, f, default=str)
+                    with open(input_hash_fp, "w") as f:
+                        json.dump(
+                            {
+                                "start_time": start_time,
+                                "completion_time": completion_time,
+                                "duration": (
+                                    completion_time - start_time
+                                ).total_seconds(),
+                            },
+                            f,
+                            default=str,
+                        )
 
                 _, imaging_dataset = get_loader_result(key, ProcessingTask)
                 caiman_dataset = imaging_dataset
-                key['processing_time'] = caiman_dataset.creation_time
-                key['package_version'] = caiman.__version__
+                key["processing_time"] = caiman_dataset.creation_time
+                key["package_version"] = caiman.__version__
             else:
-                raise NotImplementedError(f'Automatic triggering of {method} analysis'
-                                          f' is not yet supported')
+                raise NotImplementedError(
+                    f"Automatic triggering of {method} analysis"
+                    f" is not yet supported"
+                )
         else:
-            raise ValueError(f'Unknown task mode: {task_mode}')
+            raise ValueError(f"Unknown task mode: {task_mode}")
 
         self.insert1(key)
 
@@ -433,35 +483,43 @@ class Curation(dj.Manual):
     curation_note='': varchar(2000)  
     """
 
-    def create1_from_processing_task(self, key, is_curated=False, curation_note=''):
+    def create1_from_processing_task(self, key, is_curated=False, curation_note=""):
         """
         Given a "ProcessingTask", create a new corresponding "Curation"
         """
         if key not in Processing():
-            raise ValueError(f'No corresponding entry in Processing available for: '
-                             f'{key}; run `Processing.populate(key)`')
+            raise ValueError(
+                f"No corresponding entry in Processing available for: "
+                f"{key}; run `Processing.populate(key)`"
+            )
 
-        output_dir = (ProcessingTask & key).fetch1('processing_output_dir')
+        output_dir = (ProcessingTask & key).fetch1("processing_output_dir")
         method, imaging_dataset = get_loader_result(key, ProcessingTask)
 
-        if method == 'caiman':
+        if method == "caiman":
             caiman_dataset = imaging_dataset
             curation_time = caiman_dataset.creation_time
         else:
-            raise NotImplementedError('Unknown method: {}'.format(method))
+            raise NotImplementedError("Unknown method: {}".format(method))
 
         # Synthesize curation_id
-        curation_id = dj.U().aggr(self & key, n='ifnull(max(curation_id)+1,1)'
-                                  ).fetch1('n')
-        self.insert1({**key, 
-                      'curation_id': curation_id,
-                      'curation_time': curation_time, 
-                      'curation_output_dir': output_dir,
-                      'manual_curation': is_curated,
-                      'curation_note': curation_note})
+        curation_id = (
+            dj.U().aggr(self & key, n="ifnull(max(curation_id)+1,1)").fetch1("n")
+        )
+        self.insert1(
+            {
+                **key,
+                "curation_id": curation_id,
+                "curation_time": curation_time,
+                "curation_output_dir": output_dir,
+                "manual_curation": is_curated,
+                "curation_note": curation_note,
+            }
+        )
 
 
 # Motion Correction --------------------------------------------------------------------
+
 
 @schema
 class MotionCorrection(dj.Imported):
@@ -490,6 +548,7 @@ class MotionCorrection(dj.Imported):
         """
         Piece-wise rigid motion correction
         """
+
         definition = """
         -> master
         ---
@@ -534,23 +593,27 @@ class MotionCorrection(dj.Imported):
     def make(self, key):
         method, loaded_result = get_loader_result(key, ProcessingTask)
 
-        if method == 'caiman':
+        if method == "caiman":
             loaded_caiman = loaded_result
 
-            self.insert1({**key, 
-                          'motion_correct_channel': loaded_caiman.alignment_channel})
+            self.insert1(
+                {**key, "motion_correct_channel": loaded_caiman.alignment_channel}
+            )
 
             # -- rigid motion correction --
-            if not loaded_caiman.params.motion['pw_rigid']:
+            if not loaded_caiman.params.motion["pw_rigid"]:
                 rigid_correction = {
                     **key,
-                    'x_shifts': loaded_caiman.motion_correction['shifts_rig'][:, 0],
-                    'y_shifts': loaded_caiman.motion_correction['shifts_rig'][:, 1],
-                    'x_std': np.nanstd(loaded_caiman.motion_correction[
-                                                                'shifts_rig'][:, 0]),
-                    'y_std': np.nanstd(loaded_caiman.motion_correction[
-                                                                'shifts_rig'][:, 1]),
-                    'outlier_frames': None}
+                    "x_shifts": loaded_caiman.motion_correction["shifts_rig"][:, 0],
+                    "y_shifts": loaded_caiman.motion_correction["shifts_rig"][:, 1],
+                    "x_std": np.nanstd(
+                        loaded_caiman.motion_correction["shifts_rig"][:, 0]
+                    ),
+                    "y_std": np.nanstd(
+                        loaded_caiman.motion_correction["shifts_rig"][:, 1]
+                    ),
+                    "outlier_frames": None,
+                }
 
                 self.RigidMotionCorrection.insert1(rigid_correction)
 
@@ -558,52 +621,81 @@ class MotionCorrection(dj.Imported):
             else:
                 nonrigid_correction = {
                     **key,
-                    'block_height': (loaded_caiman.params.motion['strides'][0]
-                                     + loaded_caiman.params.motion['overlaps'][0]),
-                    'block_width': (loaded_caiman.params.motion['strides'][1]
-                                    + loaded_caiman.params.motion['overlaps'][1]),
-                    'block_count_x': len(
-                        set(loaded_caiman.motion_correction['coord_shifts_els'][:, 0])),
-                    'block_count_y': len(
-                        set(loaded_caiman.motion_correction['coord_shifts_els'][:, 2])),
-                    'outlier_frames': None}
+                    "block_height": (
+                        loaded_caiman.params.motion["strides"][0]
+                        + loaded_caiman.params.motion["overlaps"][0]
+                    ),
+                    "block_width": (
+                        loaded_caiman.params.motion["strides"][1]
+                        + loaded_caiman.params.motion["overlaps"][1]
+                    ),
+                    "block_count_x": len(
+                        set(loaded_caiman.motion_correction["coord_shifts_els"][:, 0])
+                    ),
+                    "block_count_y": len(
+                        set(loaded_caiman.motion_correction["coord_shifts_els"][:, 2])
+                    ),
+                    "outlier_frames": None,
+                }
 
                 nonrigid_blocks = []
-                for b_id in range(len(loaded_caiman.motion_correction['x_shifts_els'
-                                                                      ][0, :])):
+                for b_id in range(
+                    len(loaded_caiman.motion_correction["x_shifts_els"][0, :])
+                ):
                     nonrigid_blocks.append(
-                        {**key, 'block_id': b_id,
-                         'block_x': np.arange(*loaded_caiman.motion_correction[
-                                                   'coord_shifts_els'][b_id, 0:2]),
-                         'block_y': np.arange(*loaded_caiman.motion_correction[
-                                                   'coord_shifts_els'][b_id, 2:4]),
-                         'x_shifts': loaded_caiman.motion_correction[
-                                         'x_shifts_els'][:, b_id],
-                         'y_shifts': loaded_caiman.motion_correction[
-                                         'y_shifts_els'][:, b_id],
-                         'x_std': np.nanstd(loaded_caiman.motion_correction[
-                                                'x_shifts_els'][:, b_id]),
-                         'y_std': np.nanstd(loaded_caiman.motion_correction[
-                                                'y_shifts_els'][:, b_id])})
+                        {
+                            **key,
+                            "block_id": b_id,
+                            "block_x": np.arange(
+                                *loaded_caiman.motion_correction["coord_shifts_els"][
+                                    b_id, 0:2
+                                ]
+                            ),
+                            "block_y": np.arange(
+                                *loaded_caiman.motion_correction["coord_shifts_els"][
+                                    b_id, 2:4
+                                ]
+                            ),
+                            "x_shifts": loaded_caiman.motion_correction["x_shifts_els"][
+                                :, b_id
+                            ],
+                            "y_shifts": loaded_caiman.motion_correction["y_shifts_els"][
+                                :, b_id
+                            ],
+                            "x_std": np.nanstd(
+                                loaded_caiman.motion_correction["x_shifts_els"][:, b_id]
+                            ),
+                            "y_std": np.nanstd(
+                                loaded_caiman.motion_correction["y_shifts_els"][:, b_id]
+                            ),
+                        }
+                    )
 
                 self.NonRigidMotionCorrection.insert1(nonrigid_correction)
                 self.Block.insert(nonrigid_blocks)
 
             # -- summary images --
-            summary_images = {**key,
-                              'ref_image': loaded_caiman.motion_correction[
-                                'reference_image'][...][np.newaxis, ...],
-                              'average_image': loaded_caiman.motion_correction[
-                                 'average_image'][...][np.newaxis, ...],
-                              'correlation_image': loaded_caiman.motion_correction[
-                                 'correlation_image'][...][np.newaxis, ...],
-                              'max_proj_image': loaded_caiman.motion_correction[
-                                 'max_image'][...][np.newaxis, ...]}
+            summary_images = {
+                **key,
+                "ref_image": loaded_caiman.motion_correction["reference_image"][...][
+                    np.newaxis, ...
+                ],
+                "average_image": loaded_caiman.motion_correction["average_image"][...][
+                    np.newaxis, ...
+                ],
+                "correlation_image": loaded_caiman.motion_correction[
+                    "correlation_image"
+                ][...][np.newaxis, ...],
+                "max_proj_image": loaded_caiman.motion_correction["max_image"][...][
+                    np.newaxis, ...
+                ],
+            }
 
             self.Summary.insert1(summary_images)
 
         else:
-            raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
+            raise NotImplementedError("Unknown/unimplemented method: {}".format(method))
+
 
 # Segmentation -------------------------------------------------------------------------
 
@@ -631,49 +723,57 @@ class Segmentation(dj.Computed):
     def make(self, key):
         method, loaded_result = get_loader_result(key, Curation)
 
-        if method == 'caiman':
+        if method == "caiman":
             loaded_caiman = loaded_result
 
-            # infer `segmentation_channel` from `params` if available, 
+            # infer `segmentation_channel` from `params` if available,
             # else from caiman loader
-            params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            segmentation_channel = params.get('segmentation_channel',
-                                              loaded_caiman.segmentation_channel)
+            params = (ProcessingParamSet * ProcessingTask & key).fetch1("params")
+            segmentation_channel = params.get(
+                "segmentation_channel", loaded_caiman.segmentation_channel
+            )
 
             masks, cells = [], []
             for mask in loaded_caiman.masks:
-                masks.append({**key,
-                              'segmentation_channel': segmentation_channel,
-                              'mask_id': mask['mask_id'],
-                              'mask_npix': mask['mask_npix'],
-                              'mask_center_x': mask['mask_center_x'],
-                              'mask_center_y': mask['mask_center_y'],
-                              'mask_xpix': mask['mask_xpix'],
-                              'mask_ypix': mask['mask_ypix'],
-                              'mask_weights': mask['mask_weights']})
+                masks.append(
+                    {
+                        **key,
+                        "segmentation_channel": segmentation_channel,
+                        "mask_id": mask["mask_id"],
+                        "mask_npix": mask["mask_npix"],
+                        "mask_center_x": mask["mask_center_x"],
+                        "mask_center_y": mask["mask_center_y"],
+                        "mask_xpix": mask["mask_xpix"],
+                        "mask_ypix": mask["mask_ypix"],
+                        "mask_weights": mask["mask_weights"],
+                    }
+                )
 
                 if loaded_caiman.cnmf.estimates.idx_components is not None:
-                    if mask['mask_id'] in loaded_caiman.cnmf.estimates.idx_components:
-                        cells.append({
-                            **key,
-                            'mask_classification_method': 'caiman_default_classifier',
-                            'mask_id': mask['mask_id'], 
-                            'mask_type': 'soma'})
+                    if mask["mask_id"] in loaded_caiman.cnmf.estimates.idx_components:
+                        cells.append(
+                            {
+                                **key,
+                                "mask_classification_method": "caiman_default_classifier",
+                                "mask_id": mask["mask_id"],
+                                "mask_type": "soma",
+                            }
+                        )
 
             self.insert1(key)
             self.Mask.insert(masks, ignore_extra_fields=True)
 
             if cells:
-                MaskClassification.insert1({
-                    **key,
-                    'mask_classification_method': 'caiman_default_classifier'},
-                    allow_direct_insert=True)
-                MaskClassification.MaskType.insert(cells,
-                                                   ignore_extra_fields=True,
-                                                   allow_direct_insert=True)
+                MaskClassification.insert1(
+                    {**key, "mask_classification_method": "caiman_default_classifier"},
+                    allow_direct_insert=True,
+                )
+                MaskClassification.MaskType.insert(
+                    cells, ignore_extra_fields=True, allow_direct_insert=True
+                )
 
         else:
-            raise NotImplementedError(f'Unknown/unimplemented method: {method}')
+            raise NotImplementedError(f"Unknown/unimplemented method: {method}")
 
 
 @schema
@@ -682,7 +782,7 @@ class MaskType(dj.Lookup):
     mask_type        : varchar(16)
     """
 
-    contents = zip(['soma', 'axon', 'dendrite', 'neuropil', 'artefact', 'unknown'])
+    contents = zip(["soma", "axon", "dendrite", "neuropil", "artefact", "unknown"])
 
 
 @schema
@@ -691,7 +791,7 @@ class MaskClassificationMethod(dj.Lookup):
     mask_classification_method: varchar(48)
     """
 
-    contents = zip(['caiman_default_classifier'])
+    contents = zip(["caiman_default_classifier"])
 
 
 @schema
@@ -716,6 +816,7 @@ class MaskClassification(dj.Computed):
 
 # Fluorescence & Activity Traces -------------------------------------------------------
 
+
 @schema
 class Fluorescence(dj.Computed):
     definition = """  # fluorescence traces before spike extraction or filtering
@@ -736,24 +837,31 @@ class Fluorescence(dj.Computed):
     def make(self, key):
         method, loaded_result = get_loader_result(key, Curation)
 
-        if method == 'caiman':
+        if method == "caiman":
             loaded_caiman = loaded_result
 
-            # infer `segmentation_channel` from `params` if available, 
+            # infer `segmentation_channel` from `params` if available,
             # else from caiman loader
-            params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-            segmentation_channel = params.get('segmentation_channel',
-                                              loaded_caiman.segmentation_channel)
+            params = (ProcessingParamSet * ProcessingTask & key).fetch1("params")
+            segmentation_channel = params.get(
+                "segmentation_channel", loaded_caiman.segmentation_channel
+            )
 
             self.insert1(key)
-            self.Trace.insert([{**key,
-                                'mask_id': mask['mask_id'],
-                                'fluorescence_channel': segmentation_channel,
-                                'fluorescence': mask['inferred_trace']}
-                               for mask in loaded_caiman.masks])
+            self.Trace.insert(
+                [
+                    {
+                        **key,
+                        "mask_id": mask["mask_id"],
+                        "fluorescence_channel": segmentation_channel,
+                        "fluorescence": mask["inferred_trace"],
+                    }
+                    for mask in loaded_caiman.masks
+                ]
+            )
 
         else:
-            raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
+            raise NotImplementedError("Unknown/unimplemented method: {}".format(method))
 
 
 @schema
@@ -762,8 +870,7 @@ class ActivityExtractionMethod(dj.Lookup):
     extraction_method: varchar(200)
     """
 
-    contents = zip(['caiman_deconvolution',
-                    'caiman_dff'])
+    contents = zip(["caiman_deconvolution", "caiman_dff"])
 
 
 @schema
@@ -784,45 +891,57 @@ class Activity(dj.Computed):
 
     @property
     def key_source(self):
-        caiman_key_source = (Fluorescence * ActivityExtractionMethod
-                             * ProcessingParamSet.proj('processing_method')
-                             & 'processing_method = "caiman"'
-                             & 'extraction_method LIKE "caiman%"')
+        caiman_key_source = (
+            Fluorescence
+            * ActivityExtractionMethod
+            * ProcessingParamSet.proj("processing_method")
+            & 'processing_method = "caiman"'
+            & 'extraction_method LIKE "caiman%"'
+        )
 
         return caiman_key_source.proj()
 
     def make(self, key):
         method, loaded_result = get_loader_result(key, Curation)
 
-        if method == 'caiman':
+        if method == "caiman":
             loaded_caiman = loaded_result
 
-            if key['extraction_method'] in ('caiman_deconvolution', 'caiman_dff'):
-                attr_mapper = {'caiman_deconvolution': 'spikes', 'caiman_dff': 'dff'}
+            if key["extraction_method"] in ("caiman_deconvolution", "caiman_dff"):
+                attr_mapper = {"caiman_deconvolution": "spikes", "caiman_dff": "dff"}
 
-                # infer `segmentation_channel` from `params` if available, 
+                # infer `segmentation_channel` from `params` if available,
                 # else from caiman loader
-                params = (ProcessingParamSet * ProcessingTask & key).fetch1('params')
-                segmentation_channel = params.get('segmentation_channel',
-                                                  loaded_caiman.segmentation_channel)
+                params = (ProcessingParamSet * ProcessingTask & key).fetch1("params")
+                segmentation_channel = params.get(
+                    "segmentation_channel", loaded_caiman.segmentation_channel
+                )
 
                 self.insert1(key)
-                self.Trace.insert([{**key,
-                                    'mask_id': mask['mask_id'],
-                                    'fluorescence_channel': segmentation_channel,
-                                    'activity_trace': mask[attr_mapper[key[
-                                        'extraction_method']]]
-                                    }
-                                   for mask in loaded_caiman.masks])
+                self.Trace.insert(
+                    [
+                        {
+                            **key,
+                            "mask_id": mask["mask_id"],
+                            "fluorescence_channel": segmentation_channel,
+                            "activity_trace": mask[
+                                attr_mapper[key["extraction_method"]]
+                            ],
+                        }
+                        for mask in loaded_caiman.masks
+                    ]
+                )
 
         else:
-            raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
+            raise NotImplementedError("Unknown/unimplemented method: {}".format(method))
 
 
 # Helper Functions ---------------------------------------------------------------------
 
-_table_attribute_mapper = {'ProcessingTask': 'processing_output_dir',
-                           'Curation': 'curation_output_dir'}
+_table_attribute_mapper = {
+    "ProcessingTask": "processing_output_dir",
+    "Curation": "curation_output_dir",
+}
 
 
 def get_loader_result(key, table):
@@ -835,24 +954,28 @@ def get_loader_result(key, table):
          (e.g. caiman.CaImAn, etc.)
     """
     method, output_dir = (ProcessingParamSet * table & key).fetch1(
-        'processing_method', _table_attribute_mapper[table.__name__])
+        "processing_method", _table_attribute_mapper[table.__name__]
+    )
 
     output_dir = find_full_path(get_miniscope_root_data_dir(), output_dir)
 
-    if method == 'caiman':
+    if method == "caiman":
         from element_interface import caiman_loader
+
         loaded_output = caiman_loader.CaImAn(output_dir)
     else:
-        raise NotImplementedError('Unknown/unimplemented method: {}'.format(method))
+        raise NotImplementedError("Unknown/unimplemented method: {}".format(method))
 
     return method, loaded_output
 
 
 def populate_all(display_progress=True, reserve_jobs=False, suppress_errors=False):
 
-    populate_settings = {'display_progress': display_progress, 
-                         'reserve_jobs': reserve_jobs, 
-                         'suppress_errors': suppress_errors}
+    populate_settings = {
+        "display_progress": display_progress,
+        "reserve_jobs": reserve_jobs,
+        "suppress_errors": suppress_errors,
+    }
 
     RecordingInfo.populate(**populate_settings)
 
