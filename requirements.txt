@@ -1,2 +1,2 @@
-cv2
+opencv-python
 datajoint>=0.13.0
