@@ -4,8 +4,7 @@ site_name: Element Miniscope
 repo_url: https://github.com/datajoint/element-miniscope
 repo_name: datajoint/element-miniscope
 nav:
-  - Element DeepLabCut: getting_started.md
-  - Getting Started: getting_started.md
+  - Element Miniscope: index.md
   - Concepts: concepts.md
   - Tutorials: tutorials.md
   - About:
