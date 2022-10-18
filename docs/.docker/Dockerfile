@@ -5,6 +5,7 @@ COPY --chown=anaconda:anaconda ./docs/.docker/apk_requirements.txt ${APK_REQUIRE
 COPY --chown=anaconda:anaconda ./docs/.docker/pip_requirements.txt ${PIP_REQUIREMENTS}
 RUN \
     /entrypoint.sh echo "Dependencies installed" && \
+    rm ${APK_REQUIREMENTS} ${PIP_REQUIREMENTS} && \
     git config --global user.name "GitHub Action" && \
     git config --global user.email "action@github.com"&& \
     git config --global pull.rebase false && \
@@ -12,4 +13,4 @@ RUN \
 COPY --chown=anaconda:anaconda ./${PACKAGE} /main/${PACKAGE}
 COPY --chown=anaconda:anaconda ./docs/mkdocs.yaml /main/docs/mkdocs.yaml
 COPY --chown=anaconda:anaconda ./docs/src /main/docs/src
-COPY --chown=anaconda:anaconda ./CHANGELOG.md /main/docs/src/about/changelog.md
+COPY --chown=anaconda:anaconda ./CHANGELOG.md /main/
