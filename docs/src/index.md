@@ -1,8 +1,8 @@
 # Element Miniscope Calcium Imaging
 
-This repository features a DataJoint schema for functional calcium imaging data acquired with the UCLA Miniscope and `Miniscope DAQ V4` acquisition system, and analyzed with `CaImAn`.
+This Element features a DataJoint schema for functional calcium imaging data acquired with the UCLA Miniscope and `Miniscope DAQ V4` acquisition system, and analyzed with `CaImAn`.
 
-The element presented here is not a complete workflow by itself, but rather a modular design of tables and dependencies specific to the miniscope functional calcium imaging workflow.
+For details about the tables in the `miniscope` schema, see the [concepts page](./concepts.md) 
 
 ![element-miniscope diagram](https://raw.githubusercontent.com/datajoint/element-miniscope/main/images/attached_miniscope_element.svg)
 
