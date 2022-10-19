@@ -21,37 +21,26 @@ def activate(
     create_tables=True,
     linking_module=None,
 ):
-    """
-    activate(miniscope_schema_name, *, create_schema=True, create_tables=True,
-             linking_module=None)
-        :param miniscope_schema_name: schema name on the database server to activate the
-                                      `miniscope` module
-        :param create_schema: when True (default), create schema in the database if it
-                              does not yet exist.
-        :param create_tables: when True (default), create tables in the database if they
-                              do not yet exist.
-        :param linking_module: a module name or a module containing the
-         required dependencies to activate the `miniscope` module:
-            Upstream tables:
-                + Session: parent table to Recording,
-                           typically identifying a recording session
-                + Equipment: Reference table for Recording,
-                             specifying the equipment used for the acquisition
-                + AnatomicalLocation: Reference table for RecordingLocation, specifying
-                the brain location where the recording is acquired
-            Functions:
-                + get_miniscope_root_data_dir() -> list
-                    Retrieve the root data directory
-                    Contains all subject/sessions data
-                    :return: a string for full path to the root data directory
-                + get_session_directory(session_key: dict) -> str
-                    Retrieve the session directory containing the recorded data for a
-                    given session
-                    :param session_key: a dictionary of one session `key`
-                    :return: a string for full path to the session directory
-                + get_processed_root_data_dir() -> str:
-                    Retrieves the root directory for all processed data
-                    :return: a string for full path to the root dir for processed data
+    """Activate this schema.
+
+    Args:
+        miniscope_schema_name (str): schema name on the database server
+        create_schema (bool): when True (default), create schema in the database if it does not yet exist.
+        create_tables (bool): when True (default), create tables in the database if they
+                                do not yet exist.
+        linking_module (str): a module name or a module containing the required dependencies.
+    Dependencies:
+    Upstream tables:
+        Session: parent table to Recording,
+        identifying a recording session.
+        Equipment: Reference table for Recording,
+        specifying the acquisition equipment.
+        AnatomicalLocation: Reference table for RecordingLocation, specifying
+        the brain location where the recording is acquired.
+    Functions:
+        get_miniscope_root_data_dir(): Returns absolute path for root data director(y/ies) with all subject/sessions data, as (list of) string(s).
+        get_session_directory(session_key: dict) Returns the session directory with all data for the session in session_key, as a string.
+        get_processed_root_data_dir(): Returns absolute path for all processed data as a string. 
     """
 
     if isinstance(linking_module, str):
