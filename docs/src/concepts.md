@@ -91,3 +91,7 @@ Based on interviews, we are considering adding support for the tools listed belo
 
 + Acquisition tools + Miniscope DAQ V4 + Inscopix Data Acquisition Software (IDAS)
 + Preprocessing tools + Inscopix Data Processing Software (IDPS) + Inscopix Multimodal Image Registration and Analysis (MIRA) + MiniAn + CaImAn + CNMF-E + CellReg
+
+## Roadmap
+
+Further development of this Element is community driven. Upon user requests we will continue adding features to this Element.
