@@ -30,46 +30,6 @@ The preprocessing workflow for miniscope imaging includes denoising, motion corr
 
 Based on interviews with UCLA and Inscopix miniscope users and developers, each research lab uses a different preprocessing workflow. These custom workflows are often closed source and not tracked with version control software. For the preprocessing tools that are open source, they are often developed by an individual during their training period and lack funding for long term maintenance. These factors result in a lack of standardization for miniscope preprocessing tools, which is a major obstacle to adoption for new labs.
 
-## Table Architecture
-
-Each of the DataJoint Elements are a set of tables for common neuroinformatics modalities to organize, preprocess, and analyze data. Each node in the following diagram is either a table in the Element itself or a table that would be connected to the Element.
-
-![element-miniscope diagram](https://raw.githubusercontent.com/datajoint/element-miniscope/main/images/attached_miniscope_element.svg)
-
-- Upstream: 
-
-    - Element Miniscope connects to a ***Session*** table, which is modeled in our [workflow pipeline](https://github.com/datajoint/workflow-miniscope/blob/main/workflow_deeplabcut/pipeline.py). 
-
-    - Although not requried, most choose to connect ***Session*** to a ***Subject*** table for managing research subjects.
-
-- `miniscope` schema: Tables related to importing, analyzing, and exporting miniscope data:
-
-    + ***Session***: An experimental session where each recording describes a complete 3D dataset from one recording session.
-
-    + ***Recording***: A table containing information about the equipment used (e.g. the acquisition hardware information).
-
-    + ***RecordingInfo***: The metadata about this recording from the Miniscope DAQ software (e.g. frame rate, number of channels, frames, etc.).
-
-    + ***MotionCorrection***: Information about motion correction performed on a recording.
-
-    + ***MotionCorrection.RigidMotionCorrection***: Details of the rigid motion correction (e.g. shifting in x, y).
-
-    + ***MotionCorrection.NonRigidMotionCorrection*** and ***MotionCorrection.Block***: These tables are used to describe the non-rigid motion correction.
-
-    + ***MotionCorrection.Summary***: Ssummary images after motion correction (e.g. average image, correlation image, etc.).
-
-    + ***Segmentation***: This table specifies the segmentation step and its outputs, following the motion correction step.
-
-    + ***Segmentation.Mask***: This table contains the image mask for the segmented region of interest.
-
-    + ***MaskClassification***: This table contains informmation about the classification of ***Segmentation.Mask*** into a type (e.g. soma, axon, dendrite, artifact, etc.).
-
-    + ***Fluorescence***: The output fluorescence traces extracted from each ***Segmentation.Mask***.
-
-    + ***ActivityExtractionMethod***: A record of the activity extraction method (e.g. deconvolution) applied on the fluorescence trace.
-
-    + ***Activity***: The computed neuronal activity trace from fluorescence trace (e.g. spikes).
-
 ## Key Partnerships
 
 Until recently, DataJoint had not been used for miniscope pipelines. However, labs we have contacted have been eager to engage and adopt DataJoint-based workflows in their labs.
@@ -82,6 +42,43 @@ Until recently, DataJoint had not been used for miniscope pipelines. However, la
 + Antoine Adamantidis Lab, University of Bern
 + Manolis Froudaraki Lab, FORTH
 + Allan Basbaum Lab, UCSF
+
+## Element Architecture
+
+Each of the DataJoint Elements are a set of tables for common neuroinformatics modalities to organize, preprocess, and analyze data. Each node in the following diagram is either a table in the Element itself or a table that would be connected to the Element.
+
+![element-miniscope diagram](https://raw.githubusercontent.com/datajoint/element-miniscope/main/images/attached_miniscope_element.svg)
+
+### `subject` schema
+- Although not required, most choose to connect the `Session` table to a `Subject` table.
+
+| Table | Description |
+| --- | --- |
+| Subject | Basic information of the research subject |
+
+### `session` schema
+
+| Table | Description |
+| --- | --- |
+| Session | Unique experimental session identifier |
+
+### `miniscope` schema
+Tables related to importing, analyzing, and exporting miniscope data.
+
+| Table | Description |
+| --- | --- |
+| Recording | A table containing information about the equipment used (e.g. the acquisition hardware information). |
+| RecordingInfo |  The metadata about this recording from the Miniscope DAQ software (e.g. frame rate, number of channels, frames, etc.). |
+| MotionCorrection | Information about motion correction performed on a recording. |
+| MotionCorrection.RigidMotionCorrection | Details of rigid motion correction (e.g. shiting in x, y). |
+| MotionCorrection.NonRigidMotionCorrection and MotionCorrection.Block | These tables are used to describe the non-rigid motion correction. |
+| MotionCorrection.Summary | Summary images after motion correction (e.g. average image, correlation image, etc.). |
+| Segmentation | This table specifies the segmentation step and its outputs, following the motion correction step. |
+| Segmentation.Mask | This table contains the image mask for the segmented region of interest. |
+| MaskClassification | This table contains informmation about the classification of `Segmentation.Mask` into a type (e.g. soma, axon, dendrite, artifact, etc.). |
+| Fluorescence | The output fluorescence traces extracted from each `Segmentation.Mask`. |
+| ActivityExtractionMethod | A record of the activity extraction method (e.g. deconvolution) applied on the fluorescence trace. |
+| Activity | The computed neuronal activity trace from fluorescence trace (e.g. spikes). |
 
 ## Pipeline Development
 
