@@ -49,20 +49,20 @@ Each of the DataJoint Elements are a set of tables for common neuroinformatics m
 
 ![element-miniscope diagram](https://raw.githubusercontent.com/datajoint/element-miniscope/main/images/attached_miniscope_element.svg)
 
-### `subject` schema
+### `subject` schema ([API docs](https://datajoint.com/docs/elements/element-animal/api/element_animal/subject))
 - Although not required, most choose to connect the `Session` table to a `Subject` table.
 
 | Table | Description |
 | --- | --- |
 | Subject | Basic information of the research subject |
 
-### `session` schema
+### `session` schema ([API docs](https://datajoint.com/docs/elements/element-session/api/element_session/session_with_datetime))
 
 | Table | Description |
 | --- | --- |
 | Session | Unique experimental session identifier |
 
-### `miniscope` schema
+### `miniscope` schema ([API docs](../api/element_miniscope/miniscope))
 Tables related to importing, analyzing, and exporting miniscope data.
 
 | Table | Description |
