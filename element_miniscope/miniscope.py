@@ -22,21 +22,17 @@ def activate(
     linking_module=None,
 ):
     """Activate this schema.
-
     Args:
-        miniscope_schema_name (str): schema name on the database server
+        model_schema_name (str): schema name on the database server
         create_schema (bool): when True (default), create schema in the database if it does not yet exist.
-        create_tables (bool): when True (default), create tables in the database if they
-                                do not yet exist.
-        linking_module (str): a module name or a module containing the required dependencies.
+        create_tables (str): when True (default), create schema tabkes in the database if they do not yet exist.
+        linking_module (str): a module (or name) containing the required dependencies.
     Dependencies:
     Upstream tables:
         Session: parent table to Recording,
         identifying a recording session.
         Equipment: Reference table for Recording,
         specifying the acquisition equipment.
-        AnatomicalLocation: Reference table for RecordingLocation, specifying
-        the brain location where the recording is acquired.
     Functions:
         get_miniscope_root_data_dir(): Returns absolute path for root data director(y/ies) with all subject/sessions data, as (list of) string(s).
         get_session_directory(session_key: dict) Returns the session directory with all data for the session in session_key, as a string.
@@ -64,20 +60,10 @@ def activate(
 
 
 def get_miniscope_root_data_dir() -> list:
-    """
-    All data paths, directories in DataJoint Elements are recommended to be stored as
-    relative paths (posix format), with respect to some user-configured "root"
-    directory, which varies from machine to machine (e.g. different mounted drive
-    locations).
-
-    get_miniscope_root_data_dir() -> list
-        This user-provided function retrieves the possible root data directories
-         containing the miniscope data for all subjects and sessions
-         (e.g. acquired Miniscope-DAQ-V4 raw files,
-         output files from processing routines, etc.).
-
-        :return: a string for full path to the root data directory,
-         or list of strings for possible root data directories
+    """Pulls relevant func from parent namespace to specify root data dir(s).
+    It is recommended that all paths in DataJoint Elements stored as relative
+    paths, with respect to some user-configured "root" director(y/ies). The
+    root(s) may vary between data modalities and user machines. Returns a full path string or list of strongs for possible root data directories.
     """
 
     root_directories = _linking_module.get_miniscope_root_data_dir()
@@ -91,21 +77,17 @@ def get_miniscope_root_data_dir() -> list:
 
 
 def get_session_directory(session_key: dict) -> str:
-    """
-    get_session_directory(session_key: dict) -> str
-        Retrieve the session directory containing the
-         recorded data for a given session
-        :param session_key: a dictionary of one session `key`
-        :return: a string for relative or full path to the session directory
+    """Pulls relevant directory information from database.
+
+    Args:
+    session_key (dict): containing session information
+    Returns: Session directory as a string
     """
     return _linking_module.get_session_directory(session_key)
 
 
 def get_processed_root_data_dir() -> str:
-    """
-    get_processed_root_data_dir() -> str:
-        Retrieves the root directory for all processed data
-        :return: a string for full path to the root directory for processed data
+    """Retrieves the root directory for all processed data
     """
 
     if hasattr(_linking_module, "get_processed_root_data_dir"):
@@ -119,6 +101,11 @@ def get_processed_root_data_dir() -> str:
 
 @schema
 class AcquisitionSoftware(dj.Lookup):
+    """Software used for miniscope acquisition.
+
+    Attributes:
+        acquisition_software (varchar(24)): Name of the miniscope acquisition software."""
+
     definition = """
     acquisition_software: varchar(24)
     """
@@ -127,6 +114,11 @@ class AcquisitionSoftware(dj.Lookup):
 
 @schema
 class Channel(dj.Lookup):
+    """Number of channels in the miniscope recording.
+
+    Attributes:
+        channel (tinyint): Number of channels in the miniscope acquisition starting at zero."""
+
     definition = """
     channel     : tinyint  # 0-based indexing
     """
@@ -135,6 +127,17 @@ class Channel(dj.Lookup):
 
 @schema
 class Recording(dj.Manual):
+    """Table for discrete recording sessions with the miniscope.
+
+    Attributes:
+        Session (foreign key): Session primary key.
+        recording_id (foreign key, int): Unique recording ID.
+        Equipment: Lookup table for miniscope equipment information.
+        AcquisitionSoftware: Lookup table for miniscope acquisition software.
+        recording_directory (varchar(255)): relative path to recording files.
+        recording_notes (varchar(4095)): notes about the recording session.
+    """
+
     definition = """
     -> Session
     recording_id: int
@@ -148,6 +151,12 @@ class Recording(dj.Manual):
 
 @schema
 class RecordingLocation(dj.Manual):
+    """Brain location where the miniscope recording is acquired.
+
+    Attributes:
+        Recording (foreign key): Recording primary key.
+        Anatomical Location: Select the anatomical region where miniscope recording was acquired. 
+    """
     definition = """
     # Brain location where this miniscope recording is acquired
     -> Recording
@@ -158,6 +167,25 @@ class RecordingLocation(dj.Manual):
 
 @schema
 class RecordingInfo(dj.Imported):
+    """Automated table with recording metadata.
+
+    Attributes:
+        Recording (foreign key): Recording primary key.
+        nchannels (tinyint): Number of recording channels.
+        nframes (int): Number of recorded frames.
+        px_height (smallint): Height in pixels.
+        px_width (smallint): Width in pixels.
+        um_height (float): Height in microns. 
+        um_width (float): Width in microns.
+        fps (float): Frames per second, (Hz).
+        gain (float): Recording gain.
+        spatial_downsample (tinyint): Amount of downsampling applied.
+        led_power (float): LED power used for the recording.
+        time_stamps (longblob): Time stamps for each frame.
+        recording_datetime (datetime): Datetime of the recording.
+        recording_duration (float): Total recording duration (seconds). 
+    """
+
     definition = """
     # Store metadata about recording
     -> Recording
@@ -178,6 +206,14 @@ class RecordingInfo(dj.Imported):
     """
 
     class File(dj.Part):
+        """File path to recording file relative to root data directory.
+
+        Attributes:
+            master (foreign key): Recording primary key.
+            file_id (foreign key, smallint): Unique file ID.
+            path_path (varchar(255)): Relative file path to recording file.
+        """
+
         definition = """
         -> master
         file_id : smallint unsigned
@@ -186,6 +222,7 @@ class RecordingInfo(dj.Imported):
         """
 
     def make(self, key):
+        """Populate table with recording file metadata."""
 
         # Search recording directory for miniscope raw files
         acquisition_software, recording_directory = (Recording & key).fetch1(
@@ -300,6 +337,13 @@ class RecordingInfo(dj.Imported):
 
 @schema
 class ProcessingMethod(dj.Lookup):
+    """Method or analysis software to process miniscope acquisition.
+
+    Attributes:
+        processing_method (foreign key, char16): Recording processing method (e.g. CaImAn).
+        processing_method_desc (varchar(1000)): Additional information about the processing method. 
+    """
+
     definition = """
     # Method, package, analysis software used for processing of miniscope data 
     # (e.g. CaImAn, etc.)
@@ -313,6 +357,16 @@ class ProcessingMethod(dj.Lookup):
 
 @schema
 class ProcessingParamSet(dj.Lookup):
+    """Parameters of the processing method.
+
+    Attributes:
+        paramset_idx (foreign key, smallint): Unique parameter set ID.
+        ProcessingMethod (char(16)): ProcessingMethod from the lookup table.
+        paramset_desc (varchar(128)): Description of the parameter set.
+        paramset_set_hash (uuid): UUID hash for parameter set.
+        params (longblob): Dictionary of all parameters for the processing method.
+    """
+
     definition = """
     # Parameter set used for processing of miniscope data
     paramset_id:  smallint
@@ -333,6 +387,19 @@ class ProcessingParamSet(dj.Lookup):
         params: dict,
         processing_method_desc: str = "",
     ):
+        """Insert new parameter set.
+
+        Args:
+            processing_method (str): Name of the processing method or software.
+            paramset_id (int): Unique number for the set of processing parameters.
+            paramset_desc (str): Description of the processing parameter set.
+            params (dict): Dictionary of processing parameters for the selected processing_method.
+            processing_method_desc (str, optional): Description of the processing method. Defaults to "".
+
+        Raises:
+            dj.DataJointError: A parameter set with arguments in this function already exists in the database.
+        """
+
         ProcessingMethod.insert1(
             {"processing_method": processing_method}, skip_duplicates=True
         )
@@ -359,6 +426,15 @@ class ProcessingParamSet(dj.Lookup):
 
 @schema
 class ProcessingTask(dj.Manual):
+    """Table marking manual or automatic processing task.
+
+    Attributes:
+        RecordingInfo (foreign key): Recording info primary key.
+        ProcessingParamSet (foreign key): Processing param set primary key.
+        processing_output_dir (varchar(255)): relative output data directory for processed files.
+        task_mode (enum): Load existing results or trigger new processing task.   
+    """
+
     definition = """
     # Manual table marking a processing task to be triggered or manually processed
     -> RecordingInfo
@@ -372,6 +448,14 @@ class ProcessingTask(dj.Manual):
 
 @schema
 class Processing(dj.Computed):
+    """Automatic table that beings the miniscope processing pipeline.
+
+    Attributes:
+        ProcessingTask (foreign key): Processing task primary key.
+        processing_time (datetime): Generates time of the processed results.
+        package_version (varchar(16)): Package version information. 
+    """
+
     definition = """
     -> ProcessingTask
     ---
@@ -380,6 +464,7 @@ class Processing(dj.Computed):
     """
 
     def make(self, key):
+        """Runs and populates necessary tables after processing."""
         task_mode = (ProcessingTask & key).fetch1("task_mode")
 
         output_dir = (ProcessingTask & key).fetch1("processing_output_dir")
@@ -459,6 +544,17 @@ class Processing(dj.Computed):
 
 @schema
 class Curation(dj.Manual):
+    """Defines whether and how the results should be curated.
+
+    Attributes:
+        Processing (foreign key): Processing primary key.
+        curation_id (foreign key, int): Unique curation ID.
+        curation_time (datetime): Time of generation of curated results.
+        curation_output_dir (varchar(255)): Output directory for curated results.
+        manual_curation (bool): If True, manual curation has been performed.
+        curation_note (varchar(2000)): Optional description of the curation procedure.
+    """
+
     definition = """
     # Different rounds of curation performed on the processing results of the data 
     # (no-curation can also be included here)
@@ -473,8 +569,7 @@ class Curation(dj.Manual):
     """
 
     def create1_from_processing_task(self, key, is_curated=False, curation_note=""):
-        """
-        Given a "ProcessingTask", create a new corresponding "Curation"
+        """Given a "ProcessingTask", create a new corresponding "Curation"
         """
         if key not in Processing():
             raise ValueError(
@@ -512,6 +607,13 @@ class Curation(dj.Manual):
 
 @schema
 class MotionCorrection(dj.Imported):
+    """Automated table performing motion correction analysis.
+
+    Attributes:
+        Curation (foreign key): Curation primary key.
+        Channel.proj(motion_correct_channel='channel'): Channel used for motion correction.
+    """
+
     definition = """
     -> Curation
     ---
@@ -520,6 +622,17 @@ class MotionCorrection(dj.Imported):
     """
 
     class RigidMotionCorrection(dj.Part):
+        """Automated table with ridge motion correction data. 
+
+        Attributes:
+            master (foreign key): MotionCorrection primary key.
+            outlier_frames (longblob): Mask with true for frames with outlier shifts.
+            y_shifts (longblob): y motion correction shifts, pixels.
+            x_shifts (longblob): x motion correction shifts, pixels.
+            y_std (float): Standard deviation of y shifts across all frames, pixels.
+            x_std (float): Standard deviation of x shifts across all frames, pixels.
+        """
+
         definition = """
         -> master
         ---
@@ -534,8 +647,15 @@ class MotionCorrection(dj.Imported):
         """
 
     class NonRigidMotionCorrection(dj.Part):
-        """
-        Piece-wise rigid motion correction
+        """Automated table with piece-wise rigid motion correction data.
+
+        Attributes:
+            master (foreign key): MotionCorrection primary key.
+            outlier_frames (longblob): Mask with true for frames with outlier shifts (already corrected).
+            block_height (int): Height in pixels.
+            block_width (int): Width in pixels.
+            block_count_y (int): Number of blocks tiled in the y direction.
+            block_count_x (int): Number of blocks tiled in the x direction. 
         """
 
         definition = """
@@ -552,6 +672,19 @@ class MotionCorrection(dj.Imported):
         """
 
     class Block(dj.Part):
+        """Automated table with data for blocks used in non-rigid motion correction.
+
+        Attributes:
+            master.NonRigidMotionCorrection (foreign key): NonRigidMotionCorrection primary key.
+            block_id (foreign key, int): Unique ID for each block.
+            block_y (longblob): y_start and y_end of this block in pixels.
+            block_x (longblob): x_start and x_end of this block in pixels.
+            y_shifts (longblob): y motion correction shifts for every frame in pixels.
+            x_shifts (longblob): x motion correction shifta for every frame in pixels. 
+            y_std (float): standard deviation of y shifts across all frames in pixels.
+            x_std (float): standard deviation of x shifts across all frames in pixels.  
+        """
+
         definition = """  # FOV-tiled blocks used for non-rigid motion correction
         -> master.NonRigidMotionCorrection
         block_id        : int
@@ -569,6 +702,16 @@ class MotionCorrection(dj.Imported):
         """
 
     class Summary(dj.Part):
+        """A summary image for each field and channel after motion correction.
+
+        Attributes:
+            master (foreign key): MotionCorrection primary key.
+            ref_image (longblob): Image used as the alignment template.
+            average_image (longblob): Mean of registered frames.
+            correlation_image (longblob): Correlation map computed during cell detection. 
+            max_proj_image (longblob): Maximum of registered frames.
+        """
+
         definition = """ # summary images for each field and channel after corrections
         -> master
         ---
@@ -580,6 +723,7 @@ class MotionCorrection(dj.Imported):
         """
 
     def make(self, key):
+        """Populate tables with motion correction data."""
         method, loaded_result = get_loader_result(key, ProcessingTask)
 
         if method == "caiman":
@@ -691,11 +835,31 @@ class MotionCorrection(dj.Imported):
 
 @schema
 class Segmentation(dj.Computed):
+    """Automated table computes different mask segmentations.
+
+    Attributes:
+        Curations (foreign key): Curation primary key.
+    """
+
     definition = """ # Different mask segmentations.
     -> Curation
     """
 
     class Mask(dj.Part):
+        """Image masks produced during segmentation.
+
+        Attributes:
+            master (foreign key): Segmentation primary key.
+            mask_id (foreign key, smallint): Unique ID for each mask.
+            channel.proj(segmentation_channel='channel') (query): Channel to be used for segmentation.
+            mask_npix (int): Number of pixels in the mask.
+            mask_center_x (int): Center x coordinate in pixels.
+            mask_center_y (int): Center y coordinate in pixels.
+            mask_xpix (longblob): x coordinates of the mask in pixels.
+            mask_ypix (longblob): y coordinates of the mask in pixels.
+            mask_weights (longblob): weights of the mask at the indicies above.
+        """
+
         definition = """ # A mask produced by segmentation.
         -> master
         mask_id              : smallint
@@ -710,6 +874,7 @@ class Segmentation(dj.Computed):
         """
 
     def make(self, key):
+        """Populates table with segementation data."""
         method, loaded_result = get_loader_result(key, Curation)
 
         if method == "caiman":
@@ -767,6 +932,12 @@ class Segmentation(dj.Computed):
 
 @schema
 class MaskType(dj.Lookup):
+    """Possible classifications of a segmented mask. 
+
+    Attributes:
+        mask_type (foreign key, varchar(16)): Type of segmented mask.
+    """
+
     definition = """ # Possible classifications for a segmented mask
     mask_type        : varchar(16)
     """
@@ -776,6 +947,12 @@ class MaskType(dj.Lookup):
 
 @schema
 class MaskClassificationMethod(dj.Lookup):
+    """Method to classify segmented masks.
+
+    Attributes:
+        mask_classification_method (foreign key, varchar(48)): Method by which masks are classified into mask types.
+    """
+
     definition = """
     mask_classification_method: varchar(48)
     """
@@ -785,12 +962,28 @@ class MaskClassificationMethod(dj.Lookup):
 
 @schema
 class MaskClassification(dj.Computed):
+    """Automated table with mask classification data.
+    
+    Attributes:
+        Segmentation (foreign key): Segmentation primary key.
+        MaskClassificationMethod (foreign key): MaskClassificationMethod primary key.
+    """
+
     definition = """
     -> Segmentation
     -> MaskClassificationMethod
     """
 
     class MaskType(dj.Part):
+        """Automated table storing mask type data.
+
+        Attributes:
+            master (foreign key): MaskClassification primary key.
+            Segmentation.Mask (foreign key): Segmentation.Mask primary key.
+            MaskType (Lookup table): Lookup table of various mask types.
+            confidence (float): Statistical confidence of mask classification.
+        """
+
         definition = """
         -> master
         -> Segmentation.Mask
@@ -808,11 +1001,27 @@ class MaskClassification(dj.Computed):
 
 @schema
 class Fluorescence(dj.Computed):
+    """Extracts fluoresence trace information.
+
+    Attributes:
+        Segmentation (foreign key): Segmentation primary key.
+    """
+
     definition = """  # fluorescence traces before spike extraction or filtering
     -> Segmentation
     """
 
     class Trace(dj.Part):
+        """Automated table with Fluorescence traces
+
+        Attributes:
+            master (foreign key): Fluorescence primary key.
+            Segmentation.Mask (foreign key): Segmentation.Mask primary key.
+            Channel.proj(fluorescence_channel='channel') (foreign key, query): Channel used for this trace.
+            fluorescence (longblob): A fluorescence trace associated with a given mask.
+            neurpil_fluorescence (longblob): A neuropil fluorescence trace.
+        """
+
         definition = """
         -> master
         -> Segmentation.Mask
@@ -824,6 +1033,7 @@ class Fluorescence(dj.Computed):
         """
 
     def make(self, key):
+        """Populates table with fluorescence trace data."""
         method, loaded_result = get_loader_result(key, Curation)
 
         if method == "caiman":
@@ -855,6 +1065,12 @@ class Fluorescence(dj.Computed):
 
 @schema
 class ActivityExtractionMethod(dj.Lookup):
+    """Lookup table for activity extraction methods.
+
+    Attributes:
+        extraction_method (foreign key, varchar(200)): Extraction method from CaImAn.
+    """
+
     definition = """
     extraction_method: varchar(200)
     """
@@ -864,6 +1080,13 @@ class ActivityExtractionMethod(dj.Lookup):
 
 @schema
 class Activity(dj.Computed):
+    """Inferred neural activty from the fluorescence trace. 
+
+    Attributes:
+        Fluorescence (foreign key): Fluorescence primary key.
+        ActivityExtractionMethod (foreign key): ActivityExtractionMethod primary key.
+    """
+
     definition = """
     # inferred neural activity from fluorescence trace - e.g. dff, spikes
     -> Fluorescence
@@ -871,6 +1094,14 @@ class Activity(dj.Computed):
     """
 
     class Trace(dj.Part):
+        """Automated table with activity traces.
+
+        Attributes:
+            master (foreign key): Activity primary key.
+            Fluorescence.Trace (foreign key): Fluoresence.Trace primary key.
+            activity_trace (longblob): Inferred activity trace.
+        """
+
         definition = """
         -> master
         -> Fluorescence.Trace
@@ -880,6 +1111,7 @@ class Activity(dj.Computed):
 
     @property
     def key_source(self):
+        """Defines key source when the make function is called."""
         caiman_key_source = (
             Fluorescence
             * ActivityExtractionMethod
@@ -891,6 +1123,7 @@ class Activity(dj.Computed):
         return caiman_key_source.proj()
 
     def make(self, key):
+        """Populates table with activity trace data."""
         method, loaded_result = get_loader_result(key, Curation)
 
         if method == "caiman":
@@ -934,14 +1167,17 @@ _table_attribute_mapper = {
 
 
 def get_loader_result(key, table):
-    """
-    Retrieve the loaded processed imaging results from the loader (e.g. caiman, etc.)
-        :param key: the `key` to one entry of ProcessingTask or Curation
-        :param table: the class defining the table to retrieve
-         the loaded results from (e.g. ProcessingTask, Curation)
-        :return: a loader object of the loaded results
+    """Retrieve the loaded processed imaging results from the loader (e.g. caiman, etc.)
+    
+    Args:
+        key (dict): the `key` to one entry of ProcessingTask or Curation.
+        table (str): the class defining the table to retrieve
+         the loaded results from (e.g. ProcessingTask, Curation).
+    Returns:
+        a loader object of the loaded results
          (e.g. caiman.CaImAn, etc.)
     """
+
     method, output_dir = (ProcessingParamSet * table & key).fetch1(
         "processing_method", _table_attribute_mapper[table.__name__]
     )
@@ -959,6 +1195,7 @@ def get_loader_result(key, table):
 
 
 def populate_all(display_progress=True, reserve_jobs=False, suppress_errors=False):
+    """Populates all tables simultaneously."""
 
     populate_settings = {
         "display_progress": display_progress,
