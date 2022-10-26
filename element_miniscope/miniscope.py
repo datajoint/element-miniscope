@@ -104,7 +104,7 @@ class AcquisitionSoftware(dj.Lookup):
     """Software used for miniscope acquisition.
 
     Attributes:
-        acquisition_software (varchar(24)): Name of the miniscope acquisition software."""
+        acquisition_software (varchar(24) ): Name of the miniscope acquisition software."""
 
     definition = """
     acquisition_software: varchar(24)
@@ -134,8 +134,8 @@ class Recording(dj.Manual):
         recording_id (foreign key, int): Unique recording ID.
         Equipment: Lookup table for miniscope equipment information.
         AcquisitionSoftware: Lookup table for miniscope acquisition software.
-        recording_directory (varchar(255)): relative path to recording files.
-        recording_notes (varchar(4095)): notes about the recording session.
+        recording_directory (varchar(255) ): relative path to recording files.
+        recording_notes (varchar(4095) ): notes about the recording session.
     """
 
     definition = """
@@ -211,7 +211,7 @@ class RecordingInfo(dj.Imported):
         Attributes:
             master (foreign key): Recording primary key.
             file_id (foreign key, smallint): Unique file ID.
-            path_path (varchar(255)): Relative file path to recording file.
+            path_path (varchar(255) ): Relative file path to recording file.
         """
 
         definition = """
@@ -341,7 +341,7 @@ class ProcessingMethod(dj.Lookup):
 
     Attributes:
         processing_method (foreign key, char16): Recording processing method (e.g. CaImAn).
-        processing_method_desc (varchar(1000)): Additional information about the processing method. 
+        processing_method_desc (varchar(1000) ): Additional information about the processing method. 
     """
 
     definition = """
@@ -361,8 +361,8 @@ class ProcessingParamSet(dj.Lookup):
 
     Attributes:
         paramset_idx (foreign key, smallint): Unique parameter set ID.
-        ProcessingMethod (char(16)): ProcessingMethod from the lookup table.
-        paramset_desc (varchar(128)): Description of the parameter set.
+        ProcessingMethod (char(16) ): ProcessingMethod from the lookup table.
+        paramset_desc (varchar(128) ): Description of the parameter set.
         paramset_set_hash (uuid): UUID hash for parameter set.
         params (longblob): Dictionary of all parameters for the processing method.
     """
@@ -431,7 +431,7 @@ class ProcessingTask(dj.Manual):
     Attributes:
         RecordingInfo (foreign key): Recording info primary key.
         ProcessingParamSet (foreign key): Processing param set primary key.
-        processing_output_dir (varchar(255)): relative output data directory for processed files.
+        processing_output_dir (varchar(255) ): relative output data directory for processed files.
         task_mode (enum): Load existing results or trigger new processing task.   
     """
 
@@ -453,7 +453,7 @@ class Processing(dj.Computed):
     Attributes:
         ProcessingTask (foreign key): Processing task primary key.
         processing_time (datetime): Generates time of the processed results.
-        package_version (varchar(16)): Package version information. 
+        package_version (varchar(16) ): Package version information. 
     """
 
     definition = """
@@ -550,9 +550,9 @@ class Curation(dj.Manual):
         Processing (foreign key): Processing primary key.
         curation_id (foreign key, int): Unique curation ID.
         curation_time (datetime): Time of generation of curated results.
-        curation_output_dir (varchar(255)): Output directory for curated results.
+        curation_output_dir (varchar(255) ): Output directory for curated results.
         manual_curation (bool): If True, manual curation has been performed.
-        curation_note (varchar(2000)): Optional description of the curation procedure.
+        curation_note (varchar(2000) ): Optional description of the curation procedure.
     """
 
     definition = """
@@ -935,7 +935,7 @@ class MaskType(dj.Lookup):
     """Possible classifications of a segmented mask. 
 
     Attributes:
-        mask_type (foreign key, varchar(16)): Type of segmented mask.
+        mask_type (foreign key, varchar(16) ): Type of segmented mask.
     """
 
     definition = """ # Possible classifications for a segmented mask
@@ -950,7 +950,7 @@ class MaskClassificationMethod(dj.Lookup):
     """Method to classify segmented masks.
 
     Attributes:
-        mask_classification_method (foreign key, varchar(48)): Method by which masks are classified into mask types.
+        mask_classification_method (foreign key, varchar(48) ): Method by which masks are classified into mask types.
     """
 
     definition = """
@@ -1068,7 +1068,7 @@ class ActivityExtractionMethod(dj.Lookup):
     """Lookup table for activity extraction methods.
 
     Attributes:
-        extraction_method (foreign key, varchar(200)): Extraction method from CaImAn.
+        extraction_method (foreign key, varchar(200) ): Extraction method from CaImAn.
     """
 
     definition = """
