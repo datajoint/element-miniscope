@@ -15,24 +15,28 @@ _linking_module = None
 
 
 def activate(
-    miniscope_schema_name,
+    miniscope_schema_name: str,
     *,
-    create_schema=True,
-    create_tables=True,
-    linking_module=None,
+    create_schema: bool = True,
+    create_tables: bool = True,
+    linking_module: str = None,
 ):
     """Activate this schema.
+
     Args:
         model_schema_name (str): schema name on the database server
         create_schema (bool): when True (default), create schema in the database if it does not yet exist.
         create_tables (str): when True (default), create schema tabkes in the database if they do not yet exist.
         linking_module (str): a module (or name) containing the required dependencies.
+
     Dependencies:
+
     Upstream tables:
         Session: parent table to Recording,
         identifying a recording session.
         Equipment: Reference table for Recording,
         specifying the acquisition equipment.
+
     Functions:
         get_miniscope_root_data_dir(): Returns absolute path for root data director(y/ies) with all subject/sessions data, as (list of) string(s).
         get_session_directory(session_key: dict) Returns the session directory with all data for the session in session_key, as a string.
@@ -60,10 +64,12 @@ def activate(
 
 
 def get_miniscope_root_data_dir() -> list:
-    """Pulls relevant func from parent namespace to specify root data dir(s).
-    It is recommended that all paths in DataJoint Elements stored as relative
-    paths, with respect to some user-configured "root" director(y/ies). The
-    root(s) may vary between data modalities and user machines. Returns a full path string or list of strongs for possible root data directories.
+    """Fetches absolute data path to miniscope data dir(s).
+    
+    The absolute path here is used as a reference for all downstream relative paths used in DataJoint.
+    
+    Returns:
+        A list of the absolute path(s) to miniscope data directories.
     """
 
     root_directories = _linking_module.get_miniscope_root_data_dir()
@@ -77,11 +83,13 @@ def get_miniscope_root_data_dir() -> list:
 
 
 def get_session_directory(session_key: dict) -> str:
-    """Pulls relevant directory information from database.
+    """Pulls session directory information from database.
 
     Args:
-    session_key (dict): containing session information
-    Returns: Session directory as a string
+        session_key (dict): a dictionary containing session information.
+    
+    Returns:
+        Session directory as a string.
     """
     return _linking_module.get_session_directory(session_key)
 
@@ -157,6 +165,7 @@ class RecordingLocation(dj.Manual):
         Recording (foreign key): Recording primary key.
         Anatomical Location: Select the anatomical region where miniscope recording was acquired. 
     """
+
     definition = """
     # Brain location where this miniscope recording is acquired
     -> Recording
@@ -209,7 +218,7 @@ class RecordingInfo(dj.Imported):
         """File path to recording file relative to root data directory.
 
         Attributes:
-            master (foreign key): Recording primary key.
+            Recording (foreign key): Recording primary key.
             file_id (foreign key, smallint): Unique file ID.
             path_path (varchar(255) ): Relative file path to recording file.
         """
@@ -625,7 +634,7 @@ class MotionCorrection(dj.Imported):
         """Automated table with ridge motion correction data. 
 
         Attributes:
-            master (foreign key): MotionCorrection primary key.
+            MotionCorrection (foreign key): MotionCorrection primary key.
             outlier_frames (longblob): Mask with true for frames with outlier shifts.
             y_shifts (longblob): y motion correction shifts, pixels.
             x_shifts (longblob): x motion correction shifts, pixels.
@@ -650,7 +659,7 @@ class MotionCorrection(dj.Imported):
         """Automated table with piece-wise rigid motion correction data.
 
         Attributes:
-            master (foreign key): MotionCorrection primary key.
+            MotionCorrection (foreign key): MotionCorrection primary key.
             outlier_frames (longblob): Mask with true for frames with outlier shifts (already corrected).
             block_height (int): Height in pixels.
             block_width (int): Width in pixels.
@@ -705,7 +714,7 @@ class MotionCorrection(dj.Imported):
         """A summary image for each field and channel after motion correction.
 
         Attributes:
-            master (foreign key): MotionCorrection primary key.
+            MotionCorrection (foreign key): MotionCorrection primary key.
             ref_image (longblob): Image used as the alignment template.
             average_image (longblob): Mean of registered frames.
             correlation_image (longblob): Correlation map computed during cell detection. 
@@ -849,7 +858,7 @@ class Segmentation(dj.Computed):
         """Image masks produced during segmentation.
 
         Attributes:
-            master (foreign key): Segmentation primary key.
+            Segmentation (foreign key): Segmentation primary key.
             mask_id (foreign key, smallint): Unique ID for each mask.
             channel.proj(segmentation_channel='channel') (query): Channel to be used for segmentation.
             mask_npix (int): Number of pixels in the mask.
@@ -978,9 +987,9 @@ class MaskClassification(dj.Computed):
         """Automated table storing mask type data.
 
         Attributes:
-            master (foreign key): MaskClassification primary key.
+            MaskClassification (foreign key): MaskClassification primary key.
             Segmentation.Mask (foreign key): Segmentation.Mask primary key.
-            MaskType (Lookup table): Lookup table of various mask types.
+            MaskType (dict): Select mask type from entries within `MaskType` look up table.
             confidence (float): Statistical confidence of mask classification.
         """
 
@@ -1015,7 +1024,7 @@ class Fluorescence(dj.Computed):
         """Automated table with Fluorescence traces
 
         Attributes:
-            master (foreign key): Fluorescence primary key.
+            Fluorescence (foreign key): Fluorescence primary key.
             Segmentation.Mask (foreign key): Segmentation.Mask primary key.
             Channel.proj(fluorescence_channel='channel') (foreign key, query): Channel used for this trace.
             fluorescence (longblob): A fluorescence trace associated with a given mask.
@@ -1097,7 +1106,7 @@ class Activity(dj.Computed):
         """Automated table with activity traces.
 
         Attributes:
-            master (foreign key): Activity primary key.
+            Activity (foreign key): Activity primary key.
             Fluorescence.Trace (foreign key): Fluoresence.Trace primary key.
             activity_trace (longblob): Inferred activity trace.
         """
@@ -1173,6 +1182,7 @@ def get_loader_result(key, table):
         key (dict): the `key` to one entry of ProcessingTask or Curation.
         table (str): the class defining the table to retrieve
          the loaded results from (e.g. ProcessingTask, Curation).
+    
     Returns:
         a loader object of the loaded results
          (e.g. caiman.CaImAn, etc.)

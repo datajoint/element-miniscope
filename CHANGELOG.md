@@ -2,7 +2,7 @@
 
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
-## [0.2.0] - 2022-10-21
+## [0.1.4] - 2022-10-21
 + Add - mkdocs deployment with workflow API docs
 
 ## [0.1.3] - 2022-10-11

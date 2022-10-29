@@ -1,7 +1,7 @@
-# ---------------------- PROJECT SPECIFIC ---------------------------
+--- # ---------------------- PROJECT SPECIFIC ---------------------------
 
 site_name: DataJoint Documentation
-site_url: http://localhost/docs/element/element-miniscope
+site_url: http://localhost/docs/elements/element-miniscope
 repo_url: https://github.com/datajoint/element-miniscope
 repo_name: datajoint/element-miniscope
 nav:
@@ -23,7 +23,7 @@ nav:
 # 02. Instead of designating codeblocks with bash, use console. For example..
 #     ```console
 #     cd ../my_dir
-#     ``` 
+#     ```
 # 03. Links across docs should ...
 #     A. Not involve line breaks.
 #     B. Use relative paths to docs in the same repo
@@ -45,16 +45,16 @@ nav:
 # 02. Site analytics depend on a local environment variable GOOGLE_ANALYTICS_KEY
 #     You can find this in LastPass or declare with any string to suprress errors
 # 03. The API section will pull docstrings.
-#     A. Follow google styleguide e.g., 
+#     A. Follow google styleguide e.g.,
 #        https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 #        With typing suggestions: https://docs.python.org/3/library/typing.html
 #     B. To pull a specific workflow fork, change ./docs/src/api/make_pages.py#L19
 # 04. To see your fork of the workflow-{element} in this render, change the
 #     URL in ./docs/src/api/make_pages.py#L19 to your fork.
 # 05. For redirecting options For redirect options, see 'redirects' below.
-# 06. To deploy this site on your fork, 
+# 06. To deploy this site on your fork,
 #     A. declare a branch called gh-pages
-#     B. go to the your fork > settings > pages 
+#     B. go to the your fork > settings > pages
 #     C. direct pages to render from the gh-pages branch at root
 #     D. push a tag to your fork with the format test*.*.*
 #
@@ -85,6 +85,7 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 plugins:
+  - markdownextradata: {}
   - search
   # - redirects: # OPTIONAL REDIRECTS
   #     redirect_maps:
@@ -93,7 +94,7 @@ plugins:
       default_handler: python
   - gen-files:
       scripts:
-      - ./src/api/make_pages.py
+        - ./src/api/make_pages.py
   - literate-nav:
       nav_file: navigation.md
   - exclude-search:
@@ -119,8 +120,9 @@ markdown_extensions:
       linenums: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  
+
 extra:
+  PATCH_VERSION: !ENV PATCH_VERSION
   generator: false # Disable watermark
   analytics:
     provider: google
@@ -165,4 +167,4 @@ extra_css:
   - assets/stylesheets/extra.css
 
 extra_javascript:
-  - https://js-na1.hs-scripts.com/23133402.js  # HubSpot chatbot
+  - https://js-na1.hs-scripts.com/23133402.js # HubSpot chatbot

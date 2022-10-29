@@ -2,17 +2,17 @@
 
 ## Miniscopes in Neuroscience Research
 
-Miniature fluorescence microscopes (miniscopes) are a head-mounted calcium imaging full-frame video modality first introduced in 2005 by Mark Schnitzer's lab ([Flusberg et al., Optics Letters 2005](https://pubmed.ncbi.nlm.nih.gov/16190441/)). Due to their light weight, these miniscopes allow measuring the dynamic activity of populations of cortical neurons in freely behaving animals. In 2011, Inscopix Inc. was founded to support one-photon miniscopes as a commercial neuroscience research platform, providing proprietary hardware, acquisition software, and analysis software. Today, they estimate their active user base is 491 labs with a total of 1179 installs. An open-source alternative was launched by a UCLA team led by Daniel Aharoni and Peyman Golshani ([Cai et al., Nature 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5063500/); [Aharoni and Hoogland, Frontiers in Cellular Neuroscience 2019](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6461004/)). In our conversation with Dr. Aharoni, he estimated about 700 labs currently using the UCLA system alone. The Inscopix user base is smaller but more established. Several two-photon miniscopes have been developed but lack widespread adoption likely due to the expensive hardware required for the two-photon excitation ([Helmchen et al., Neuron 2001](https://pubmed.ncbi.nlm.nih.gov/11580892/); [Zong et al., Nature Methods 2017](https://pubmed.ncbi.nlm.nih.gov/28553965/); [Aharoni and Hoogland, Frontiers in Cellular Neuroscience 2019](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6461004/)). Due to the low costs and ability to record during natural behaviors, one-photon miniscope imaging appears to be the fastest growing calcium imaging modality in the field today. In Year 1, we focused our efforts on supporting the UCLA platform due its fast growth and deficiency of standardization in acquisition and processing pipelines. In future phases, we will reach out to Inscopix to support their platform as well.
+Miniature fluorescence microscopes (miniscopes) are a head-mounted calcium imaging full-frame video modality first introduced in 2005 by Mark Schnitzer's lab ([Flusberg et al., Optics Letters 2005](https://pubmed.ncbi.nlm.nih.gov/16190441/)). Due to their light weight, these miniscopes allow measuring the dynamic activity of populations of cortical neurons in freely behaving animals. In 2011, Inscopix Inc. was founded to support one-photon miniscopes as a commercial neuroscience research platform, providing proprietary hardware, acquisition software, and analysis software. Today, they estimate their active user base is 491 labs with a total of 1179 installs. 
+An open-source alternative was launched by a UCLA team led by Drs. Daniel Aharoni and Peyman Golshani ([Cai et al., Nature 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5063500/); [Aharoni and Hoogland, Frontiers in Cellular Neuroscience 2019](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6461004/)). In our conversation with Dr. Aharoni, he estimated about 700 labs currently using the UCLA system alone. The Inscopix user base is smaller but more established. Several two-photon miniscopes have been developed but lack widespread adoption likely due to the expensive hardware required for the two-photon excitation ([Helmchen et al., Neuron 2001](https://pubmed.ncbi.nlm.nih.gov/11580892/); [Zong et al., Nature Methods 2017](https://pubmed.ncbi.nlm.nih.gov/28553965/); [Aharoni and Hoogland, Frontiers in Cellular Neuroscience 2019](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6461004/)). Due to the low costs and ability to record during natural behaviors, one-photon miniscope imaging appears to be the fastest growing calcium imaging modality in the field today. 
+The DataJoint team focused efforts on supporting the UCLA platform due rapid growth and limited standardization in acquisition and processing pipelines. In the future, we will reach out to Inscopix to support their platform as well.
 
 ### Acquisition Tools
 
-Daniel Aharoni's lab has developed iterations of the UCLA Miniscope platform. Based on interviews, we have found labs using the two most recent versions including [Miniscope DAQ V3](http://miniscope.org/index.php/Information_on_the_(previous_Version_3)_Miniscope_platform) and [Miniscope DAQ V4](https://github.com/Aharoni-Lab/Miniscope-v4/wiki). Labs also use the Bonsai OpenEphys tool for data acquisition with the UCLA miniscope. Inscopix provides the Inscopix Data Acquisition Software (IDAS) for the nVista and nVoke systems.
+Dr. Daniel Aharoni's lab has developed iterations of the UCLA Miniscope platform. Based on interviews, we have found labs using the two most recent versions including [Miniscope DAQ V3](http://miniscope.org/index.php/Information_on_the_(previous_Version_3)_Miniscope_platform) and [Miniscope DAQ V4](https://github.com/Aharoni-Lab/Miniscope-v4/wiki). Labs also use the Bonsai OpenEphys tool for data acquisition with the UCLA miniscope. Inscopix provides the Inscopix Data Acquisition Software (IDAS) for the nVista and nVoke systems.
 
 ### Preprocessing Tools
 
 The preprocessing workflow for miniscope imaging includes denoising, motion correction, cell segmentation, and calcium event extraction (sometimes described as "deconvolution" or "spike inference"). For the UCLA Miniscopes, the following [analysis packages](https://github.com/Aharoni-Lab/Miniscope-v4/wiki/Analysis-Packages) are commonly used:
-
-(Package, Developer [Affiliation], Programming Language)
 
 + [Miniscope Denoising](https://github.com/Aharoni-Lab/Miniscope-v4/wiki/Removing-Horizontal-Noise-from-Recordings), Daniel Aharoni (UCLA), Python
 + [NoRMCorre](https://github.com/flatironinstitute/NoRMCorre), Flatiron Institute, MATLAB
@@ -54,13 +54,13 @@ Each of the DataJoint Elements are a set of tables for common neuroinformatics m
 
 | Table | Description |
 | --- | --- |
-| Subject | Basic information of the research subject |
+| Subject | Basic information of the research subject. |
 
 ### `session` schema ([API docs](https://datajoint.com/docs/elements/element-session/api/element_session/session_with_datetime))
 
 | Table | Description |
 | --- | --- |
-| Session | Unique experimental session identifier |
+| Session | Unique experimental session identifier. |
 
 ### `miniscope` schema ([API docs](../api/element_miniscope/miniscope))
 Tables related to importing, analyzing, and exporting miniscope data.
@@ -69,16 +69,16 @@ Tables related to importing, analyzing, and exporting miniscope data.
 | --- | --- |
 | Recording | A table containing information about the equipment used (e.g. the acquisition hardware information). |
 | RecordingInfo |  The metadata about this recording from the Miniscope DAQ software (e.g. frame rate, number of channels, frames, etc.). |
-| MotionCorrection | Information about motion correction performed on a recording. |
-| MotionCorrection.RigidMotionCorrection | Details of rigid motion correction (e.g. shiting in x, y). |
-| MotionCorrection.NonRigidMotionCorrection and MotionCorrection.Block | These tables are used to describe the non-rigid motion correction. |
-| MotionCorrection.Summary | Summary images after motion correction (e.g. average image, correlation image, etc.). |
+| MotionCorrection | A table with information about motion correction performed on a recording. |
+| MotionCorrection.RigidMotionCorrection | A table with details of rigid motion correction (e.g. shiting in x, y). |
+| MotionCorrection.NonRigidMotionCorrection and MotionCorrection.Block | These tables describe the non-rigid motion correction. |
+| MotionCorrection.Summary | A table containing summary images after motion correction. |
 | Segmentation | This table specifies the segmentation step and its outputs, following the motion correction step. |
 | Segmentation.Mask | This table contains the image mask for the segmented region of interest. |
 | MaskClassification | This table contains informmation about the classification of `Segmentation.Mask` into a type (e.g. soma, axon, dendrite, artifact, etc.). |
-| Fluorescence | The output fluorescence traces extracted from each `Segmentation.Mask`. |
-| ActivityExtractionMethod | A record of the activity extraction method (e.g. deconvolution) applied on the fluorescence trace. |
-| Activity | The computed neuronal activity trace from fluorescence trace (e.g. spikes). |
+| Fluorescence | This table contains the fluorescence traces extracted from each `Segmentation.Mask`. |
+| ActivityExtractionMethod | A table with information about the activity extraction method (e.g. deconvolution) applied on the fluorescence trace. |
+| Activity | A table with neuronal activity traces from fluorescence trace (e.g. spikes). |
 
 ## Pipeline Development
 
