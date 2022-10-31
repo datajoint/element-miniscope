@@ -1120,7 +1120,7 @@ class Activity(dj.Computed):
 
     @property
     def key_source(self):
-        """Defines key source when the make function is called."""
+        """Defines the order of keys when the `make` function is called."""
         caiman_key_source = (
             Fluorescence
             * ActivityExtractionMethod
