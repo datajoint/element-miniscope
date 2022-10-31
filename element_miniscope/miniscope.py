@@ -441,7 +441,7 @@ class ProcessingTask(dj.Manual):
         RecordingInfo (foreign key): Recording info primary key.
         ProcessingParamSet (foreign key): Processing param set primary key.
         processing_output_dir (varchar(255) ): relative output data directory for processed files.
-        task_mode (enum): Load existing results or trigger new processing task.   
+        task_mode (enum): `Load` existing results or `trigger` new processing task.   
     """
 
     definition = """
