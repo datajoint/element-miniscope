@@ -32,7 +32,7 @@ Based on interviews with UCLA and Inscopix miniscope users and developers, each 
 
 ## Key Partnerships
 
-Until recently, DataJoint had not been used for miniscope pipelines. However, labs we have contacted have been eager to engage and adopt DataJoint-based workflows in their labs.
+The DataJoint team have been in contact with the following teams who are eager to engage and adopt DataJoint-based workflows in their labs.
 
 + Adrien Peyrache Lab, McGill University
 + Peyman Golshani Lab, UCLA
@@ -82,7 +82,7 @@ Tables related to importing, analyzing, and exporting miniscope data.
 
 ## Pipeline Development
 
-With assistance from Peyman Golshani’s Lab (UCLA) we have added support for the UCLA Miniscope DAQ V3 acquisition tool and MiniscopeAnalysis preprocessing tool in `element-miniscope` and `workflow-miniscope`. They have provided example data for development, and will begin validating in March 2021.
+With assistance from Dr. Peyman Golshani’s Lab (UCLA) we have added support for the UCLA Miniscope DAQ V3 acquisition tool and MiniscopeAnalysis preprocessing tool in `element-miniscope` and `workflow-miniscope`. They have provided example data for development.
 
 Based on interviews, we are considering adding support for the tools listed below. The deciding factors include the number of users, long term support, quality controls, and python programming language (so that the preprocessing tool can be triggered within the element).
 
@@ -91,7 +91,17 @@ Based on interviews, we are considering adding support for the tools listed belo
 
 ## Roadmap
 
-Further development of this Element is community driven. Upon user requests we will continue adding features to this Element.
+Further development of this Element is community driven. Upon user requests and based on guidance from the Scientific Steering Group we will add features to this Element, such as:
+
++ Acquisition & Preprocessing tools 
++ Inscopix 
+  + Data Acquisition Software (IDAS)
+  + Data Processing Software (IDPS) 
+  + Multimodal Image Registration and Analysis (MIRA) 
++ MiniAn 
++ CaImAn 
++ CNMF-E 
++ CellReg
 
 ## References
 
