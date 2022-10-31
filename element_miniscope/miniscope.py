@@ -64,12 +64,12 @@ def activate(
 
 
 def get_miniscope_root_data_dir() -> list:
-    """Fetches absolute data path to miniscope data dir(s).
+    """Fetches absolute data path to miniscope data directory.
     
     The absolute path here is used as a reference for all downstream relative paths used in DataJoint.
     
     Returns:
-        A list of the absolute path(s) to miniscope data directories.
+        A list of the absolute path to miniscope data directory.
     """
 
     root_directories = _linking_module.get_miniscope_root_data_dir()
@@ -370,7 +370,7 @@ class ProcessingParamSet(dj.Lookup):
 
     Attributes:
         paramset_idx (foreign key, smallint): Unique parameter set ID.
-        ProcessingMethod (char(16) ): ProcessingMethod from the lookup table.
+        ProcessingMethod (varchar(16) ): ProcessingMethod from the lookup table.
         paramset_desc (varchar(128) ): Description of the parameter set.
         paramset_set_hash (uuid): UUID hash for parameter set.
         params (longblob): Dictionary of all parameters for the processing method.
