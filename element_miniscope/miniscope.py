@@ -1205,7 +1205,7 @@ def get_loader_result(key, table):
 
 
 def populate_all(display_progress=True, reserve_jobs=False, suppress_errors=False):
-    """Populates all tables simultaneously."""
+    """Populates all Computed/Imported tables in this schema, in order."""
 
     populate_settings = {
         "display_progress": display_progress,
