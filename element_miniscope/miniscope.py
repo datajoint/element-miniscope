@@ -473,7 +473,7 @@ class Processing(dj.Computed):
     """
 
     def make(self, key):
-        """Runs and populates necessary tables after processing."""
+        """Triggers processing and populates Processing table."""
         task_mode = (ProcessingTask & key).fetch1("task_mode")
 
         output_dir = (ProcessingTask & key).fetch1("processing_output_dir")
