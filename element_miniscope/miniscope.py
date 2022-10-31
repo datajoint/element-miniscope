@@ -473,7 +473,7 @@ class Processing(dj.Computed):
     """
 
     def make(self, key):
-        """Runs and populates necessary tables after processing."""
+        """Triggers processing and populates Processing table."""
         task_mode = (ProcessingTask & key).fetch1("task_mode")
 
         output_dir = (ProcessingTask & key).fetch1("processing_output_dir")
@@ -1120,7 +1120,7 @@ class Activity(dj.Computed):
 
     @property
     def key_source(self):
-        """Defines key source when the make function is called."""
+        """Defines the order of keys when the `make` function is called."""
         caiman_key_source = (
             Fluorescence
             * ActivityExtractionMethod
@@ -1205,7 +1205,7 @@ def get_loader_result(key, table):
 
 
 def populate_all(display_progress=True, reserve_jobs=False, suppress_errors=False):
-    """Populates all tables simultaneously."""
+    """Populates all Computed/Imported tables in this schema, in order."""
 
     populate_settings = {
         "display_progress": display_progress,
