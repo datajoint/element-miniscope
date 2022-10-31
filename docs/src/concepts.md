@@ -2,8 +2,8 @@
 
 ## Miniscopes in Neuroscience Research
 
-Miniature fluorescence microscopes (miniscopes) are a head-mounted calcium imaging full-frame video modality first introduced in 2005 by Mark Schnitzer's lab ([Flusberg et al., Optics Letters 2005](https://pubmed.ncbi.nlm.nih.gov/16190441/)). Due to their light weight, these miniscopes allow measuring the dynamic activity of populations of cortical neurons in freely behaving animals. In 2011, Inscopix Inc. was founded to support one-photon miniscopes as a commercial neuroscience research platform, providing proprietary hardware, acquisition software, and analysis software. Today, they estimate their active user base is 491 labs with a total of 1179 installs. 
-An open-source alternative was launched by a UCLA team led by Drs. Daniel Aharoni and Peyman Golshani ([Cai et al., Nature 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5063500/); [Aharoni and Hoogland, Frontiers in Cellular Neuroscience 2019](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6461004/)). In our conversation with Dr. Aharoni, he estimated about 700 labs currently using the UCLA system alone. The Inscopix user base is smaller but more established. Several two-photon miniscopes have been developed but lack widespread adoption likely due to the expensive hardware required for the two-photon excitation ([Helmchen et al., Neuron 2001](https://pubmed.ncbi.nlm.nih.gov/11580892/); [Zong et al., Nature Methods 2017](https://pubmed.ncbi.nlm.nih.gov/28553965/); [Aharoni and Hoogland, Frontiers in Cellular Neuroscience 2019](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6461004/)). Due to the low costs and ability to record during natural behaviors, one-photon miniscope imaging appears to be the fastest growing calcium imaging modality in the field today. 
+Miniature fluorescence microscopes (miniscopes) are a head-mounted calcium imaging full-frame video modality first introduced in 2005 by Mark Schnitzer's lab<sup>[1](#references)</sup>. Due to their light weight, these miniscopes allow measuring the dynamic activity of populations of cortical neurons in freely behaving animals. In 2011, Inscopix Inc. was founded to support one-photon miniscopes as a commercial neuroscience research platform, providing proprietary hardware, acquisition software, and analysis software. Today, they estimate their active user base is 491 labs with a total of 1179 installs. 
+An open-source alternative was launched by a UCLA team led by Drs. Daniel Aharoni and Peyman Golshani<sup>[2](#references), [3](#references)</sup>. In our conversation with Dr. Aharoni, he estimated about 700 labs currently using the UCLA system alone. The Inscopix user base is smaller but more established. Several two-photon miniscopes have been developed but lack widespread adoption likely due to the expensive hardware required for the two-photon excitation<sup>[3](#references), [4](#references), [5](#references)</sup>. Due to the low costs and ability to record during natural behaviors, one-photon miniscope imaging appears to be the fastest growing calcium imaging modality in the field today. 
 The DataJoint team focused efforts on supporting the UCLA platform due rapid growth and limited standardization in acquisition and processing pipelines. In the future, we will reach out to Inscopix to support their platform as well.
 
 ### Acquisition Tools
@@ -92,3 +92,15 @@ Based on interviews, we are considering adding support for the tools listed belo
 ## Roadmap
 
 Further development of this Element is community driven. Upon user requests we will continue adding features to this Element.
+
+## References
+
+[1]: Flusberg BA, Jung JC, Cocker ED, Anderson EP, Schnitzer MJ. In vivo brain imaging using a portable 3.9 gram two-photon fluorescence microendoscope. *Opt Lett.* 2005 Sep 1;30(17):2272-4. doi: 10.1364/ol.30.002272. PMID: 16190441.
+
+[2]: Cai DJ, Aharoni D, Shuman T, Shobe J, Biane J, Song W, Wei B, Veshkini M, La-Vu M, Lou J, Flores SE, Kim I, Sano Y, Zhou M, Baumgaertel K, Lavi A, Kamata M, Tuszynski M, Mayford M, Golshani P, Silva AJ. A shared neural ensemble links distinct contextual memories encoded close in time. *Nature.* 2016 Jun 2;534(7605):115-8. doi: 10.1038/nature17955. Epub 2016 May 23. PMID: 27251287; PMCID: PMC5063500.
+
+[3]: Aharoni D, Hoogland TM. Circuit Investigations With Open-Source Miniaturized Microscopes: Past, Present and Future. *Front Cell Neurosci.* 2019 Apr 5;13:141. doi: 10.3389/fncel.2019.00141. PMID: 31024265; PMCID: PMC6461004.
+
+[4]: Helmchen F, Fee MS, Tank DW, Denk W. A miniature head-mounted two-photon microscope. high-resolution brain imaging in freely moving animals. *Neuron.* 2001 Sep 27;31(6):903-12. doi: 10.1016/s0896-6273(01)00421-4. PMID: 11580892.
+
+[5]: Zong W, Wu R, Li M, Hu Y, Li Y, Li J, Rong H, Wu H, Xu Y, Lu Y, Jia H, Fan M, Zhou Z, Zhang Y, Wang A, Chen L, Cheng H. Fast high-resolution miniature two-photon microscopy for brain imaging in freely behaving mice. *Nat Methods.* 2017 Jul;14(7):713-719. doi: 10.1038/nmeth.4305. Epub 2017 May 29. PMID: 28553965.
