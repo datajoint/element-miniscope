@@ -3,7 +3,9 @@
 ## Miniscopes in Neuroscience Research
 
 Miniature fluorescence microscopes (miniscopes) are a head-mounted calcium imaging full-frame video modality first introduced in 2005 by Mark Schnitzer's lab<sup>[1](#references)</sup>. Due to their light weight, these miniscopes allow measuring the dynamic activity of populations of cortical neurons in freely behaving animals. In 2011, Inscopix Inc. was founded to support one-photon miniscopes as a commercial neuroscience research platform, providing proprietary hardware, acquisition software, and analysis software. Today, they estimate their active user base is 491 labs with a total of 1179 installs. 
+
 An open-source alternative was launched by a UCLA team led by Drs. Daniel Aharoni and Peyman Golshani<sup>[2](#references), [3](#references)</sup>. In our conversation with Dr. Aharoni, he estimated about 700 labs currently using the UCLA system alone. The Inscopix user base is smaller but more established. Several two-photon miniscopes have been developed but lack widespread adoption likely due to the expensive hardware required for the two-photon excitation<sup>[3](#references), [4](#references), [5](#references)</sup>. Due to the low costs and ability to record during natural behaviors, one-photon miniscope imaging appears to be the fastest growing calcium imaging modality in the field today. 
+
 The DataJoint team focused efforts on supporting the UCLA platform due rapid growth and limited standardization in acquisition and processing pipelines. In the future, we will reach out to Inscopix to support their platform as well.
 
 ### Acquisition Tools
