@@ -349,14 +349,14 @@ class ProcessingMethod(dj.Lookup):
     """Method or analysis software to process miniscope acquisition.
 
     Attributes:
-        processing_method (foreign key, char16): Recording processing method (e.g. CaImAn).
+        processing_method (foreign key, varchar16): Recording processing method (e.g. CaImAn).
         processing_method_desc (varchar(1000) ): Additional information about the processing method. 
     """
 
     definition = """
     # Method, package, analysis software used for processing of miniscope data 
     # (e.g. CaImAn, etc.)
-    processing_method: char(16)
+    processing_method: varchar(16)
     ---
     processing_method_desc='': varchar(1000)
     """

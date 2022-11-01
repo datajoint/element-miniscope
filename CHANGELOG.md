@@ -4,6 +4,7 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 
 ## [0.1.4] - 2022-10-21
 + Add - mkdocs deployment with workflow API docs
++ Update - processing_method: char(16) -> varchar(16)
 
 ## [0.1.3] - 2022-10-11
 + Update - CICD workflows for PyPI release
