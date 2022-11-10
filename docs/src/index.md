@@ -14,5 +14,3 @@ Visit the [Concepts page](./concepts.md) for more information about miniscope ca
 imaging and Element Miniscope. To get started with building your data pipeline visit
 the [Tutorials page](./tutorials.md).  
 
-![element-miniscope diagram]
- (https://raw.githubusercontent.com/datajoint/element-miniscope/main/images/attached_miniscope_element.svg)
