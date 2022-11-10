@@ -15,12 +15,6 @@
                 <mxCell id="5" value="Generate quality&lt;br style=&quot;font-size: 28px&quot;&gt;control metrics" style="rounded=1;whiteSpace=wrap;html=1;fontSize=28;fontFamily=Roboto Slab;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BSlab;container=1;labelBackgroundColor=none;fillColor=#808285;fontColor=#FFFFFF;strokeColor=none;" parent="1" vertex="1">
                     <mxGeometry x="10" y="2110" width="323" height="200" as="geometry"/>
                 </mxCell>
-                <mxCell id="6" value="" style="rounded=1;whiteSpace=wrap;html=1;fontSize=28;fontFamily=Roboto Slab;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BSlab;container=1;labelBackgroundColor=none;fillColor=#808285;fontColor=#FFFFFF;strokeColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="348" y="2110" width="355" height="204" as="geometry"/>
-                </mxCell>
-                <mxCell id="28" value="Synchronize data modalities&lt;br&gt;&amp;amp; exploratory&lt;br&gt;analysis" style="rounded=1;whiteSpace=wrap;html=1;fontSize=28;fontFamily=Roboto Slab;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BSlab;container=1;labelBackgroundColor=none;fillColor=#808285;fontColor=#FFFFFF;strokeColor=none;" vertex="1" parent="6">
-                    <mxGeometry x="30.25" y="4" width="262.5" height="200" as="geometry"/>
-                </mxCell>
                 <mxCell id="7" value="Acquire UCLA&lt;br&gt;Miniscope data" style="rounded=1;whiteSpace=wrap;html=1;fontSize=28;fontFamily=Roboto Slab;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BSlab;container=1;labelBackgroundColor=none;fillColor=#808285;fontColor=#FFFFFF;strokeColor=none;verticalAlign=top;" parent="1" vertex="1">
                     <mxGeometry x="10" y="1810" width="323" height="200" as="geometry"/>
                 </mxCell>
@@ -54,14 +48,8 @@
                 <mxCell id="18" value="Optionally&lt;br style=&quot;font-size: 28px;&quot;&gt;curate cells" style="rounded=1;whiteSpace=wrap;html=1;fontSize=28;fontFamily=Roboto Slab;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BSlab;container=1;labelBackgroundColor=none;fillColor=#808285;fontColor=#FFFFFF;strokeColor=none;" parent="1" vertex="1">
                     <mxGeometry x="1024" y="1810" width="323" height="200" as="geometry"/>
                 </mxCell>
-                <mxCell id="19" value="" style="triangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;rounded=1;strokeColor=#808285;strokeWidth=2;fontSize=28;" parent="1" vertex="1">
-                    <mxGeometry x="318" y="2130" width="60" height="160" as="geometry"/>
-                </mxCell>
                 <mxCell id="20" value="" style="triangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;rounded=1;strokeColor=#808285;fontSize=28;" parent="1" vertex="1">
                     <mxGeometry x="994" y="1830" width="60" height="160" as="geometry"/>
-                </mxCell>
-                <mxCell id="21" value="" style="triangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;rounded=1;strokeColor=#808285;strokeWidth=2;fontSize=28;" parent="1" vertex="1">
-                    <mxGeometry x="656" y="2130" width="60" height="160" as="geometry"/>
                 </mxCell>
                 <mxCell id="22" value="&lt;br&gt;&amp;nbsp;Export &amp;amp; publish&lt;br&gt;&lt;br&gt;&amp;nbsp;&lt;br&gt;&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;fontSize=28;fontFamily=Roboto Slab;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BSlab;container=1;labelBackgroundColor=none;fillColor=#808285;fontColor=#FFFFFF;strokeColor=none;verticalAlign=top;" parent="1" vertex="1">
                     <mxGeometry x="1024" y="2110" width="323" height="200" as="geometry"/>
@@ -80,6 +68,18 @@
                 </mxCell>
                 <mxCell id="27" value="" style="triangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;rounded=1;strokeColor=#808285;strokeWidth=2;rotation=90;fontSize=28;" parent="1" vertex="1">
                     <mxGeometry x="142.90708926581615" y="2040" width="60" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="" style="rounded=1;whiteSpace=wrap;html=1;fontSize=28;fontFamily=Roboto Slab;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BSlab;container=1;labelBackgroundColor=none;fillColor=#808285;fontColor=#FFFFFF;strokeColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="348" y="2110" width="323" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="Synchronize data modalities&lt;br&gt;&amp;amp; exploratory&lt;br&gt;analysis" style="rounded=1;whiteSpace=wrap;html=1;fontSize=28;fontFamily=Roboto Slab;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DRoboto%2BSlab;container=1;labelBackgroundColor=none;fillColor=#808285;fontColor=#FFFFFF;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="390.4480281690141" y="2111" width="238.09859154929583" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="" style="triangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;rounded=1;strokeColor=#808285;strokeWidth=2;fontSize=28;" parent="1" vertex="1">
+                    <mxGeometry x="318" y="2130" width="60" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="" style="triangle;whiteSpace=wrap;html=1;fillColor=#FFFFFF;rounded=1;strokeColor=#808285;strokeWidth=2;fontSize=28;" parent="1" vertex="1">
+                    <mxGeometry x="656" y="2130" width="60" height="160" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
