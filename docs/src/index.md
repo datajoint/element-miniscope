@@ -13,4 +13,3 @@ combined with other Elements to assemble a fully functional pipeline.
 Visit the [Concepts page](./concepts.md) for more information about miniscope calcium
 imaging and Element Miniscope. To get started with building your data pipeline visit
 the [Tutorials page](./tutorials.md).  
-
