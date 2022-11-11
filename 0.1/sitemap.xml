@@ -2,72 +2,72 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/changelog/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/citation/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/concepts/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/tutorials/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>None</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/api/element_miniscope/miniscope/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/api/element_miniscope/version/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/api/workflow_miniscope/analysis/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/api/workflow_miniscope/ingest/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/api/workflow_miniscope/paths/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/api/workflow_miniscope/pipeline/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/api/workflow_miniscope/populate/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.1/api/workflow_miniscope/version/</loc>
-         <lastmod>2022-11-10</lastmod>
+         <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
