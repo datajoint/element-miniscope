@@ -10,5 +10,5 @@ combined with other Elements to assemble a fully functional pipeline.
 
 ![diagram](https://raw.githubusercontent.com/datajoint/element-miniscope/main/images/diagram_flowchart.svg)
 
-Installation and usage instructions can be found at the 
+Installation and usage instructions can be found at the
 [Element documentation](https://datajoint.com/docs/elements/element-miniscope).

@@ -1,12 +1,13 @@
-import datajoint as dj
-import numpy as np
-import pathlib
-from datetime import datetime
+import csv
 import importlib
 import inspect
-import cv2
 import json
-import csv
+import pathlib
+from datetime import datetime
+
+import cv2
+import datajoint as dj
+import numpy as np
 from element_interface.utils import dict_to_uuid, find_full_path, find_root_directory
 
 schema = dj.Schema()
@@ -24,7 +25,7 @@ def activate(
     """Activate this schema.
 
     Args:
-        model_schema_name (str): schema name on the database server
+        miniscope_schema_name (str): schema name on the database server
         create_schema (bool): when True (default), create schema in the database if it does not yet exist.
         create_tables (str): when True (default), create schema tabkes in the database if they do not yet exist.
         linking_module (str): a module (or name) containing the required dependencies.
@@ -40,7 +41,7 @@ def activate(
     Functions:
         get_miniscope_root_data_dir(): Returns absolute path for root data director(y/ies) with all subject/sessions data, as (list of) string(s).
         get_session_directory(session_key: dict) Returns the session directory with all data for the session in session_key, as a string.
-        get_processed_root_data_dir(): Returns absolute path for all processed data as a string. 
+        get_processed_root_data_dir(): Returns absolute path for all processed data as a string.
     """
 
     if isinstance(linking_module, str):
@@ -65,9 +66,9 @@ def activate(
 
 def get_miniscope_root_data_dir() -> list:
     """Fetches absolute data path to miniscope data directory.
-    
+
     The absolute path here is used as a reference for all downstream relative paths used in DataJoint.
-    
+
     Returns:
         A list of the absolute path to miniscope data directory.
     """
@@ -87,7 +88,7 @@ def get_session_directory(session_key: dict) -> str:
 
     Args:
         session_key (dict): a dictionary containing session information.
-    
+
     Returns:
         Session directory as a string.
     """
@@ -95,8 +96,7 @@ def get_session_directory(session_key: dict) -> str:
 
 
 def get_processed_root_data_dir() -> str:
-    """Retrieves the root directory for all processed data
-    """
+    """Retrieves the root directory for all processed data"""
 
     if hasattr(_linking_module, "get_processed_root_data_dir"):
         return _linking_module.get_processed_root_data_dir()
@@ -163,7 +163,7 @@ class RecordingLocation(dj.Manual):
 
     Attributes:
         Recording (foreign key): Recording primary key.
-        Anatomical Location: Select the anatomical region where miniscope recording was acquired. 
+        Anatomical Location: Select the anatomical region where miniscope recording was acquired.
     """
 
     definition = """
@@ -184,7 +184,7 @@ class RecordingInfo(dj.Imported):
         nframes (int): Number of recorded frames.
         px_height (smallint): Height in pixels.
         px_width (smallint): Width in pixels.
-        um_height (float): Height in microns. 
+        um_height (float): Height in microns.
         um_width (float): Width in microns.
         fps (float): Frames per second, (Hz).
         gain (float): Recording gain.
@@ -192,7 +192,7 @@ class RecordingInfo(dj.Imported):
         led_power (float): LED power used for the recording.
         time_stamps (longblob): Time stamps for each frame.
         recording_datetime (datetime): Datetime of the recording.
-        recording_duration (float): Total recording duration (seconds). 
+        recording_duration (float): Total recording duration (seconds).
     """
 
     definition = """
@@ -350,11 +350,11 @@ class ProcessingMethod(dj.Lookup):
 
     Attributes:
         processing_method (foreign key, varchar16): Recording processing method (e.g. CaImAn).
-        processing_method_desc (varchar(1000) ): Additional information about the processing method. 
+        processing_method_desc (varchar(1000) ): Additional information about the processing method.
     """
 
     definition = """
-    # Method, package, analysis software used for processing of miniscope data 
+    # Method, package, analysis software used for processing of miniscope data
     # (e.g. CaImAn, etc.)
     processing_method: varchar(16)
     ---
@@ -441,7 +441,7 @@ class ProcessingTask(dj.Manual):
         RecordingInfo (foreign key): Recording info primary key.
         ProcessingParamSet (foreign key): Processing param set primary key.
         processing_output_dir (varchar(255) ): relative output data directory for processed files.
-        task_mode (enum): `Load` existing results or `trigger` new processing task.   
+        task_mode (enum): `Load` existing results or `trigger` new processing task.
     """
 
     definition = """
@@ -462,7 +462,7 @@ class Processing(dj.Computed):
     Attributes:
         ProcessingTask (foreign key): Processing task primary key.
         processing_time (datetime): Generates time of the processed results.
-        package_version (varchar(16) ): Package version information. 
+        package_version (varchar(16) ): Package version information.
     """
 
     definition = """
@@ -565,21 +565,20 @@ class Curation(dj.Manual):
     """
 
     definition = """
-    # Different rounds of curation performed on the processing results of the data 
+    # Different rounds of curation performed on the processing results of the data
     # (no-curation can also be included here)
     -> Processing
     curation_id: int
     ---
-    curation_time: datetime             # time of generation of these curated results 
-    curation_output_dir: varchar(255)   # output directory of the curated results, 
+    curation_time: datetime             # time of generation of these curated results
+    curation_output_dir: varchar(255)   # output directory of the curated results,
                                         # relative to root data directory
     manual_curation: bool               # has manual curation been performed?
-    curation_note='': varchar(2000)  
+    curation_note='': varchar(2000)
     """
 
     def create1_from_processing_task(self, key, is_curated=False, curation_note=""):
-        """Given a "ProcessingTask", create a new corresponding "Curation"
-        """
+        """Given a "ProcessingTask", create a new corresponding "Curation" """
         if key not in Processing():
             raise ValueError(
                 f"No corresponding entry in Processing available for: "
@@ -626,12 +625,12 @@ class MotionCorrection(dj.Imported):
     definition = """
     -> Curation
     ---
-    -> Channel.proj(motion_correct_channel='channel') # channel used for 
+    -> Channel.proj(motion_correct_channel='channel') # channel used for
                                                       # motion correction
     """
 
     class RigidMotionCorrection(dj.Part):
-        """Automated table with ridge motion correction data. 
+        """Automated table with ridge motion correction data.
 
         Attributes:
             MotionCorrection (foreign key): MotionCorrection primary key.
@@ -645,13 +644,13 @@ class MotionCorrection(dj.Imported):
         definition = """
         -> master
         ---
-        outlier_frames=null : longblob  # mask with true for frames with outlier shifts 
+        outlier_frames=null : longblob  # mask with true for frames with outlier shifts
                                         # (already corrected)
         y_shifts            : longblob  # (pixels) y motion correction shifts
         x_shifts            : longblob  # (pixels) x motion correction shifts
-        y_std               : float     # (pixels) standard deviation of 
+        y_std               : float     # (pixels) standard deviation of
                                         # y shifts across all frames
-        x_std               : float     # (pixels) standard deviation of 
+        x_std               : float     # (pixels) standard deviation of
                                         # x shifts across all frames
         """
 
@@ -664,19 +663,19 @@ class MotionCorrection(dj.Imported):
             block_height (int): Height in pixels.
             block_width (int): Width in pixels.
             block_count_y (int): Number of blocks tiled in the y direction.
-            block_count_x (int): Number of blocks tiled in the x direction. 
+            block_count_x (int): Number of blocks tiled in the x direction.
         """
 
         definition = """
         -> master
         ---
-        outlier_frames=null             : longblob  # mask with true for frames with 
+        outlier_frames=null             : longblob  # mask with true for frames with
                                                     # outlier shifts (already corrected)
         block_height                    : int       # (pixels)
         block_width                     : int       # (pixels)
-        block_count_y                   : int       # number of blocks tiled in the 
+        block_count_y                   : int       # number of blocks tiled in the
                                                     # y direction
-        block_count_x                   : int       # number of blocks tiled in the 
+        block_count_x                   : int       # number of blocks tiled in the
                                                     # x direction
         """
 
@@ -689,9 +688,9 @@ class MotionCorrection(dj.Imported):
             block_y (longblob): y_start and y_end of this block in pixels.
             block_x (longblob): x_start and x_end of this block in pixels.
             y_shifts (longblob): y motion correction shifts for every frame in pixels.
-            x_shifts (longblob): x motion correction shifta for every frame in pixels. 
+            x_shifts (longblob): x motion correction shifta for every frame in pixels.
             y_std (float): standard deviation of y shifts across all frames in pixels.
-            x_std (float): standard deviation of x shifts across all frames in pixels.  
+            x_std (float): standard deviation of x shifts across all frames in pixels.
         """
 
         definition = """  # FOV-tiled blocks used for non-rigid motion correction
@@ -700,13 +699,13 @@ class MotionCorrection(dj.Imported):
         ---
         block_y         : longblob  # (y_start, y_end) in pixel of this block
         block_x         : longblob  # (x_start, x_end) in pixel of this block
-        y_shifts        : longblob  # (pixels) y motion correction shifts for 
+        y_shifts        : longblob  # (pixels) y motion correction shifts for
                                     # every frame
-        x_shifts        : longblob  # (pixels) x motion correction shifts for 
+        x_shifts        : longblob  # (pixels) x motion correction shifts for
                                     # every frame
-        y_std           : float     # (pixels) standard deviation of y shifts 
+        y_std           : float     # (pixels) standard deviation of y shifts
                                     # across all frames
-        x_std           : float     # (pixels) standard deviation of x shifts 
+        x_std           : float     # (pixels) standard deviation of x shifts
                                     # across all frames
         """
 
@@ -717,7 +716,7 @@ class MotionCorrection(dj.Imported):
             MotionCorrection (foreign key): MotionCorrection primary key.
             ref_image (longblob): Image used as the alignment template.
             average_image (longblob): Mean of registered frames.
-            correlation_image (longblob): Correlation map computed during cell detection. 
+            correlation_image (longblob): Correlation map computed during cell detection.
             max_proj_image (longblob): Maximum of registered frames.
         """
 
@@ -726,7 +725,7 @@ class MotionCorrection(dj.Imported):
         ---
         ref_image=null          : longblob  # image used as alignment template
         average_image           : longblob  # mean of registered frames
-        correlation_image=null  : longblob  # correlation map 
+        correlation_image=null  : longblob  # correlation map
                                             # (computed during cell detection)
         max_proj_image=null     : longblob  # max of registered frames
         """
@@ -941,7 +940,7 @@ class Segmentation(dj.Computed):
 
 @schema
 class MaskType(dj.Lookup):
-    """Possible classifications of a segmented mask. 
+    """Possible classifications of a segmented mask.
 
     Attributes:
         mask_type (foreign key, varchar(16) ): Type of segmented mask.
@@ -972,7 +971,7 @@ class MaskClassificationMethod(dj.Lookup):
 @schema
 class MaskClassification(dj.Computed):
     """Automated table with mask classification data.
-    
+
     Attributes:
         Segmentation (foreign key): Segmentation primary key.
         MaskClassificationMethod (foreign key): MaskClassificationMethod primary key.
@@ -1036,7 +1035,7 @@ class Fluorescence(dj.Computed):
         -> Segmentation.Mask
         -> Channel.proj(fluorescence_channel='channel')  # channel used for this trace
         ---
-        fluorescence                : longblob  # fluorescence trace associated 
+        fluorescence                : longblob  # fluorescence trace associated
                                                 # with this mask
         neuropil_fluorescence=null  : longblob  # Neuropil fluorescence trace
         """
@@ -1089,7 +1088,7 @@ class ActivityExtractionMethod(dj.Lookup):
 
 @schema
 class Activity(dj.Computed):
-    """Inferred neural activty from the fluorescence trace. 
+    """Inferred neural activty from the fluorescence trace.
 
     Attributes:
         Fluorescence (foreign key): Fluorescence primary key.
@@ -1177,15 +1176,14 @@ _table_attribute_mapper = {
 
 def get_loader_result(key, table):
     """Retrieve the loaded processed imaging results from the loader (e.g. caiman, etc.)
-    
+
     Args:
         key (dict): the `key` to one entry of ProcessingTask or Curation.
         table (str): the class defining the table to retrieve
-         the loaded results from (e.g. ProcessingTask, Curation).
-    
+            the loaded results from (e.g. ProcessingTask, Curation).
+
     Returns:
-        a loader object of the loaded results
-         (e.g. caiman.CaImAn, etc.)
+        a loader object of the loaded results (e.g. caiman.CaImAn, etc.)
     """
 
     method, output_dir = (ProcessingParamSet * table & key).fetch1(
