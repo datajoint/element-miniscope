@@ -688,7 +688,7 @@ class MotionCorrection(dj.Imported):
             block_y (longblob): y_start and y_end of this block in pixels.
             block_x (longblob): x_start and x_end of this block in pixels.
             y_shifts (longblob): y motion correction shifts for every frame in pixels.
-            x_shifts (longblob): x motion correction shifta for every frame in pixels.
+            x_shifts (longblob): x motion correction shifts for every frame in pixels.
             y_std (float): standard deviation of y shifts across all frames in pixels.
             x_std (float): standard deviation of x shifts across all frames in pixels.
         """
