@@ -1,0 +1,84 @@
+// cSpell Settings
+//https://github.com/streetsidesoftware/vscode-spell-checker
+{
+    "version": "0.2", // Version of the setting file.  Always 0.2
+    "language": "en", // language - current active spelling language
+    "enabledLanguageIds": [
+        "markdown"
+    ],
+    // flagWords - list of words to be always considered incorrect
+    // This is useful for offensive words and common spelling errors.
+    // For example "hte" should be "the"
+    "flagWords": [],
+    "allowCompoundWords": true,
+    "ignorePaths": [
+        "src/archive"
+    ],
+    "words": [
+        "Adrien",
+        "Ahanonu",
+        "Aharoni",
+        "Aharoni's",
+        "Atah",
+        "Baumgaertel",
+        "Biane",
+        "Cheng",
+        "CNMF",
+        "Corre",
+        "deconvolution",
+        "Denk",
+        "Denk",
+        "denoising",
+        "Ephys",
+        "Epub",
+        "Etter",
+        "fncel",
+        "Froudaraki",
+        "Golshani",
+        "Guillaume",
+        "IDAS",
+        "IDPS",
+        "Jinghao",
+        "Kamata",
+        "Lavi",
+        "Liron",
+        "Manolis",
+        "Manolis",
+        "Miniscopes ",
+        "miniscopes",
+        "miniscoPy",
+        "neuroinformatics",
+        "Neurosci",
+        "nmeth",
+        "nVoke",
+        "Pengcheng",
+        "Peyman",
+        "Peyrache",
+        "Peyrache's",
+        "PIMPN",
+        "PMCID",
+        "PMID",
+        "Reimer",
+        "Rong",
+        "Sano",
+        "Sasaki",
+        "Schnitzer",
+        "Schnitzer's",
+        "Sheintuch",
+        "Shen",
+        "Shobe",
+        "Shuman",
+        "Sitonic",
+        "Sylvain",
+        "Sylvian",
+        "Tolias",
+        "Tuszynski",
+        "UCSF",
+        "Veshkini",
+        "Viejo",
+        "Yaniv",
+        "Zhang",
+        "Zhou",
+        "Ziv's"
+    ]
+}
