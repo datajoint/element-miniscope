@@ -177,9 +177,9 @@ as:
 
 - Acquisition & Preprocessing tools
 - Inscopix
-    - Data Acquisition Software (IDAS)
-    - Data Processing Software (IDPS)
-    - Multimodal Image Registration and Analysis (MIRA)
+  - Data Acquisition Software (IDAS)
+  - Data Processing Software (IDPS)
+  - Multimodal Image Registration and Analysis (MIRA)
 - MiniAn
 - CaImAn
 - CNMF-E
