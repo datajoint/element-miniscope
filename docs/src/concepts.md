@@ -23,29 +23,29 @@ The DataJoint team focused efforts on supporting the UCLA platform due rapid gro
 limited standardization in acquisition and processing pipelines. In the future, we will
 reach out to Inscopix to support their platform as well.
 
-[^1]: 
+[^1]:
     Flusberg BA, Jung JC, Cocker ED, Anderson EP, Schnitzer MJ. In vivo brain imaging
     using a portable 3.9 gram two-photon fluorescence microendoscope. *Opt Lett.* 2005
     Sep 1;30(17):2272-4. doi: 10.1364/ol.30.002272. PMID: 16190441.
 
-[^2]: 
+[^2]:
     Cai DJ, Aharoni D, Shuman T, Shobe J, Biane J, Song W, Wei B, Veshkini M, La-Vu M,
     Lou J, Flores SE, Kim I, Sano Y, Zhou M, Baumgaertel K, Lavi A, Kamata M, Tuszynski
     M, Mayford M, Golshani P, Silva AJ. A shared neural ensemble links distinct
     contextual memories encoded close in time. *Nature.* 2016 Jun 2;534(7605):115-8.
     doi: 10.1038/nature17955. Epub 2016 May 23. PMID: 27251287; PMCID: PMC5063500.
 
-[^3]: 
+[^3]:
     Aharoni D, Hoogland TM. Circuit Investigations With Open-Source Miniaturized
     Microscopes: Past, Present and Future. *Front Cell Neurosci.* 2019 Apr 5;13:141.
     doi: 10.3389/fncel.2019.00141. PMID: 31024265; PMCID: PMC6461004.
 
-[^4]: 
+[^4]:
     Helmchen F, Fee MS, Tank DW, Denk W. A miniature head-mounted two-photon
     microscope. high-resolution brain imaging in freely moving animals. *Neuron.* 2001
     Sep 27;31(6):903-12. doi: 10.1016/s0896-6273(01)00421-4. PMID: 11580892.
 
-[^5]: 
+[^5]:
     Zong W, Wu R, Li M, Hu Y, Li Y, Li J, Rong H, Wu H, Xu Y, Lu Y, Jia H, Fan M, Zhou
     Z, Zhang Y, Wang A, Chen L, Cheng H. Fast high-resolution miniature two-photon
     microscopy for brain imaging in freely behaving mice. *Nat Methods.* 2017
@@ -68,26 +68,26 @@ or "spike inference"). For the UCLA Miniscopes, the following [analysis
 packages](https://github.com/Aharoni-Lab/Miniscope-v4/wiki/Analysis-Packages) are
 commonly used:
 
-+ [Miniscope Denoising](https://github.com/Aharoni-Lab/Miniscope-v4/wiki/Removing-Horizontal-Noise-from-Recordings),
+- [Miniscope Denoising](https://github.com/Aharoni-Lab/Miniscope-v4/wiki/Removing-Horizontal-Noise-from-Recordings),
   Daniel Aharoni (UCLA), Python
-+ [NoRMCorre](https://github.com/flatironinstitute/NoRMCorre), Flatiron Institute, MATLAB
-+ [CNMF-E](https://github.com/zhoupc/CNMF_E), Pengcheng Zhou (Liam Paninski's Lab, Columbia
+- [NoRMCorre](https://github.com/flatironinstitute/NoRMCorre), Flatiron Institute, MATLAB
+- [CNMF-E](https://github.com/zhoupc/CNMF_E), Pengcheng Zhou (Liam Paninski's Lab, Columbia
   University), MATLAB
-+ [CaImAn](https://github.com/flatironinstitute/CaImAn), Flatiron Institute, Python
-+ [miniscoPy](https://github.com/PeyracheLab/miniscoPy), Guillaume Viejo (Adrien Peyrache's
+- [CaImAn](https://github.com/flatironinstitute/CaImAn), Flatiron Institute, Python
+- [miniscoPy](https://github.com/PeyracheLab/miniscoPy), Guillaume Viejo (Adrien Peyrache's
   Lab, McGill University), Python
-+ [MIN1PIPE](https://github.com/JinghaoLu/MIN1PIPE), Jinghao Lu (Fan Wang's Lab, MIT), MATLAB
-+ [CIAtah](https://github.com/bahanonu/ciatah), Biafra Ahanonu, MATLAB
-+ [MiniAn](https://github.com/DeniseCaiLab/minian), Phil Dong (Denise Cai's Lab, Mount Sinai),
+- [MIN1PIPE](https://github.com/JinghaoLu/MIN1PIPE), Jinghao Lu (Fan Wang's Lab, MIT), MATLAB
+- [CIAtah](https://github.com/bahanonu/ciatah), Biafra Ahanonu, MATLAB
+- [MiniAn](https://github.com/DeniseCaiLab/minian), Phil Dong (Denise Cai's Lab, Mount Sinai),
   Python
-+ [MiniscopeAnalysis](https://github.com/etterguillaume/MiniscopeAnalysis), Guillaume Etter
+- [MiniscopeAnalysis](https://github.com/etterguillaume/MiniscopeAnalysis), Guillaume Etter
   (Sylvain Williams' Lab, McGill University), MATLAB
-+ [PIMPN](https://github.com/etterguillaume/PIMPN), Guillaume Etter (Sylvain Williams's Lab,
+- [PIMPN](https://github.com/etterguillaume/PIMPN), Guillaume Etter (Sylvain Williams's Lab,
   McGill University), Python
-+ [CellReg](https://github.com/zivlab/CellReg), Liron Sheintuch (Yaniv Ziv's Lab, Weizmann
+- [CellReg](https://github.com/zivlab/CellReg), Liron Sheintuch (Yaniv Ziv's Lab, Weizmann
   Institute of Science), MATLAB
-+ Inscopix Data Processing Software (IDPS)
-+ Inscopix Multimodal Image Registration and Analysis (MIRA)
+- Inscopix Data Processing Software (IDPS)
+- Inscopix Multimodal Image Registration and Analysis (MIRA)
 
 Based on interviews with UCLA and Inscopix miniscope users and developers, each research
 lab uses a different preprocessing workflow. These custom workflows are often closed
@@ -102,14 +102,14 @@ for new labs.
 The DataJoint team have been in contact with the following teams who are eager to engage
 and adopt DataJoint-based workflows in their labs.
 
-+ Adrien Peyrache Lab, McGill University
-+ Peyman Golshani Lab, UCLA
-+ Daniel Aharoni Lab, UCLA
-+ Anne Churchland Lab, UCLA
-+ Fan Wang Lab, MIT
-+ Antoine Adamantidis Lab, University of Bern
-+ Manolis Froudaraki Lab, FORTH
-+ Allan Basbaum Lab, UCSF
+- Adrien Peyrache Lab, McGill University
+- Peyman Golshani Lab, UCLA
+- Daniel Aharoni Lab, UCLA
+- Anne Churchland Lab, UCLA
+- Fan Wang Lab, MIT
+- Antoine Adamantidis Lab, University of Bern
+- Manolis Froudaraki Lab, FORTH
+- Allan Basbaum Lab, UCSF
 
 ## Element Architecture
 
@@ -165,8 +165,8 @@ deciding factors include the number of users, long term support, quality control
 python programming language (so that the preprocessing tool can be triggered within the
 element).
 
-+ Acquisition tools + Miniscope DAQ V4 + Inscopix Data Acquisition Software (IDAS)
-+ Preprocessing tools + Inscopix Data Processing Software (IDPS) + Inscopix Multimodal Image
+- Acquisition tools + Miniscope DAQ V4 + Inscopix Data Acquisition Software (IDAS)
+- Preprocessing tools + Inscopix Data Processing Software (IDPS) + Inscopix Multimodal Image
   Registration and Analysis (MIRA) + MiniAn + CaImAn + CNMF-E + CellReg
 
 ## Roadmap
@@ -175,12 +175,12 @@ Further development of this Element is community driven. Upon user requests and 
 guidance from the Scientific Steering Group we will add features to this Element, such
 as:
 
-+ Acquisition & Preprocessing tools
-+ Inscopix
-  + Data Acquisition Software (IDAS)
-  + Data Processing Software (IDPS)
-  + Multimodal Image Registration and Analysis (MIRA)
-+ MiniAn
-+ CaImAn
-+ CNMF-E
-+ CellReg
+- Acquisition & Preprocessing tools
+- Inscopix
+    - Data Acquisition Software (IDAS)
+    - Data Processing Software (IDPS)
+    - Multimodal Image Registration and Analysis (MIRA)
+- MiniAn
+- CaImAn
+- CNMF-E
+- CellReg
