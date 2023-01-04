@@ -1004,7 +1004,9 @@ class MaskClassification(dj.Computed):
         """
 
     def make(self, key):
-        pass
+        raise NotImplementedError(
+            "To add to this table, use `insert` with allow_direct_insert=True"
+        )
 
 
 # Fluorescence & Activity Traces -------------------------------------------------------
