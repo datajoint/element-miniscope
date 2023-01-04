@@ -2,6 +2,7 @@ import csv
 import importlib
 import inspect
 import json
+import logging
 import pathlib
 from datetime import datetime
 
@@ -13,6 +14,7 @@ from element_interface.utils import dict_to_uuid, find_full_path, find_root_dire
 schema = dj.Schema()
 
 _linking_module = None
+logger = logging.getLogger("datajoint")
 
 
 def activate(
@@ -922,6 +924,9 @@ class Segmentation(dj.Computed):
                         "mask_weights": mask["mask_weights"],
                     }
                 )
+
+                if not all(masks[-1].values()):
+                    logger.warning(f"Could not load all mask values for {key}")
 
                 if loaded_caiman.cnmf.estimates.idx_components is not None:
                     if mask["mask"] in loaded_caiman.cnmf.estimates.idx_components:
