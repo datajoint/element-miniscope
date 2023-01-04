@@ -2,7 +2,6 @@ import csv
 import importlib
 import inspect
 import json
-import logging
 import pathlib
 from datetime import datetime
 
@@ -14,7 +13,6 @@ from element_interface.utils import dict_to_uuid, find_full_path, find_root_dire
 schema = dj.Schema()
 
 _linking_module = None
-logger = logging.getLogger("datajoint")
 
 
 def activate(
