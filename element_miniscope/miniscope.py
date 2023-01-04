@@ -28,7 +28,7 @@ def activate(
         miniscope_schema_name (str): schema name on the database server
         create_schema (bool): when True (default), create schema in the database if it
             does not yet exist.
-        create_tables (str): when True (default), create schema tabkes in the database
+        create_tables (str): when True (default), create schema takes in the database
             if they do not yet exist.
         linking_module (str): a module (or name) containing the required dependencies.
 
@@ -858,7 +858,7 @@ class Segmentation(dj.Computed):
     """Automated table computes different mask segmentations.
 
     Attributes:
-        Curations (foreign key): Curation primary key.
+        Curation (foreign key): Curation primary key.
     """
 
     definition = """ # Different mask segmentations.
@@ -877,7 +877,7 @@ class Segmentation(dj.Computed):
             mask_center_y (int): Center y coordinate in pixels.
             mask_xpix (longblob): x coordinates of the mask in pixels.
             mask_ypix (longblob): y coordinates of the mask in pixels.
-            mask_weights (longblob): weights of the mask at the indicies above.
+            mask_weights (longblob): weights of the mask at the indices above.
         """
 
         definition = """ # A mask produced by segmentation.
@@ -894,7 +894,7 @@ class Segmentation(dj.Computed):
         """
 
     def make(self, key):
-        """Populates table with segementation data."""
+        """Populates table with segmentation data."""
         method, loaded_result = get_loader_result(key, Curation)
 
         if method == "caiman":
@@ -1007,7 +1007,7 @@ class MaskClassification(dj.Computed):
 
 @schema
 class Fluorescence(dj.Computed):
-    """Extracts fluoresence trace information.
+    """Extracts fluorescence trace information.
 
     Attributes:
         Segmentation (foreign key): Segmentation primary key.
@@ -1026,7 +1026,7 @@ class Fluorescence(dj.Computed):
             Channel.proj(fluorescence_channel='channel') (foreign key, query): Channel
                 used for this trace.
             fluorescence (longblob): A fluorescence trace associated with a given mask.
-            neurpil_fluorescence (longblob): A neuropil fluorescence trace.
+            neuropil_fluorescence (longblob): A neuropil fluorescence trace.
         """
 
         definition = """
@@ -1087,7 +1087,7 @@ class ActivityExtractionMethod(dj.Lookup):
 
 @schema
 class Activity(dj.Computed):
-    """Inferred neural activty from the fluorescence trace.
+    """Inferred neural activity from the fluorescence trace.
 
     Attributes:
         Fluorescence (foreign key): Fluorescence primary key.
@@ -1105,7 +1105,7 @@ class Activity(dj.Computed):
 
         Attributes:
             Activity (foreign key): Activity primary key.
-            Fluorescence.Trace (foreign key): Fluoresence.Trace primary key.
+            Fluorescence.Trace (foreign key): fluorescence.Trace primary key.
             activity_trace (longblob): Inferred activity trace.
         """
 
@@ -1182,7 +1182,7 @@ def get_loader_result(key, table):
             the loaded results from (e.g. ProcessingTask, Curation).
 
     Returns:
-        a loader object of the loaded results (e.g. caiman.CaImAn, etc.)
+        tuple: method string and loader object with results (e.g. caiman.CaImAn, etc.)
     """
 
     method, output_dir = (ProcessingParamSet * table & key).fetch1(
@@ -1199,27 +1199,3 @@ def get_loader_result(key, table):
         raise NotImplementedError("Unknown/unimplemented method: {}".format(method))
 
     return method, loaded_output
-
-
-def populate_all(display_progress=True, reserve_jobs=False, suppress_errors=False):
-    """Populates all Computed/Imported tables in this schema, in order."""
-
-    populate_settings = {
-        "display_progress": display_progress,
-        "reserve_jobs": reserve_jobs,
-        "suppress_errors": suppress_errors,
-    }
-
-    RecordingInfo.populate(**populate_settings)
-
-    Processing.populate(**populate_settings)
-
-    MotionCorrection.populate(**populate_settings)
-
-    Segmentation.populate(**populate_settings)
-
-    MaskClassification.populate(**populate_settings)
-
-    Fluorescence.populate(**populate_settings)
-
-    Activity.populate(**populate_settings)

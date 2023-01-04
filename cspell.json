@@ -4,7 +4,7 @@
     "version": "0.2", // Version of the setting file.  Always 0.2
     "language": "en", // language - current active spelling language
     "enabledLanguageIds": [
-        "markdown"
+        "markdown", "yaml"
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.
@@ -48,6 +48,7 @@
         "miniscopes",
         "miniscoPy",
         "neuroinformatics",
+        "Neurodata",
         "Neurosci",
         "nmeth",
         "nVoke",
@@ -79,6 +80,16 @@
         "Yaniv",
         "Zhang",
         "Zhou",
-        "Ziv's"
+        "Ziv's",
+        "npix",
+        "xpix",
+        "ypix",
+        "nchannels",
+        "nframes",
+        "pname",
+        "neuropil",
+        "Neuropil",
+        "aggr",
+        "ifnull"
     ]
 }
