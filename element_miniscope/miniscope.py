@@ -101,15 +101,6 @@ def get_session_directory(session_key: dict) -> str:
     return _linking_module.get_session_directory(session_key)
 
 
-def get_processed_root_data_dir() -> str:
-    """Retrieves the root directory for all processed data"""
-
-    if hasattr(_linking_module, "get_processed_root_data_dir"):
-        return _linking_module.get_processed_root_data_dir()
-    else:
-        return get_miniscope_root_data_dir()[0]
-
-
 # Experiment and analysis meta information -------------------------------------
 
 
@@ -504,7 +495,7 @@ class Processing(dj.Computed):
                 key = {**key, "processing_time": loaded_caiman.creation_time}
             else:
                 raise NotImplementedError(
-                    f"Loading of {method} data is not yet" f"supported"
+                    f"Loading of {method} data is not yet supported"
                 )
         elif task_mode == "trigger":
             method = (
@@ -595,6 +586,7 @@ class Curation(dj.Manual):
     curation_note='': varchar(2000)
     """
 
+    @classmethod
     def create1_from_processing_task(self, key, is_curated=False, curation_note=""):
         """Given a "ProcessingTask", create a new corresponding "Curation" """
         if key not in Processing():
@@ -911,11 +903,13 @@ class Segmentation(dj.Computed):
 
             masks, cells = [], []
             for mask in loaded_caiman.masks:
+                # Sample data had _id key, not mask. Permitting both
+                mask_id = mask.get("mask", mask["mask_id"])
                 masks.append(
                     {
                         **key,
                         "segmentation_channel": segmentation_channel,
-                        "mask": mask["mask"],
+                        "mask": mask_id,
                         "mask_npix": mask["mask_npix"],
                         "mask_center_x": mask["mask_center_x"],
                         "mask_center_y": mask["mask_center_y"],
@@ -925,19 +919,19 @@ class Segmentation(dj.Computed):
                     }
                 )
 
-                if not all(masks[-1].values()):
-                    logger.warning(f"Could not load all mask values for {key}")
-
                 if loaded_caiman.cnmf.estimates.idx_components is not None:
-                    if mask["mask"] in loaded_caiman.cnmf.estimates.idx_components:
+                    if mask_id in loaded_caiman.cnmf.estimates.idx_components:
                         cells.append(
                             {
                                 **key,
                                 "mask_classification_method": "caiman_default_classifier",
-                                "mask": mask["mask"],
+                                "mask": mask_id,
                                 "mask_type": "soma",
                             }
                         )
+
+            if not all([all(m.values()) for m in masks]):
+                logger.warning("Could not load all pixel values for at least one mask")
 
             self.insert1(key)
             self.Mask.insert(masks, ignore_extra_fields=True)
@@ -1065,7 +1059,7 @@ class Fluorescence(dj.Computed):
                 [
                     {
                         **key,
-                        "mask": mask["mask"],
+                        "mask": mask.get("mask", mask["mask_id"]),
                         "fluorescence_channel": segmentation_channel,
                         "fluorescence": mask["inferred_trace"],
                     }
@@ -1158,7 +1152,7 @@ class Activity(dj.Computed):
                     [
                         {
                             **key,
-                            "mask": mask["mask"],
+                            "mask": mask.get("mask", mask["mask_id"]),
                             "fluorescence_channel": segmentation_channel,
                             "activity_trace": mask[
                                 attr_mapper[key["extraction_method"]]
