@@ -2,6 +2,7 @@ import csv
 import importlib
 import inspect
 import json
+import logging
 import pathlib
 from datetime import datetime
 
@@ -13,6 +14,7 @@ from element_interface.utils import dict_to_uuid, find_full_path, find_root_dire
 schema = dj.Schema()
 
 _linking_module = None
+logger = logging.getLogger("datajoint")
 
 
 def activate(
@@ -26,22 +28,26 @@ def activate(
 
     Args:
         miniscope_schema_name (str): schema name on the database server
-        create_schema (bool): when True (default), create schema in the database if it does not yet exist.
-        create_tables (str): when True (default), create schema tabkes in the database if they do not yet exist.
+        create_schema (bool): when True (default), create schema in the database if it
+            does not yet exist.
+        create_tables (str): when True (default), create schema takes in the database
+            if they do not yet exist.
         linking_module (str): a module (or name) containing the required dependencies.
 
     Dependencies:
 
     Upstream tables:
-        Session: parent table to Recording,
-        identifying a recording session.
-        Equipment: Reference table for Recording,
-        specifying the acquisition equipment.
+        Session: parent table to Recording, identifying a recording session.
+        Device: Reference table for Recording, specifying the acquisition device.
+        AnatomicalLocation: Reference table for anatomical region for recording acquisition.
 
     Functions:
-        get_miniscope_root_data_dir(): Returns absolute path for root data director(y/ies) with all subject/sessions data, as (list of) string(s).
-        get_session_directory(session_key: dict) Returns the session directory with all data for the session in session_key, as a string.
-        get_processed_root_data_dir(): Returns absolute path for all processed data as a string.
+        get_miniscope_root_data_dir(): Returns absolute path for root data director(y/ies)
+            with all subject/sessions data, as (list of) string(s).
+        get_session_directory(session_key: dict) Returns the session directory with all
+            data for the session in session_key, as a string.
+        get_processed_root_data_dir(): Returns absolute path for all processed data as
+            a string.
     """
 
     if isinstance(linking_module, str):
@@ -95,15 +101,6 @@ def get_session_directory(session_key: dict) -> str:
     return _linking_module.get_session_directory(session_key)
 
 
-def get_processed_root_data_dir() -> str:
-    """Retrieves the root directory for all processed data"""
-
-    if hasattr(_linking_module, "get_processed_root_data_dir"):
-        return _linking_module.get_processed_root_data_dir()
-    else:
-        return get_miniscope_root_data_dir()[0]
-
-
 # Experiment and analysis meta information -------------------------------------
 
 
@@ -112,10 +109,10 @@ class AcquisitionSoftware(dj.Lookup):
     """Software used for miniscope acquisition.
 
     Attributes:
-        acquisition_software (varchar(24) ): Name of the miniscope acquisition software."""
+        acq_software (varchar(24) ): Name of the miniscope acquisition software."""
 
     definition = """
-    acquisition_software: varchar(24)
+    acq_software: varchar(24)
     """
     contents = zip(["Miniscope-DAQ-V3", "Miniscope-DAQ-V4"])
 
@@ -140,9 +137,8 @@ class Recording(dj.Manual):
     Attributes:
         Session (foreign key): Session primary key.
         recording_id (foreign key, int): Unique recording ID.
-        Equipment: Lookup table for miniscope equipment information.
+        Device: Lookup table for miniscope device information.
         AcquisitionSoftware: Lookup table for miniscope acquisition software.
-        recording_directory (varchar(255) ): relative path to recording files.
         recording_notes (varchar(4095) ): notes about the recording session.
     """
 
@@ -150,9 +146,8 @@ class Recording(dj.Manual):
     -> Session
     recording_id: int
     ---
-    -> Equipment
+    -> Device
     -> AcquisitionSoftware
-    recording_directory: varchar(255)  # relative to root data directory
     recording_notes='' : varchar(4095) # free-notes
     """
 
@@ -163,7 +158,7 @@ class RecordingLocation(dj.Manual):
 
     Attributes:
         Recording (foreign key): Recording primary key.
-        Anatomical Location: Select the anatomical region where miniscope recording was acquired.
+        Anatomical Location: Select the anatomical region where recording was acquired.
     """
 
     definition = """
@@ -234,9 +229,8 @@ class RecordingInfo(dj.Imported):
         """Populate table with recording file metadata."""
 
         # Search recording directory for miniscope raw files
-        acquisition_software, recording_directory = (Recording & key).fetch1(
-            "acquisition_software", "recording_directory"
-        )
+        acq_software = (Recording & key).fetch1("acq_software")
+        recording_directory = get_session_directory(key)
 
         recording_path = find_full_path(
             get_miniscope_root_data_dir(), recording_directory
@@ -249,7 +243,7 @@ class RecordingInfo(dj.Imported):
         if not recording_filepaths:
             raise FileNotFoundError(f"No .avi files found in " f"{recording_directory}")
 
-        if acquisition_software == "Miniscope-DAQ-V3":
+        if acq_software == "Miniscope-DAQ-V3":
             recording_timestamps = recording_path / "timestamp.dat"
             if not recording_timestamps.exists():
                 raise FileNotFoundError(
@@ -272,7 +266,7 @@ class RecordingInfo(dj.Imported):
 
             fps = video.get(cv2.CAP_PROP_FPS)
 
-        elif acquisition_software == "Miniscope-DAQ-V4":
+        elif acq_software == "Miniscope-DAQ-V4":
             recording_metadata = list(recording_path.glob("metaData.json"))[0]
             recording_timestamps = list(recording_path.glob("timeStamps.csv"))[0]
 
@@ -304,7 +298,7 @@ class RecordingInfo(dj.Imported):
             )
         else:
             raise NotImplementedError(
-                f"Loading routine not implemented for {acquisition_software}"
+                f"Loading routine not implemented for {acq_software}"
                 " acquisition software"
             )
 
@@ -434,6 +428,21 @@ class ProcessingParamSet(dj.Lookup):
 
 
 @schema
+class MaskType(dj.Lookup):
+    """Possible classifications of a segmented mask.
+
+    Attributes:
+        mask_type (foreign key, varchar(16) ): Type of segmented mask.
+    """
+
+    definition = """ # Possible classifications for a segmented mask
+    mask_type        : varchar(16)
+    """
+
+    contents = zip(["soma", "axon", "dendrite", "neuropil", "artefact", "unknown"])
+
+
+@schema
 class ProcessingTask(dj.Manual):
     """Table marking manual or automatic processing task.
 
@@ -486,7 +495,7 @@ class Processing(dj.Computed):
                 key = {**key, "processing_time": loaded_caiman.creation_time}
             else:
                 raise NotImplementedError(
-                    f"Loading of {method} data is not yet" f"supported"
+                    f"Loading of {method} data is not yet supported"
                 )
         elif task_mode == "trigger":
             method = (
@@ -577,6 +586,7 @@ class Curation(dj.Manual):
     curation_note='': varchar(2000)
     """
 
+    @classmethod
     def create1_from_processing_task(self, key, is_curated=False, curation_note=""):
         """Given a "ProcessingTask", create a new corresponding "Curation" """
         if key not in Processing():
@@ -695,18 +705,14 @@ class MotionCorrection(dj.Imported):
 
         definition = """  # FOV-tiled blocks used for non-rigid motion correction
         -> master.NonRigidMotionCorrection
-        block_id        : int
+        block_id : int
         ---
-        block_y         : longblob  # (y_start, y_end) in pixel of this block
-        block_x         : longblob  # (x_start, x_end) in pixel of this block
-        y_shifts        : longblob  # (pixels) y motion correction shifts for
-                                    # every frame
-        x_shifts        : longblob  # (pixels) x motion correction shifts for
-                                    # every frame
-        y_std           : float     # (pixels) standard deviation of y shifts
-                                    # across all frames
-        x_std           : float     # (pixels) standard deviation of x shifts
-                                    # across all frames
+        block_y  : longblob  # (y_start, y_end) in pixel of this block
+        block_x  : longblob  # (x_start, x_end) in pixel of this block
+        y_shifts : longblob  # (pixels) y motion correction shifts for every frame
+        x_shifts : longblob  # (pixels) x motion correction shifts for every frame
+        y_std    : float     # (pixels) standard deviation of y shifts across all frames
+        x_std    : float     # (pixels) standard deviation of x shifts across all frames
         """
 
     class Summary(dj.Part):
@@ -723,11 +729,11 @@ class MotionCorrection(dj.Imported):
         definition = """ # summary images for each field and channel after corrections
         -> master
         ---
-        ref_image=null          : longblob  # image used as alignment template
-        average_image           : longblob  # mean of registered frames
-        correlation_image=null  : longblob  # correlation map
-                                            # (computed during cell detection)
-        max_proj_image=null     : longblob  # max of registered frames
+        ref_image=null         : longblob  # image used as alignment template
+        average_image          : longblob  # mean of registered frames
+        correlation_image=null : longblob  # correlation map
+                                           # (computed during cell detection)
+        max_proj_image=null    : longblob  # max of registered frames
         """
 
     def make(self, key):
@@ -846,7 +852,7 @@ class Segmentation(dj.Computed):
     """Automated table computes different mask segmentations.
 
     Attributes:
-        Curations (foreign key): Curation primary key.
+        Curation (foreign key): Curation primary key.
     """
 
     definition = """ # Different mask segmentations.
@@ -858,19 +864,19 @@ class Segmentation(dj.Computed):
 
         Attributes:
             Segmentation (foreign key): Segmentation primary key.
-            mask_id (foreign key, smallint): Unique ID for each mask.
+            mask (smallint): Unique ID for each mask.
             channel.proj(segmentation_channel='channel') (query): Channel to be used for segmentation.
             mask_npix (int): Number of pixels in the mask.
             mask_center_x (int): Center x coordinate in pixels.
             mask_center_y (int): Center y coordinate in pixels.
             mask_xpix (longblob): x coordinates of the mask in pixels.
             mask_ypix (longblob): y coordinates of the mask in pixels.
-            mask_weights (longblob): weights of the mask at the indicies above.
+            mask_weights (longblob): weights of the mask at the indices above.
         """
 
         definition = """ # A mask produced by segmentation.
         -> master
-        mask_id              : smallint
+        mask                 : smallint
         ---
         -> Channel.proj(segmentation_channel='channel')  # channel used for segmentation
         mask_npix            : int       # number of pixels in this mask
@@ -882,7 +888,7 @@ class Segmentation(dj.Computed):
         """
 
     def make(self, key):
-        """Populates table with segementation data."""
+        """Populates table with segmentation data."""
         method, loaded_result = get_loader_result(key, Curation)
 
         if method == "caiman":
@@ -897,11 +903,13 @@ class Segmentation(dj.Computed):
 
             masks, cells = [], []
             for mask in loaded_caiman.masks:
+                # Sample data had _id key, not mask. Permitting both
+                mask_id = mask.get("mask", mask["mask_id"])
                 masks.append(
                     {
                         **key,
                         "segmentation_channel": segmentation_channel,
-                        "mask_id": mask["mask_id"],
+                        "mask": mask_id,
                         "mask_npix": mask["mask_npix"],
                         "mask_center_x": mask["mask_center_x"],
                         "mask_center_y": mask["mask_center_y"],
@@ -912,15 +920,18 @@ class Segmentation(dj.Computed):
                 )
 
                 if loaded_caiman.cnmf.estimates.idx_components is not None:
-                    if mask["mask_id"] in loaded_caiman.cnmf.estimates.idx_components:
+                    if mask_id in loaded_caiman.cnmf.estimates.idx_components:
                         cells.append(
                             {
                                 **key,
                                 "mask_classification_method": "caiman_default_classifier",
-                                "mask_id": mask["mask_id"],
+                                "mask": mask_id,
                                 "mask_type": "soma",
                             }
                         )
+
+            if not all([all(m.values()) for m in masks]):
+                logger.warning("Could not load all pixel values for at least one mask")
 
             self.insert1(key)
             self.Mask.insert(masks, ignore_extra_fields=True)
@@ -939,26 +950,12 @@ class Segmentation(dj.Computed):
 
 
 @schema
-class MaskType(dj.Lookup):
-    """Possible classifications of a segmented mask.
-
-    Attributes:
-        mask_type (foreign key, varchar(16) ): Type of segmented mask.
-    """
-
-    definition = """ # Possible classifications for a segmented mask
-    mask_type        : varchar(16)
-    """
-
-    contents = zip(["soma", "axon", "dendrite", "neuropil", "artefact", "unknown"])
-
-
-@schema
 class MaskClassificationMethod(dj.Lookup):
     """Method to classify segmented masks.
 
     Attributes:
-        mask_classification_method (foreign key, varchar(48) ): Method by which masks are classified into mask types.
+        mask_classification_method (foreign key, varchar(48) ): Method by which masks
+            are classified into mask types.
     """
 
     definition = """
@@ -1001,7 +998,9 @@ class MaskClassification(dj.Computed):
         """
 
     def make(self, key):
-        pass
+        raise NotImplementedError(
+            "To add to this table, use `insert` with allow_direct_insert=True"
+        )
 
 
 # Fluorescence & Activity Traces -------------------------------------------------------
@@ -1009,7 +1008,7 @@ class MaskClassification(dj.Computed):
 
 @schema
 class Fluorescence(dj.Computed):
-    """Extracts fluoresence trace information.
+    """Extracts fluorescence trace information.
 
     Attributes:
         Segmentation (foreign key): Segmentation primary key.
@@ -1025,9 +1024,10 @@ class Fluorescence(dj.Computed):
         Attributes:
             Fluorescence (foreign key): Fluorescence primary key.
             Segmentation.Mask (foreign key): Segmentation.Mask primary key.
-            Channel.proj(fluorescence_channel='channel') (foreign key, query): Channel used for this trace.
+            Channel.proj(fluorescence_channel='channel') (foreign key, query): Channel
+                used for this trace.
             fluorescence (longblob): A fluorescence trace associated with a given mask.
-            neurpil_fluorescence (longblob): A neuropil fluorescence trace.
+            neuropil_fluorescence (longblob): A neuropil fluorescence trace.
         """
 
         definition = """
@@ -1059,7 +1059,7 @@ class Fluorescence(dj.Computed):
                 [
                     {
                         **key,
-                        "mask_id": mask["mask_id"],
+                        "mask": mask.get("mask", mask["mask_id"]),
                         "fluorescence_channel": segmentation_channel,
                         "fluorescence": mask["inferred_trace"],
                     }
@@ -1076,11 +1076,11 @@ class ActivityExtractionMethod(dj.Lookup):
     """Lookup table for activity extraction methods.
 
     Attributes:
-        extraction_method (foreign key, varchar(200) ): Extraction method from CaImAn.
+        extraction_method (foreign key, varchar(32) ): Extraction method from CaImAn.
     """
 
     definition = """
-    extraction_method: varchar(200)
+    extraction_method: varchar(32)
     """
 
     contents = zip(["caiman_deconvolution", "caiman_dff"])
@@ -1088,7 +1088,7 @@ class ActivityExtractionMethod(dj.Lookup):
 
 @schema
 class Activity(dj.Computed):
-    """Inferred neural activty from the fluorescence trace.
+    """Inferred neural activity from the fluorescence trace.
 
     Attributes:
         Fluorescence (foreign key): Fluorescence primary key.
@@ -1106,7 +1106,7 @@ class Activity(dj.Computed):
 
         Attributes:
             Activity (foreign key): Activity primary key.
-            Fluorescence.Trace (foreign key): Fluoresence.Trace primary key.
+            Fluorescence.Trace (foreign key): fluorescence.Trace primary key.
             activity_trace (longblob): Inferred activity trace.
         """
 
@@ -1152,7 +1152,7 @@ class Activity(dj.Computed):
                     [
                         {
                             **key,
-                            "mask_id": mask["mask_id"],
+                            "mask": mask.get("mask", mask["mask_id"]),
                             "fluorescence_channel": segmentation_channel,
                             "activity_trace": mask[
                                 attr_mapper[key["extraction_method"]]
@@ -1183,7 +1183,7 @@ def get_loader_result(key, table):
             the loaded results from (e.g. ProcessingTask, Curation).
 
     Returns:
-        a loader object of the loaded results (e.g. caiman.CaImAn, etc.)
+        tuple: method string and loader object with results (e.g. caiman.CaImAn, etc.)
     """
 
     method, output_dir = (ProcessingParamSet * table & key).fetch1(
@@ -1200,27 +1200,3 @@ def get_loader_result(key, table):
         raise NotImplementedError("Unknown/unimplemented method: {}".format(method))
 
     return method, loaded_output
-
-
-def populate_all(display_progress=True, reserve_jobs=False, suppress_errors=False):
-    """Populates all Computed/Imported tables in this schema, in order."""
-
-    populate_settings = {
-        "display_progress": display_progress,
-        "reserve_jobs": reserve_jobs,
-        "suppress_errors": suppress_errors,
-    }
-
-    RecordingInfo.populate(**populate_settings)
-
-    Processing.populate(**populate_settings)
-
-    MotionCorrection.populate(**populate_settings)
-
-    Segmentation.populate(**populate_settings)
-
-    MaskClassification.populate(**populate_settings)
-
-    Fluorescence.populate(**populate_settings)
-
-    Activity.populate(**populate_settings)
