@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD053 -->
 # Concepts
 
 ## Miniscopes in Neuroscience Research
@@ -152,6 +153,21 @@ Tables related to importing, analyzing, and exporting miniscope data.
 | Fluorescence | This table contains the fluorescence traces extracted from each `Segmentation.Mask`. |
 | ActivityExtractionMethod | A table with information about the activity extraction method (e.g. deconvolution) applied on the fluorescence trace. |
 | Activity | A table with neuronal activity traces from fluorescence trace (e.g. spikes). |
+
+### `miniscope_report` schema ([API docs](../api/element_miniscope/miniscope_report))
+
+Tables related to summary reports of miniscope data.
+
+| Table | Description |
+| --- | --- |
+| QualityMetrics | A table containing information about CaImAn estimates. |
+
+The above `QualityMetrics` table includes the following for each component in the CaImAn
+analysis:
+
+- `r_values`: Space correlation.
+- `snr`: Trace SNR.
+- `cnn_preds`: CNN predictions.
 
 ## Pipeline Development
 

@@ -17,8 +17,8 @@ class QualityMetricFigs(object):
         mini: types.ModuleType,
         key: dict = None,
         scale: float = 1,
-        fig_width=800,
-        dark_mode: bool = True,
+        fig_width: int = 800,
+        dark_mode: bool = False,
     ):
         """Initialize QC metric class
 
@@ -27,12 +27,6 @@ class QualityMetricFigs(object):
             key (dict, optional): key from mini.QualityMetric table. Defaults to None.
             scale (float, optional): Scale at which to render figure. Defaults to 1.4.
             fig_width (int, optional): Figure width in pixels. Defaults to 800.
-            amplitude_cutoff_maximum (float, optional): Cutoff for unit ampliude in
-                visualizations. Defaults to None.
-            presence_ratio_minimum (float, optional): Cutoff for presence ratio in
-                visualizations. Defaults to None.
-            isi_violations_maximum (float, optional): Cutoff for isi violations in
-                visualizations. Defaults to None.
             dark_mode (bool, optional): Set background to black, foreground white.
                 Default False, black on white.
         """
@@ -57,7 +51,7 @@ class QualityMetricFigs(object):
     def key(self, key: dict):
         """Use class_instance.key = your_key to reset key"""
         if key not in self._mini.Curation.fetch("KEY"):
-            # If not already full key, check if unquely identifies entry
+            # If not already full key, check if uniquely identifies entry
             key = (self._mini.Curation & key).fetch1("KEY")
         self._key = key
 
@@ -96,7 +90,7 @@ class QualityMetricFigs(object):
     def _format_fig(
         self, fig: go.Figure = None, scale: float = None, ratio: float = 1.0
     ) -> go.Figure:
-        """Return formatted figure or apply prmatting to existing figure
+        """Return formatted figure or apply formatting to existing figure
 
         Args:
             fig (go.Figure, optional): Apply formatting to this plotly graph object
@@ -221,7 +215,7 @@ class QualityMetricFigs(object):
         """Plot grid of histograms as subplots in go.Figure using n_columns
 
         Args:
-            n_columns (int, optional): Number of colums in grid. Defaults to 4.
+            n_columns (int, optional): Number of columns in grid. Defaults to 4.
             scale (float, optional): Scale to render fig. Defaults to scale at class
                 init, 1.
 
@@ -303,19 +297,29 @@ class QualityMetricFigs(object):
 
     @property
     def plot_list(self):
-        """List of plots that can be rendered inidividually by name or as grid"""
+        """List of plots that can be rendered individually by name or as grid"""
         if not self._plots:
             _ = self.plots
         return [plot for plot in self._plots]
 
-    def _default_bins(self, component):
+    def _default_bins(self, component: pd.Series, nbins: int = 10) -> np.ndarray:
+        """Default bins for rendered histograms
+
+        Args:
+            component (pd.Series): Pandas series of which we'll use min and max
+            nbins (int, optional): Number of bins to use. Defaults to 10.
+
+        Returns:
+            numpy.ndarray: numpy linspace(min(component), max(component), nbins)
+        """
         values = self.components.get(component, self._null_series).replace(
             [np.inf, -np.inf], np.nan
         )
-        return np.linspace(min(values), max(values), 10)
+        return np.linspace(min(values), max(values), nbins)
 
     @property
-    def plots(self):
+    def plots(self) -> dict:
+        """Set of plots available to be rendered"""
         if not self._plots:
             self._plots = {
                 "r_values": {

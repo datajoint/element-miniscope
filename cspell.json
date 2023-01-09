@@ -4,7 +4,8 @@
     "version": "0.2", // Version of the setting file.  Always 0.2
     "language": "en", // language - current active spelling language
     "enabledLanguageIds": [
-        "markdown", "yaml"
+        "markdown",
+        "yaml"
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.
@@ -16,6 +17,7 @@
     ],
     "words": [
         "Adrien",
+        "aggr",
         "Ahanonu",
         "Aharoni",
         "Aharoni's",
@@ -27,7 +29,6 @@
         "Corre",
         "deconvolution",
         "Denk",
-        "Denk",
         "denoising",
         "Ephys",
         "Epub",
@@ -38,19 +39,25 @@
         "Guillaume",
         "IDAS",
         "IDPS",
+        "ifnull",
+        "Inscopix",
         "Jinghao",
         "Kamata",
         "Lavi",
         "Liron",
         "Manolis",
-        "Manolis",
-        "Miniscopes ",
         "miniscopes",
+        "Miniscopes ",
         "miniscoPy",
-        "neuroinformatics",
+        "nchannels",
         "Neurodata",
+        "neuroinformatics",
+        "neuropil",
+        "Neuropil",
         "Neurosci",
+        "nframes",
         "nmeth",
+        "npix",
         "nVoke",
         "Pengcheng",
         "Peyman",
@@ -59,6 +66,7 @@
         "PIMPN",
         "PMCID",
         "PMID",
+        "pname",
         "Reimer",
         "Rong",
         "Sano",
@@ -77,19 +85,12 @@
         "UCSF",
         "Veshkini",
         "Viejo",
+        "xpix",
         "Yaniv",
+        "ypix",
         "Zhang",
         "Zhou",
         "Ziv's",
-        "npix",
-        "xpix",
-        "ypix",
-        "nchannels",
-        "nframes",
-        "pname",
-        "neuropil",
-        "Neuropil",
-        "aggr",
-        "ifnull"
+        "Zong"
     ]
 }
