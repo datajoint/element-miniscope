@@ -21,7 +21,6 @@ def activate(
             does not yet exist.
         create_tables (str): when True (default), create schema takes in the database
             if they do not yet exist.
-        linking_module (str): a module (or name) containing the required dependencies.
     """
     global miniscope
     miniscope = dj.create_virtual_module("miniscope", miniscope_schema_name)

@@ -1177,7 +1177,7 @@ _table_attribute_mapper = {
 }
 
 
-def get_loader_result(key, table):
+def get_loader_result(key, table) -> tuple:
     """Retrieve the loaded processed imaging results from the loader (e.g. caiman, etc.)
 
     Args:
@@ -1186,7 +1186,7 @@ def get_loader_result(key, table):
             the loaded results from (e.g. ProcessingTask, Curation).
 
     Returns:
-        tuple: method string and loader object with results (e.g. caiman.CaImAn, etc.)
+        method, loaded_output (tuple): method string and loader object with results (e.g. caiman.CaImAn, etc.)
     """
 
     method, output_dir = (ProcessingParamSet * table & key).fetch1(

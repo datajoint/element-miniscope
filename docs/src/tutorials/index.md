@@ -38,12 +38,16 @@ Jupyter environment with access to example data, visit
    tables.
 - [Process](./03-Process.ipynb) steps through adding data to these tables and launching
    key Miniscope features, like model training.
-<!-- - [Automate](./04-Automate_Optional.ipynb)
-   highlights the same steps as above, but utilizing all built-in automation tools. -->
-- [Visualization](./05-Explore.ipynb)
+- [Automate](./04-Automate_Optional.ipynb)
+   highlights the same steps as above, but utilizing all built-in automation tools.
+- [Explore](./05-Explore.ipynb)
    demonstrates how to fetch data from the Element.
 - [Drop schemas](./06-Drop_Optional.ipynb)
-   provides the steps for dropping all the tables to start fresh.
+   provides the steps for dropping all the tables to start fresh.]
+- [Downstream Analysis](./07-DownstreamAnalysis_Optional.ipynb) highlights how to link
+   this Element to Element Event for event-based analyses.
+- [Visualizations](./08-Visualizations.ipynb) highlights how to use a built-in module 
+   for visualizing Quality Metrics from CaImAn analyses.
 - `NWB-Export` (coming soon!) will describe how to export into NWB files. 
 
 <!-- ## Data Export to Neurodata Without Borders (NWB)
