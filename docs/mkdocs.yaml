@@ -102,6 +102,12 @@ plugins:
   #       "index.md": "getting_started.md"
   - mkdocstrings:
       default_handler: python
+      handlers:
+        python:
+          options:
+            members_order: source
+            group_by_category: false
+            line_length: 88
   - gen-files:
       scripts:
         - ./src/api/make_pages.py
@@ -112,7 +118,6 @@ plugins:
         - "*/navigation.md"
   - mkdocs-jupyter:
       ignore_h1_titles: True
-      ignore: ["*make_pages.py"]
       
 markdown_extensions:
   - attr_list
@@ -176,4 +181,4 @@ extra_css:
   - assets/stylesheets/extra.css
 
 extra_javascript:
-  - https://js-na1.hs-scripts.com/23133402.js # HubSpot chatbot
+  - https://js-na1.hs-scripts.com/23133402.js  # HubSpot chatbot

@@ -1,4 +1,4 @@
-# MODE="LIVE|QA|PUSH" PACKAGE=element_miniscope UPSTREAM_REPO=https://github.com/datajoint/element-miniscope.git HOST_UID=$(id -u) docker compose -f docs/docker-compose.yaml up --build
+# MODE="LIVE" PACKAGE=element_miniscope UPSTREAM_REPO=https://github.com/datajoint/element-miniscope.git HOST_UID=$(id -u) docker compose -f docs/docker-compose.yaml up --build
 #
 # navigate to http://localhost/
 version: "2.4"
@@ -36,6 +36,7 @@ services:
           mv /main/delete/notebooks/*ipynb /main/docs/src/tutorials/
           rm -fR /main/delete
         fi
+        ln -fs ./plotting/qc.py ./element_miniscope/qc.py # Workaround for subfolder error
         if echo "$${MODE}" | grep -i live &>/dev/null; then
             mkdocs serve --config-file ./docs/mkdocs.yaml -a 0.0.0.0:80
         elif echo "$${MODE}" | grep -iE "qa|push" &>/dev/null; then
