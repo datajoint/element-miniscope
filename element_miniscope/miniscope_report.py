@@ -51,11 +51,14 @@ class QualityMetrics(dj.Imported):
             method == "caiman"
         ), f"Quality figures for {method} not yet implemented. Try CaImAn."
 
-        data = {
-            attrib_name: getattr(loaded_result.cnmf.estimates, attrib, None)
-            for attrib_name, attrib in zip(
-                ["r_values", "snr", "cnn_preds"], ["r_values", "SNR_comp", "cnn_preds"]
-            )
-        }
+        key.update(
+            {
+                attrib_name: getattr(loaded_result.cnmf.estimates, attrib, None)
+                for attrib_name, attrib in zip(
+                    ["r_values", "snr", "cnn_preds"],
+                    ["r_values", "SNR_comp", "cnn_preds"],
+                )
+            }
+        )
 
-        self.insert1({**key, **data})
+        self.insert1(key)

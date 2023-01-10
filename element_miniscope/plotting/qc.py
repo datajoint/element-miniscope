@@ -10,6 +10,11 @@ from ..miniscope import get_loader_result
 
 logger = logging.getLogger("datajoint")
 
+try:
+    from caiman.source_extraction.cnmf.estimates import Estimates  # noqa: E402
+except ModuleNotFoundError:
+    logger.error("Please install CaImAn")
+
 
 class QualityMetricFigs(object):
     def __init__(
@@ -36,6 +41,8 @@ class QualityMetricFigs(object):
         self._plots = {}  # Empty default to defer set to dict property below
         self._fig_width = fig_width
         self._dark_mode = dark_mode
+        self._estimates = None
+        self._component_list = []
         self._components = pd.DataFrame()  # Empty default
         self._x_fmt = dict(showgrid=False, zeroline=False, linewidth=2, ticks="outside")
         self._y_fmt = dict(showgrid=False, linewidth=0, zeroline=True, visible=False)
@@ -53,6 +60,7 @@ class QualityMetricFigs(object):
         if key not in self._mini.Curation.fetch("KEY"):
             # If not already full key, check if uniquely identifies entry
             key = (self._mini.Curation & key).fetch1("KEY")
+            self._estimates = None  # Refresh estimates
         self._key = key
 
     @key.deleter  # Allows `del cls.property` to clear key
@@ -62,27 +70,42 @@ class QualityMetricFigs(object):
         self._key = None
 
     @property
+    def estimates(self) -> Estimates:
+        if not self._estimates:
+            method, loaded_result = get_loader_result(self._key, self._mini.Curation)
+            assert (
+                method == "caiman"
+            ), f"Quality figures for {method} not yet implemented. Try CaImAn."
+
+            self._estimates = loaded_result.cnmf.estimates
+        return self._estimates
+
+    @property
+    def component_list(self) -> list:
+        if not self._component_list:
+            self._component_list = ["r_values", "SNR_comp", "cnn_preds"]
+        return self._component_list
+
+    @component_list.setter
+    def component_list(self, component_list: list):
+        self._component_list = component_list
+        self._components = pd.DataFrame()  # Reset components
+
+    @property
     def components(self) -> pd.DataFrame:
         """Pandas dataframe of QC metrics"""
         if not self._key:
             return self._null_series
 
         if self._components.empty:
-            method, loaded_result = get_loader_result(self._key, self._mini.Curation)
-            assert (
-                method == "caiman"
-            ), f"Quality figures for {method} not yet implemented. Try CaImAn."
-
-            estimates = loaded_result.cnmf.estimates
-            empty_array = np.zeros((estimates.C.shape[0],))
-            column_names = ["r_values", "SNR", "cnn_preds"]
-            attrib_names = ["r_values", "SNR_comp", "cnn_preds"]
+            empty_array = np.zeros((self.estimates.C.shape[0],))
 
             self._components = pd.DataFrame(
                 data=[
-                    getattr(estimates, attrib, empty_array) for attrib in attrib_names
+                    getattr(self.estimates, attrib, empty_array).astype(np.float64)
+                    for attrib in self.component_list
                 ],
-                index=column_names,
+                index=self.component_list,
             ).T
 
         return self._components
@@ -330,8 +353,8 @@ class QualityMetricFigs(object):
                 },
                 "SNR": {
                     "xaxis": "SNR",
-                    "data": self.components.get("SNR", self._null_series),
-                    "bins": self._default_bins("SNR"),
+                    "data": self.components.get("SNR_comp", self._null_series),
+                    "bins": self._default_bins("SNR_comp"),
                     "vline": 2,
                 },
                 "cnn_preds": {
