@@ -3,11 +3,12 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
-## [0.2.0] - Unreleased
+## [0.2.0] - 2023-01-11
 
 - Update - Attribute names relative to issues #20, #22, #26
 - Add - Tutorial pages
 - Add - Quality Control plotting tool and report schema
+- Add - Optional caiman installation
 
 ## [0.1.4] - 2022-10-21
 
