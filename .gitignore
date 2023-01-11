@@ -104,3 +104,4 @@ temp/*
 /docs/site/
 /docs/src/tutorials/*ipynb
 /docs/mike-mkdocs*
+element_miniscope/qc.py

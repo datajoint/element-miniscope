@@ -11,6 +11,8 @@ import datajoint as dj
 import numpy as np
 from element_interface.utils import dict_to_uuid, find_full_path, find_root_directory
 
+from . import miniscope_report
+
 schema = dj.Schema()
 
 _linking_module = None
@@ -65,6 +67,7 @@ def activate(
         create_tables=create_tables,
         add_objects=_linking_module.__dict__,
     )
+    miniscope_report.activate(f"{miniscope_schema_name}_report", miniscope_schema_name)
 
 
 # Functions required by the element-miniscope  -----------------------------------------
@@ -1174,7 +1177,7 @@ _table_attribute_mapper = {
 }
 
 
-def get_loader_result(key, table):
+def get_loader_result(key, table) -> tuple:
     """Retrieve the loaded processed imaging results from the loader (e.g. caiman, etc.)
 
     Args:
@@ -1183,7 +1186,7 @@ def get_loader_result(key, table):
             the loaded results from (e.g. ProcessingTask, Curation).
 
     Returns:
-        tuple: method string and loader object with results (e.g. caiman.CaImAn, etc.)
+        method, loaded_output (tuple): method string and loader object with results (e.g. caiman.CaImAn, etc.)
     """
 
     method, output_dir = (ProcessingParamSet * table & key).fetch1(

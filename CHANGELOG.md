@@ -7,6 +7,7 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 
 - Update - Attribute names relative to issues #20, #22, #26
 - Add - Tutorial pages
+- Add - Quality Control plotting tool and report schema
 
 ## [0.1.4] - 2022-10-21
 
