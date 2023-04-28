@@ -10,7 +10,6 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 + Add - Quality Control plotting tool and report schema
 + Fix - `.ipynb` output in tutorials is not visible in dark mode.
 
-
 ## [0.1.4] - 2022-10-21
 
 + Add - mkdocs deployment with workflow API docs
