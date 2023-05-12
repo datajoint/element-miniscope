@@ -86,12 +86,22 @@ site
 # mypy
 .mypy_cache/
 
-# datajoint
-dj_local_con*.json
-temp*
-
 # emacs
 **/*~
 **/#*#
 **/.#*
 docker-compose.yml
+
+.vscode*
+
+# datajoint, notes, nwb export
+dj_local_c*.json
+temp*
+temp/*
+*nwb
+
+# docs
+/docs/site/
+/docs/src/tutorials/*ipynb
+/docs/mike-mkdocs*
+element_miniscope/qc.py
