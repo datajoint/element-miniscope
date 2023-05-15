@@ -43,18 +43,33 @@ detailed documentation on each table, see the API docs for the respective schema
 
 | Table | Description |
 | --- | --- |
-| Recording | A table containing information about the equipment used (e.g. the acquisition hardware information). |
-| RecordingInfo |  The metadata about this recording from the Miniscope DAQ software (e.g. frame rate, number of channels, frames, etc.). |
-| MotionCorrection | A table with information about motion correction performed on a recording. |
-| MotionCorrection.RigidMotionCorrection | A table with details of rigid motion correction (e.g. shifting in x, y). |
-| MotionCorrection.NonRigidMotionCorrection and MotionCorrection.Block | These tables describe the non-rigid motion correction. |
-| MotionCorrection.Summary | A table containing summary images after motion correction. |
-| Segmentation | This table specifies the segmentation step and its outputs, following the motion correction step. |
-| Segmentation.Mask | This table contains the image mask for the segmented region of interest. |
-| MaskClassification | This table contains information about the classification of `Segmentation.Mask` into a type (e.g. soma, axon, dendrite, artifact, etc.). |
-| Fluorescence | This table contains the fluorescence traces extracted from each `Segmentation.Mask`. |
-| ActivityExtractionMethod | A table with information about the activity extraction method (e.g. deconvolution) applied on the fluorescence trace. |
-| Activity | A table with neuronal activity traces from fluorescence trace (e.g. spikes). |
+| AcquisitionSoftware | Software used for miniscope acquisition |
+| Channel | Number of channels in the miniscope recording |
+| Recording | Information about the equipment used (e.g. the acquisition hardware information). |
+| RecordingLocation | Brain location of the miniscope recording |
+| RecordingInfo |  Metadata about this recording from the Miniscope DAQ software (e.g. frame rate, number of channels, frames, etc.) |
+| RecordingInfo.File | Relative file paths for the recording files |
+| ProcessingMethod | Available analysis suites that can be used in processing of the miniscope datasets |
+| ProcessingParamSet | All parameters required to process a miniscope dataset |
+| MaskType | All possible classifications of a segmented mask |
+| ProcessingTask | Task defined by a combination of Recording and ProcessingParamSet |
+| Processing | The core table that executes a ProcessingTask |
+| Curation | Curated results |
+| MotionCorrection | Results of the motion correction procedure |
+| MotionCorrection.RigidMotionCorrection | Details of the rigid motion correction performed on the miniscope data |
+| MotionCorrection.NonRigidMotionCorrection | Details of nonrigid motion correction performed on the miniscope data |
+| MotionCorrection.NonRigidMotionCorrection.Block | Results of non-rigid motion correction for each block |
+| MotionCorrection.Summary | Summary images for each field and channel after motion correction |
+| Segmentation | Results of the segmentation |
+| Segmentation.Mask | Masks identified in the segmentation procedure |
+| MaskClassificationMethod | Method used in the mask classification procedure |
+| MaskClassification | Result of the mask classification procedure |
+| MaskClassification.MaskType | Classification type assigned to each mask (e.g. soma, axon, dendrite, artifact, etc.) |
+| Fluorescence | Fluorescence measurements |
+| Fluorescence.Trace | Fluorescence trace for each region of interest |
+| ActivityExtractionMethod | Method used in activity extraction |
+| Activity | Inferred neural activity |
+| Activity.Trace | Inferred neural activity for each fluorescence trace |
 | ProcessingQualityMetrics | Quality metrics used to evaluate the results of the calcium imaging analysis pipeline |
 | ProcessingQualityMetrics.Mask | Quality metrics used to evaluate the masks |
 | ProcessingQualityMetrics.Trace | Quality metrics used to evaluate the fluorescence traces |
