@@ -18,6 +18,7 @@ for path in sorted(Path(package).glob("**/*.py")) + sorted(
 ):
     if (
         path.stem == "__init__"
+        or path.stem == "version"
         or "plotting" in path.parts  # Workaround for mkdocstring-python subfolder error
     ):
         continue
