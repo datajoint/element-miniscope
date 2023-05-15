@@ -107,7 +107,8 @@ plugins:
         - "*/navigation.md"
   - mkdocs-jupyter:
       ignore_h1_titles: True
-      
+      include: ["*.ipynb"]
+  - section-index
 markdown_extensions:
   - attr_list
   - toc:
