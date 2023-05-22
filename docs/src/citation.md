@@ -8,3 +8,5 @@ Resource Identifier (RRID).
   Neurophysiology. bioRxiv. 2021 Jan 1. doi: https://doi.org/10.1101/2021.03.30.437358
 
 + DataJoint Element Miniscope - [RRID:SCR_021894](https://scicrunch.org/resolver/SCR_021894) - Version {{ PATCH_VERSION }}
+
+If your work uses CaImAn, please cite the respective [manuscripts](https://caiman.readthedocs.io/en/latest/CaImAn_features_and_references.html#references).
