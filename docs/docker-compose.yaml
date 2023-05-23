@@ -14,7 +14,7 @@ services:
       - PACKAGE
       - UPSTREAM_REPO
       - MODE
-      - PATCH_VERSION 
+      - PATCH_VERSION
     volumes:
       - ../docs:/main/docs
       - ../${PACKAGE}:/main/${PACKAGE}
@@ -50,10 +50,10 @@ services:
                 mike serve --config-file ./docs/mkdocs.yaml -a 0.0.0.0:80
             elif echo "$${MODE}" | grep -i push &>/dev/null; then
                 echo "INFO::Push gh-pages to upstream"
+                git config http.postBuffer 524288000 # max 500MB git push through https
                 git push $${UPSTREAM_REPO} gh-pages
             fi
         else
             echo "Unexpected mode..."
             exit 1
         fi
-        
