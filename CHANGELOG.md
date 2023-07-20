@@ -3,6 +3,10 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+## [0.3.2] - 2023-07-20
+
++ Add `opencv-python` to requirements
+
 ## [0.3.1] - 2023-05-22
 
 + Add - CaImAn citation
@@ -46,6 +50,7 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 + Add - Load data acquired with Miniscope-DAQ-V3
 + Add - Load data analyzed with MiniscopeAnalysis
 
+[0.3.2]: https://github.com/datajoint/element-miniscope/releases/tag/0.3.2
 [0.3.1]: https://github.com/datajoint/element-miniscope/releases/tag/0.3.1
 [0.3.0]: https://github.com/datajoint/element-miniscope/releases/tag/0.3.0
 [0.2.1]: https://github.com/datajoint/element-miniscope/releases/tag/0.2.1
