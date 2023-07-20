@@ -17,7 +17,7 @@
         <link rel="next" href="../paths/">
       
       <link rel="icon" href="../../../assets/images/company-logo-blue.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.14">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -25,10 +25,10 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.85bb2934.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.a6bdf11c.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
       
       
 
@@ -754,18 +754,20 @@
 
 
 <h2 id="workflow_miniscope.analysis.ActivityAlignmentCondition" class="doc doc-heading">
-        <code>ActivityAlignmentCondition</code>
+          <code>ActivityAlignmentCondition</code>
 
 
 <a href="#workflow_miniscope.analysis.ActivityAlignmentCondition" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="datajoint">dj</span>.<span title="datajoint.Manual">Manual</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="datajoint">dj</span>.<span title="datajoint.Manual">Manual</span></code></p>
 
   
       <p>Alignment activity table</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -782,44 +784,63 @@
           <td>
                 <code>foreign key</code>
           </td>
-          <td><p>Activity primary key</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Activity primary key</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>event.AlignmentEvent</code></td>
           <td>
                 <code>foreign key</code>
           </td>
-          <td><p>Alignment Event primary key</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Alignment Event primary key</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>trial_condition</code></td>
           <td>
                 <code>foreign key</code>
           </td>
-          <td><p>varchar(128) # user-friendly name of condition</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>varchar(128) # user-friendly name of condition</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>condition_description</code></td>
           <td>
                 <code> varchar(1000), nullable</code>
           </td>
-          <td><p>condition description</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>condition description</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>bin_size</code></td>
           <td>
                 <code>float</code>
           </td>
-          <td><p>Bin-size (in second) used to compute the PSTH
-Default 0.04</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Bin-size (in second) used to compute the PSTH
+Default 0.04</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>workflow_miniscope/analysis.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">10</span>
+            <details class="quote">
+              <summary>Source code in <code>workflow_miniscope/analysis.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">10</span>
 <span class="normal">11</span>
 <span class="normal">12</span>
 <span class="normal">13</span>
@@ -873,7 +894,7 @@ Default 0.04</p></td>
 <span class="s2">        -&gt; trial.Trial</span>
 <span class="s2">        &quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -899,18 +920,20 @@ Default 0.04</p></td>
 
 
 <h2 id="workflow_miniscope.analysis.ActivityAlignment" class="doc doc-heading">
-        <code>ActivityAlignment</code>
+          <code>ActivityAlignment</code>
 
 
 <a href="#workflow_miniscope.analysis.ActivityAlignment" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="datajoint">dj</span>.<span title="datajoint.Computed">Computed</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="datajoint">dj</span>.<span title="datajoint.Computed">Computed</span></code></p>
 
   
       <p>Computed table for alignment activity</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -927,22 +950,29 @@ Default 0.04</p></td>
           <td>
                 <code>foreign key</code>
           </td>
-          <td><p>Activity Alignment Condition key</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Activity Alignment Condition key</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>aligned_timestamps</code></td>
           <td>
                 <code>longblob</code>
           </td>
-          <td><p>aligned timestamps</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>aligned timestamps</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>workflow_miniscope/analysis.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 39</span>
+            <details class="quote">
+              <summary>Source code in <code>workflow_miniscope/analysis.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 39</span>
 <span class="normal"> 40</span>
 <span class="normal"> 41</span>
 <span class="normal"> 42</span>
@@ -1236,7 +1266,7 @@ Default 0.04</p></td>
 
         <span class="k">return</span> <span class="n">fig</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -1253,18 +1283,20 @@ Default 0.04</p></td>
 
 
 <h3 id="workflow_miniscope.analysis.ActivityAlignment.AlignedTrialActivity" class="doc doc-heading">
-        <code>AlignedTrialActivity</code>
+          <code>AlignedTrialActivity</code>
 
 
 <a href="#workflow_miniscope.analysis.ActivityAlignment.AlignedTrialActivity" class="headerlink" title="Permanent link">&para;</a></h3>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><span title="datajoint">dj</span>.<span title="datajoint.Part">Part</span></code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code><span title="datajoint">dj</span>.<span title="datajoint.Part">Part</span></code></p>
 
   
       <p>Calcium activity aligned to the event time within the designated window</p>
+
+
 
   <p><strong>Attributes:</strong></p>
   <table>
@@ -1281,29 +1313,40 @@ Default 0.04</p></td>
           <td>
                 <code>foreign key</code>
           </td>
-          <td><p>Activity trace primary key</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Activity trace primary key</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>ActivityAlignmentCondition.Trial</code></td>
           <td>
                 <code>foreign key</code>
           </td>
-          <td><p>Alignment condition key</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Alignment condition key</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td><code>aligned_trace</code></td>
           <td>
                 <code>longblob</code>
           </td>
-          <td><p>(s) Calcium activity aligned to the event time</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>(s) Calcium activity aligned to the event time</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
 
-
-        <details class="quote">
-          <summary>Source code in <code>workflow_miniscope/analysis.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">54</span>
+            <details class="quote">
+              <summary>Source code in <code>workflow_miniscope/analysis.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">54</span>
 <span class="normal">55</span>
 <span class="normal">56</span>
 <span class="normal">57</span>
@@ -1335,7 +1378,7 @@ Default 0.04</p></td>
 <span class="s2">    aligned_trace: longblob  # (s) Calcium activity aligned to the event time</span>
 <span class="s2">    &quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
@@ -1356,6 +1399,7 @@ Default 0.04</p></td>
 
 
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -1369,6 +1413,8 @@ Default 0.04</p></td>
   <div class="doc doc-contents ">
   
       <p>Populate ActivityAlignment and AlignedTrialActivity</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1386,7 +1432,11 @@ Default 0.04</p></td>
           <td>
                 <code>dict</code>
           </td>
-          <td><p>Dict uniquely identifying one ActivityAlignmentCondition</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dict uniquely identifying one ActivityAlignmentCondition</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1394,9 +1444,9 @@ Default 0.04</p></td>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>workflow_miniscope/analysis.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 71</span>
+          <details class="quote">
+            <summary>Source code in <code>workflow_miniscope/analysis.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 71</span>
 <span class="normal"> 72</span>
 <span class="normal"> 73</span>
 <span class="normal"> 74</span>
@@ -1512,10 +1562,11 @@ Default 0.04</p></td>
     <span class="bp">self</span><span class="o">.</span><span class="n">insert1</span><span class="p">({</span><span class="o">**</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;aligned_timestamps&quot;</span><span class="p">:</span> <span class="n">aligned_timestamps</span><span class="p">})</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">AlignedTrialActivity</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">aligned_trial_activities</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 
 
@@ -1537,6 +1588,8 @@ Default 0.04</p></td>
       <p>Plot event-aligned and trial-averaged calcium activities</p>
 <p>Activities including: dF/F, neuropil-corrected dF/F, Calcium events, etc.</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -1553,7 +1606,11 @@ Default 0.04</p></td>
           <td>
                 <code>dict</code>
           </td>
-          <td><p>key of ActivityAlignment master table</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>key of ActivityAlignment master table</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1563,7 +1620,11 @@ Default 0.04</p></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>miniscope segmentation mask</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>miniscope segmentation mask</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1573,8 +1634,12 @@ Default 0.04</p></td>
           <td>
                 <code>tuple</code>
           </td>
-          <td><p>Definition of axes for plot.
-Default is plt.subplots(2, 1, figsize=(12, 8))</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Definition of axes for plot.
+Default is plt.subplots(2, 1, figsize=(12, 8))</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -1584,13 +1649,19 @@ Default is plt.subplots(2, 1, figsize=(12, 8))</p></td>
           <td>
                 <code>str</code>
           </td>
-          <td><p>Optional title label. Defaults to None.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Optional title label. Defaults to None.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -1605,15 +1676,19 @@ Default is plt.subplots(2, 1, figsize=(12, 8))</p></td>
 <td><code>fig</code></td>          <td>
                 <code>matplotlib.<span title="matplotlib.figure">figure</span>.<span title="matplotlib.figure.Figure">Figure</span></code>
           </td>
-          <td><p>Plot event-aligned and trial-averaged
-calcium activities</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Plot event-aligned and trial-averaged
+calcium activities</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>workflow_miniscope/analysis.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">130</span>
+          <details class="quote">
+            <summary>Source code in <code>workflow_miniscope/analysis.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span>
@@ -1725,7 +1800,7 @@ calcium activities</p></td>
 
     <span class="k">return</span> <span class="n">fig</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1865,12 +1940,14 @@ calcium activities</p></td>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.integrate", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.integrate", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.b4d07000.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
-        <script src="https://js-na1.hs-scripts.com/23133402.js"></script>
+        
+          <script src="https://js-na1.hs-scripts.com/23133402.js"></script>
+        
       
     
   </body>

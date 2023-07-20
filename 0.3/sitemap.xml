@@ -2,132 +2,132 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/changelog/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/citation/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/concepts/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/partnerships/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/pipeline/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/roadmap/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/api/element_miniscope/miniscope/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/api/element_miniscope/miniscope_report/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/api/element_miniscope/qc/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/api/workflow_miniscope/analysis/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/api/workflow_miniscope/paths/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/api/workflow_miniscope/pipeline/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/api/workflow_miniscope/reference/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/01-Configure/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/02-WorkflowStructure_Optional/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/03-Process/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/04-Automate_Optional/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/05-Explore/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/06-Drop_Optional/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/07-DownstreamAnalysis_Optional/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/08-Visualizations/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/demo_prepare/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/quality_metrics/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/elements/element-miniscope/0.3/tutorials/tutorial/</loc>
-         <lastmod>2023-05-26</lastmod>
+         <lastmod>2023-07-20</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

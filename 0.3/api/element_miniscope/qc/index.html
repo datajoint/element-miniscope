@@ -17,7 +17,7 @@
         <link rel="next" href="../../workflow_miniscope/analysis/">
       
       <link rel="icon" href="../../../assets/images/company-logo-blue.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.14">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
     
     
       
@@ -25,10 +25,10 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.85bb2934.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.eebd395e.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.a6bdf11c.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ecc896b0.min.css">
       
       
 
@@ -613,13 +613,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#element_miniscope.qc.get_loader_result" class="md-nav__link">
-    get_loader_result()
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -785,21 +778,20 @@
 
 
 <h2 id="element_miniscope.qc.QualityMetricFigs" class="doc doc-heading">
-        <code>QualityMetricFigs</code>
+          <code>QualityMetricFigs</code>
 
 
 <a href="#element_miniscope.qc.QualityMetricFigs" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
   <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code>object</code></p>
+          <p class="doc doc-class-bases">
+            Bases: <code>object</code></p>
 
 
-
-        <details class="quote">
-          <summary>Source code in <code>element_miniscope/qc.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 19</span>
+            <details class="quote">
+              <summary>Source code in <code>element_miniscope/qc.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 19</span>
 <span class="normal"> 20</span>
 <span class="normal"> 21</span>
 <span class="normal"> 22</span>
@@ -1529,11 +1521,12 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Removes an item from the set of plots&quot;&quot;&quot;</span>
         <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plots</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">plot_name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+            </details>
 
   
 
   <div class="doc doc-children">
+
 
 
 
@@ -1555,6 +1548,8 @@
   
       <p>Initialize QC metric class</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -1571,7 +1566,11 @@
           <td>
                 <code>module</code>
           </td>
-          <td><p>datajoint module with a QualityMetric table</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>datajoint module with a QualityMetric table</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1581,7 +1580,11 @@
           <td>
                 <code>dict</code>
           </td>
-          <td><p>key from mini.QualityMetric table. Defaults to None.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>key from mini.QualityMetric table. Defaults to None.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -1591,7 +1594,11 @@
           <td>
                 <code>float</code>
           </td>
-          <td><p>Scale at which to render figure. Defaults to 1.4.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Scale at which to render figure. Defaults to 1.4.</p>
+            </div>
+          </td>
           <td>
                 <code>1</code>
           </td>
@@ -1601,7 +1608,11 @@
           <td>
                 <code>int</code>
           </td>
-          <td><p>Figure width in pixels. Defaults to 800.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Figure width in pixels. Defaults to 800.</p>
+            </div>
+          </td>
           <td>
                 <code>800</code>
           </td>
@@ -1611,8 +1622,12 @@
           <td>
                 <code>bool</code>
           </td>
-          <td><p>Set background to black, foreground white.
-Default False, black on white.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Set background to black, foreground white.
+Default False, black on white.</p>
+            </div>
+          </td>
           <td>
                 <code>False</code>
           </td>
@@ -1620,9 +1635,9 @@ Default False, black on white.</p></td>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>element_miniscope/qc.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">20</span>
+          <details class="quote">
+            <summary>Source code in <code>element_miniscope/qc.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span>
@@ -1684,7 +1699,7 @@ Default False, black on white.</p></td>
     <span class="bp">self</span><span class="o">.</span><span class="n">_no_data_text</span> <span class="o">=</span> <span class="s2">&quot;No data available&quot;</span>  <span class="c1"># What to show when no data in table</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_null_series</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>  <span class="c1"># What to substitute when no data</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -1702,9 +1717,9 @@ Default False, black on white.</p></td>
 <code class="highlight language-python"><span class="n">key</span><span class="p">:</span> <span class="nb">dict</span></code>
   
   <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-deletable"><code>deletable</code></small>
       <small class="doc doc-label doc-label-property"><code>property</code></small>
       <small class="doc doc-label doc-label-writable"><code>writable</code></small>
-      <small class="doc doc-label doc-label-deletable"><code>deletable</code></small>
   </span>
 
 <a href="#element_miniscope.qc.QualityMetricFigs.key" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -1748,6 +1763,7 @@ Default False, black on white.</p></td>
 
 
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -1761,6 +1777,8 @@ Default False, black on white.</p></td>
   <div class="doc doc-contents ">
   
       <p>Return a single figure of the plots listed in the plot_list property</p>
+
+
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -1778,7 +1796,11 @@ Default False, black on white.</p></td>
           <td>
                 <code>str</code>
           </td>
-          <td><p>Name of figure to be rendered</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Name of figure to be rendered</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1788,14 +1810,20 @@ Default False, black on white.</p></td>
           <td>
                 <code>float</code>
           </td>
-          <td><p>Scale to render fig. Defaults to scale at class
-init, 1.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Scale to render fig. Defaults to scale at class
+init, 1.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -1808,16 +1836,20 @@ init, 1.</p></td>
     <tbody>
         <tr>
           <td>
-                <code><span title="plotly.graph_objs">go</span>.<span title="plotly.graph_objs.Figure">Figure</span></code>
+                <code><span title="plotly">go</span>.<span title="plotly.Figure">Figure</span></code>
           </td>
-          <td><p>go.Figure: Histogram plot</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>go.Figure: Histogram plot</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>element_miniscope/qc.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">199</span>
+          <details class="quote">
+            <summary>Source code in <code>element_miniscope/qc.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">199</span>
 <span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span>
@@ -1891,10 +1923,11 @@ init, 1.</p></td>
 
     <span class="k">return</span> <span class="n">fig</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
+
 
 
 
@@ -1915,6 +1948,8 @@ init, 1.</p></td>
   
       <p>Plot grid of histograms as subplots in go.Figure using n_columns</p>
 
+
+
   <p><strong>Parameters:</strong></p>
   <table>
     <thead>
@@ -1931,7 +1966,11 @@ init, 1.</p></td>
           <td>
                 <code>int</code>
           </td>
-          <td><p>Number of columns in grid. Defaults to 4.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Number of columns in grid. Defaults to 4.</p>
+            </div>
+          </td>
           <td>
                 <code>3</code>
           </td>
@@ -1941,14 +1980,20 @@ init, 1.</p></td>
           <td>
                 <code>float</code>
           </td>
-          <td><p>Scale to render fig. Defaults to scale at class
-init, 1.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Scale to render fig. Defaults to scale at class
+init, 1.</p>
+            </div>
+          </td>
           <td>
                 <code>1.0</code>
           </td>
         </tr>
     </tbody>
   </table>
+
+
 
   <p><strong>Returns:</strong></p>
   <table>
@@ -1961,16 +2006,20 @@ init, 1.</p></td>
     <tbody>
         <tr>
           <td>
-                <code><span title="plotly.graph_objs">go</span>.<span title="plotly.graph_objs.Figure">Figure</span></code>
+                <code><span title="plotly">go</span>.<span title="plotly.Figure">Figure</span></code>
           </td>
-          <td><p>go.Figure: grid of available plots</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>go.Figure: grid of available plots</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
 
-      <details class="quote">
-        <summary>Source code in <code>element_miniscope/qc.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">237</span>
+          <details class="quote">
+            <summary>Source code in <code>element_miniscope/qc.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">237</span>
 <span class="normal">238</span>
 <span class="normal">239</span>
 <span class="normal">240</span>
@@ -2136,7 +2185,7 @@ init, 1.</p></td>
 
     <span class="k">return</span> <span class="n">fig</span><span class="o">.</span><span class="n">update_xaxes</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_x_fmt</span><span class="p">)</span><span class="o">.</span><span class="n">update_yaxes</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_y_fmt</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2199,6 +2248,7 @@ init, 1.</p></td>
 
 
 
+
 <div class="doc doc-object doc-function">
 
 
@@ -2213,15 +2263,15 @@ init, 1.</p></td>
   
       <p>Removes an item from the set of plots</p>
 
-      <details class="quote">
-        <summary>Source code in <code>element_miniscope/qc.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">381</span>
+          <details class="quote">
+            <summary>Source code in <code>element_miniscope/qc.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">381</span>
 <span class="normal">382</span>
 <span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">remove_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Removes an item from the set of plots&quot;&quot;&quot;</span>
     <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plots</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">plot_name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
+          </details>
   </div>
 
 </div>
@@ -2238,133 +2288,6 @@ init, 1.</p></td>
 
 
 
-
-
-<div class="doc doc-object doc-function">
-
-
-
-<h2 id="element_miniscope.qc.get_loader_result" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">get_loader_result</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span></code>
-
-<a href="#element_miniscope.qc.get_loader_result" class="headerlink" title="Permanent link">&para;</a></h2>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Retrieve the loaded processed imaging results from the loader (e.g. caiman, etc.)</p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>key</code></td>
-          <td>
-                <code>dict</code>
-          </td>
-          <td><p>the <code>key</code> to one entry of ProcessingTask or Curation.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>table</code></td>
-          <td>
-                <code>str</code>
-          </td>
-          <td><p>the class defining the table to retrieve
-the loaded results from (e.g. ProcessingTask, Curation).</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>tuple</code>
-          </td>
-          <td><p>method, loaded_output (tuple): method string and loader object with results (e.g. caiman.CaImAn, etc.)</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-      <details class="quote">
-        <summary>Source code in <code>element_miniscope/miniscope.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1239</span>
-<span class="normal">1240</span>
-<span class="normal">1241</span>
-<span class="normal">1242</span>
-<span class="normal">1243</span>
-<span class="normal">1244</span>
-<span class="normal">1245</span>
-<span class="normal">1246</span>
-<span class="normal">1247</span>
-<span class="normal">1248</span>
-<span class="normal">1249</span>
-<span class="normal">1250</span>
-<span class="normal">1251</span>
-<span class="normal">1252</span>
-<span class="normal">1253</span>
-<span class="normal">1254</span>
-<span class="normal">1255</span>
-<span class="normal">1256</span>
-<span class="normal">1257</span>
-<span class="normal">1258</span>
-<span class="normal">1259</span>
-<span class="normal">1260</span>
-<span class="normal">1261</span>
-<span class="normal">1262</span>
-<span class="normal">1263</span>
-<span class="normal">1264</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_loader_result</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve the loaded processed imaging results from the loader (e.g. caiman, etc.)</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        key (dict): the `key` to one entry of ProcessingTask or Curation.</span>
-<span class="sd">        table (str): the class defining the table to retrieve</span>
-<span class="sd">            the loaded results from (e.g. ProcessingTask, Curation).</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        method, loaded_output (tuple): method string and loader object with results (e.g. caiman.CaImAn, etc.)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">method</span><span class="p">,</span> <span class="n">output_dir</span> <span class="o">=</span> <span class="p">(</span><span class="n">ProcessingParamSet</span> <span class="o">*</span> <span class="n">table</span> <span class="o">&amp;</span> <span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">fetch1</span><span class="p">(</span>
-        <span class="s2">&quot;processing_method&quot;</span><span class="p">,</span> <span class="n">_table_attribute_mapper</span><span class="p">[</span><span class="n">table</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span>
-    <span class="p">)</span>
-
-    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">find_full_path</span><span class="p">(</span><span class="n">get_miniscope_root_data_dir</span><span class="p">(),</span> <span class="n">output_dir</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;caiman&quot;</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">element_interface</span> <span class="kn">import</span> <span class="n">caiman_loader</span>
-
-        <span class="n">loaded_output</span> <span class="o">=</span> <span class="n">caiman_loader</span><span class="o">.</span><span class="n">CaImAn</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Unknown/unimplemented method: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">method</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">method</span><span class="p">,</span> <span class="n">loaded_output</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
 
 
 
@@ -2492,12 +2415,14 @@ the loaded results from (e.g. ProcessingTask, Curation).</p></td>
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.integrate", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["toc.integrate", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.b4d07000.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
-        <script src="https://js-na1.hs-scripts.com/23133402.js"></script>
+        
+          <script src="https://js-na1.hs-scripts.com/23133402.js"></script>
+        
       
     
   </body>
