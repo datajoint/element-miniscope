@@ -2,7 +2,6 @@ import csv
 import importlib
 import inspect
 import json
-import logging
 import pathlib
 from datetime import datetime
 
@@ -16,7 +15,7 @@ from . import miniscope_report
 schema = dj.Schema()
 
 _linking_module = None
-logger = logging.getLogger("datajoint")
+logger = dj.logger
 
 
 def activate(
@@ -125,7 +124,8 @@ class Channel(dj.Lookup):
     """Number of channels in the miniscope recording.
 
     Attributes:
-        channel (tinyint): Number of channels in the miniscope acquisition starting at zero."""
+        channel (tinyint): Number of channels in the miniscope acquisition starting at zero.
+    """
 
     definition = """
     channel     : tinyint  # 0-based indexing
@@ -506,7 +506,6 @@ class Processing(dj.Computed):
             ).fetch1("processing_method")
 
             if method == "caiman":
-                import caiman
                 from element_interface.run_caiman import run_caiman
 
                 avi_files = (
@@ -1203,7 +1202,11 @@ class ProcessingQualityMetrics(dj.Computed):
         """Populate the ProcessingQualityMetrics table and its part tables."""
         from scipy.stats import skew
 
-        (fluorescence, fluorescence_channels, mask_ids,) = (
+        (
+            fluorescence,
+            fluorescence_channels,
+            mask_ids,
+        ) = (
             Segmentation.Mask * RecordingInfo * Fluorescence.Trace & key
         ).fetch("fluorescence", "fluorescence_channel", "mask")
 

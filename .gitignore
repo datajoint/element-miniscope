@@ -105,3 +105,6 @@ temp/*
 /docs/src/tutorials/*ipynb
 /docs/mike-mkdocs*
 element_miniscope/qc.py
+
+# DevContainer/Codespaces
+example_data/
