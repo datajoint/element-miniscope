@@ -25,6 +25,7 @@ def get_miniscope_root_data_dir():
     else:
         raise TypeError("`imaging_root_data_dir` must be a string, pathlib, or list")
 
+
 # Activate schemas
 lab.activate(db_prefix + "lab")
 Device = lab.Device
