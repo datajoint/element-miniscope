@@ -92,7 +92,6 @@ site
 **/.#*
 docker-compose.yml
 
-.vscode*
 
 # datajoint, notes, nwb export
 dj_local_c*.json
