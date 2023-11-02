@@ -27,8 +27,29 @@ def get_miniscope_root_data_dir():
 
 # Activate schemas
 lab.activate(db_prefix + "lab")
+Device = lab.Device
 subject.activate(db_prefix + "subject", linking_module=__name__)
 session.activate(db_prefix + "session", linking_module=__name__)
+
+schema = dj.Schema(db_prefix + "reference")
+
+
+@schema
+class AnatomicalLocation(dj.Manual):
+    """Lookup table for anatomical location
+
+    Attributes:
+        recording_location_id  ( varchar(16) ): Lookup id for location
+        anatomical_description ( varchar(256) ): Location full description
+    """
+
+    definition = """
+    recording_location_id : varchar(16) # Lookup id for location
+    ---
+    anatomical_description: varchar(256) # Location full description
+    """
+
+
 miniscope.activate(db_prefix + "miniscope", linking_module=__name__)
 
 
