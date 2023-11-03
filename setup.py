@@ -42,6 +42,8 @@ setup(
         "caiman @ git+https://github.com/datajoint/CaImAn"
     ],
     extras_require={
+        "caiman_requirements": [caiman_requirements],
+        "caiman": ["caiman @ git+https://github.com/datajoint/CaImAn"],
         "elements": [
             "element-animal>=0.1.8",
             "element-event>=0.2.3",
