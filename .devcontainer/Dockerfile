@@ -32,7 +32,7 @@ COPY ./ /tmp/element-miniscope/
 RUN \
     # pipeline dependencies
     apt-get install gcc g++ ffmpeg libsm6 libxext6 -y && \
-    pip install --no-cache-dir -e /tmp/element-miniscope[caiman_requirements] && \
+    # pip install --no-cache-dir -e /tmp/element-miniscope[caiman_requirements] && \
     # pip install --no-cache-dir -e /tmp/element-miniscope[caiman] && \
     pip install --no-cache-dir -e /tmp/element-miniscope[elements,tests] && \
     # clean up
