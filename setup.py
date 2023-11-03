@@ -39,7 +39,6 @@ setup(
         "ipywidgets",
         "plotly",
         "opencv-python",
-        "caiman @ git+https://github.com/datajoint/CaImAn"
     ],
     extras_require={
         "caiman_requirements": [caiman_requirements],
