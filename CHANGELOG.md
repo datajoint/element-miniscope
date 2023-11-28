@@ -7,7 +7,7 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 
 + Add - DevContainer for codespaces
 + Add - `tutorial_pipeline.py`
-+ Add - 60 min tutorial using Jupyter Notebooks, short demo notebook
++ Add - 60 min tutorial using Jupyter Notebooks
 + Update - General improvements to increase consistency with other DataJoint Elements
 
 ## [0.3.2] - 2023-07-20
