@@ -1,3 +1,5 @@
+import os
+import pathlib
 import datajoint as dj
 from element_animal import subject
 from element_animal.subject import Subject
@@ -9,7 +11,22 @@ from element_lab.lab import User as Experimenter
 from element_session import session_with_datetime as session
 from element_session.session_with_datetime import Session
 import element_interface
-import pathlib
+
+
+if "custom" not in dj.config:
+    dj.config["custom"] = {}
+
+# overwrite dj.config['custom'] values with environment variables if available
+
+dj.config["custom"]["database.prefix"] = os.getenv(
+    "DATABASE_PREFIX", dj.config["custom"].get("database.prefix", "")
+)
+
+dj.config["custom"]["miniscope_root_data_dir"] = os.getenv(
+    "MINISCOPE_ROOT_DATA_DIR", dj.config["custom"].get("miniscope_root_data_dir", "")
+)
+
+db_prefix = dj.config["custom"].get("database.prefix", "")
 
 
 # Declare functions for retrieving data
