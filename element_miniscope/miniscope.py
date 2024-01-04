@@ -366,7 +366,7 @@ class ProcessingParamSet(dj.Lookup):
     """Parameters of the processing method.
 
     Attributes:
-        paramset_id (foreign key, smallint): Unique parameter set ID.
+        paramset_idx (foreign key, smallint): Unique parameter set ID.
         ProcessingMethod (varchar(16) ): ProcessingMethod from the lookup table.
         paramset_desc (varchar(128) ): Description of the parameter set.
         paramset_set_hash (uuid): UUID hash for parameter set.
@@ -375,7 +375,7 @@ class ProcessingParamSet(dj.Lookup):
 
     definition = """
     # Parameter set used for processing of miniscope data
-    paramset_id:  smallint
+    paramset_idx:  smallint
     ---
     -> ProcessingMethod
     paramset_desc: varchar(128)
@@ -388,7 +388,7 @@ class ProcessingParamSet(dj.Lookup):
     def insert_new_params(
         cls,
         processing_method: str,
-        paramset_id: int,
+        paramset_idx: int,
         paramset_desc: str,
         params: dict,
         processing_method_desc: str = "",
@@ -397,7 +397,7 @@ class ProcessingParamSet(dj.Lookup):
 
         Args:
             processing_method (str): Name of the processing method or software.
-            paramset_id (int): Unique number for the set of processing parameters.
+            paramset_idx (int): Unique number for the set of processing parameters.
             paramset_desc (str): Description of the processing parameter set.
             params (dict): Dictionary of processing parameters for the selected processing_method.
             processing_method_desc (str, optional): Description of the processing method. Defaults to "".
@@ -411,7 +411,7 @@ class ProcessingParamSet(dj.Lookup):
         )
         param_dict = {
             "processing_method": processing_method,
-            "paramset_id": paramset_id,
+            "paramset_idx": paramset_idx,
             "paramset_desc": paramset_desc,
             "params": params,
             "param_set_hash": dict_to_uuid(params),
@@ -419,8 +419,8 @@ class ProcessingParamSet(dj.Lookup):
         q_param = cls & {"param_set_hash": param_dict["param_set_hash"]}
 
         if q_param:  # If the specified param-set already exists
-            pname = q_param.fetch1("paramset_id")
-            if pname == paramset_id:  # If the existed set has the same name: job done
+            pname = q_param.fetch1("paramset_idx")
+            if pname == paramset_idx:  # If the existed set has the same name: job done
                 return
             else:  # If not same name: human error, try adding with different name
                 raise dj.DataJointError(
