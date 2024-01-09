@@ -3,6 +3,14 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+## [0.4.0] - 2023-10-31
+
++ Add - DevContainer for codespaces
++ Add - `tutorial_pipeline.py`
++ Add - 60 min tutorial using Jupyter Notebooks
++ Update - General improvements to increase consistency with other DataJoint Elements
++ Update - `paramset_id` attribute to `paramset_idx`
+
 ## [0.3.2] - 2023-07-20
 
 + Add `opencv-python` to requirements
@@ -50,6 +58,7 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 + Add - Load data acquired with Miniscope-DAQ-V3
 + Add - Load data analyzed with MiniscopeAnalysis
 
+[0.4.0]: https://github.com/datajoint/element-miniscope/releases/tag/0.4.0
 [0.3.2]: https://github.com/datajoint/element-miniscope/releases/tag/0.3.2
 [0.3.1]: https://github.com/datajoint/element-miniscope/releases/tag/0.3.1
 [0.3.0]: https://github.com/datajoint/element-miniscope/releases/tag/0.3.0
