@@ -3,6 +3,10 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+## [0.4.1] - 2023-10-31
+
++ Fix - `tutorial_pipeline.py` markdown and variable name typos
+
 ## [0.4.0] - 2023-10-31
 
 + Add - DevContainer for codespaces
