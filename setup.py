@@ -39,6 +39,7 @@ setup(
         "ipywidgets",
         "plotly",
         "opencv-python",
+        "element-interface @ git+https://github.com/datajoint/element-interface.git",
     ],
     extras_require={
         "caiman_requirements": [caiman_requirements],
@@ -46,7 +47,6 @@ setup(
         "elements": [
             "element-animal @ git+https://github.com/datajoint/element-animal.git",
             "element-event @ git+https://github.com/datajoint/element-event.git",
-            "element-interface @ git+https://github.com/datajoint/element-interface.git",
             "element-lab @ git+https://github.com/datajoint/element-lab.git",
             "element-session @ git+https://github.com/datajoint/element-session.git",
         ],

@@ -3,11 +3,17 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
-## [0.4.1] - 2023-10-31
+## [0.4.2] - 2024-01-29
+
++ Fix - `element-interface` required during package installation
++ Fix - apply `black` formatting across the repository
++ Update - GitHub Actions no longer release to PyPI
+
+## [0.4.1] - 2024-01-22
 
 + Fix - `tutorial_pipeline.py` markdown and variable name typos
 
-## [0.4.0] - 2023-10-31
+## [0.4.0] - 2024-01-09
 
 + Add - DevContainer for codespaces
 + Add - `tutorial_pipeline.py`
