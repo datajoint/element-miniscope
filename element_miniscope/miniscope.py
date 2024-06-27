@@ -8,6 +8,7 @@ from datetime import datetime
 import cv2
 import datajoint as dj
 import numpy as np
+import pandas as pd
 from element_interface.utils import dict_to_uuid, find_full_path, find_root_directory
 
 from . import miniscope_report
@@ -116,7 +117,7 @@ class AcquisitionSoftware(dj.Lookup):
     definition = """
     acq_software: varchar(24)
     """
-    contents = zip(["Miniscope-DAQ-V3", "Miniscope-DAQ-V4"])
+    contents = zip(["Miniscope-DAQ-V3", "Miniscope-DAQ-V4", "Inscopix"])
 
 
 @schema
@@ -241,8 +242,8 @@ class RecordingInfo(dj.Imported):
 
         recording_filepaths = [
             file_path.as_posix() for file_path in recording_path.glob("*.avi")
-        ]
-
+        ] if acq_software != "Inscopix" else [
+            file_path.as_posix() for file_path in recording_path.rglob("*.avi")]
         if not recording_filepaths:
             raise FileNotFoundError(f"No .avi files found in " f"{recording_directory}")
 
@@ -299,6 +300,23 @@ class RecordingInfo(dj.Imported):
             time_stamps = np.array(
                 [list(map(int, time_stamps[i])) for i in range(1, len(time_stamps))]
             )
+
+        elif acq_software == "Inscopix":
+            session_metadata = list(recording_path.glob("apply_session.json"))[0]
+            timestamps_file = next(recording_path.glob("*/*timestamps.csv"))[0]
+            inscopix_metadata = json.load(open(session_metadata))
+            recording_timestamps = pd.read_csv(timestamps_file)
+
+            nchannels = len(inscopix_metadata["manual"]["mScope"]["ledMaxPower"])
+            nframes = len(recording_timestamps)
+            fps = inscopix_metadata["microscope"]["fps"]["fps"]
+            gain = inscopix_metadata["microscope"]["gain"]
+            led_power = inscopix_metadata["microscope"]["led"]["exPower"]
+            time_stamps = (recording_timestamps[" time (ms)"] / 1000).values
+            px_height = None
+            px_width = None
+            spatial_downsample = None
+        
         else:
             raise NotImplementedError(
                 f"Loading routine not implemented for {acq_software}"
@@ -391,7 +409,6 @@ class ProcessingParamSet(dj.Lookup):
         paramset_idx: int,
         paramset_desc: str,
         params: dict,
-        processing_method_desc: str = "",
     ):
         """Insert new parameter set.
 
