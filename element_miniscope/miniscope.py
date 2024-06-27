@@ -303,7 +303,7 @@ class RecordingInfo(dj.Imported):
 
         elif acq_software == "Inscopix":
             session_metadata = list(recording_path.glob("apply_session.json"))[0]
-            timestamps_file = next(recording_path.glob("*/*timestamps.csv"))[0]
+            timestamps_file = list(recording_path.glob("*/*timestamps.csv"))[0]
             inscopix_metadata = json.load(open(session_metadata))
             recording_timestamps = pd.read_csv(timestamps_file)
 
