@@ -33,8 +33,8 @@ RUN \
     # pipeline dependencies
     apt-get install gcc g++ ffmpeg libsm6 libxext6 -y && \
     pip install --no-cache-dir -e /tmp/element-miniscope[elements]
-RUN cd /tmp/element-miniscope && \
-    python install_caiman.py && \
+RUN cd ./tmp && git clone git+https://github.com/datajoint/CaImAn.git && cd ./CaImAn && \
+    pip install -e . && caimanmanager.py install --inplace && cd ~ && \
     # clean up
     rm -rf /tmp/element-miniscope && \
     apt-get clean
