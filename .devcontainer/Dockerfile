@@ -32,9 +32,9 @@ COPY ./ /tmp/element-miniscope/
 RUN \
     # pipeline dependencies
     apt-get install gcc g++ ffmpeg libsm6 libxext6 -y && \
-    pip install numpy Cython && \
-    pip install --no-cache-dir -e /tmp/element-miniscope[elements,caiman_requirements,caiman] && \
-    caimanmanager.py install && \
+    pip install --no-cache-dir -e /tmp/element-miniscope[elements]
+RUN cd /tmp/element-miniscope && \
+    python install_caiman.py && \
     # clean up
     rm -rf /tmp/element-miniscope && \
     apt-get clean
