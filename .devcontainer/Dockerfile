@@ -33,10 +33,12 @@ RUN \
     # pipeline dependencies
     apt-get install gcc g++ ffmpeg libsm6 libxext6 -y && \
     pip install --no-cache-dir -e /tmp/element-miniscope[elements]
-RUN cd ./tmp && git clone git+https://github.com/datajoint/CaImAn.git && cd ./CaImAn && \
-    pip install -e . && caimanmanager.py install --inplace && cd ~ && \
+RUN cd ./tmp && git clone https://github.com/datajoint/CaImAn.git && cd ./CaImAn && \
+    pip install -r requirements.txt && pip install -e . && \
+    caimanmanager install --inplace && cd ~ && \
     # clean up
     rm -rf /tmp/element-miniscope && \
+    rm -rf /tmp/CaImAn && \
     apt-get clean
 
 ENV DJ_HOST fakeservices.datajoint.io
