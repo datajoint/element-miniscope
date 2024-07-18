@@ -739,66 +739,6 @@ class Processing(dj.Computed):
         self.insert1(key)
 
 
-@schema
-class Curation(dj.Manual):
-    """Defines whether and how the results should be curated.
-
-    Attributes:
-        Processing (foreign key): Processing primary key.
-        curation_id (int): Unique curation ID.
-        curation_time (datetime): Time of generation of curated results.
-        curation_output_dir (str): Output directory for curated results.
-        manual_curation (bool): If True, manual curation has been performed.
-        curation_note (str, optional): Optional description of the curation procedure.
-    """
-
-    definition = """
-    # Different rounds of curation performed on the processing results of the data
-    # (no-curation can also be included here)
-    -> Processing
-    curation_id: int
-    ---
-    curation_time: datetime             # time of generation of these curated results
-    curation_output_dir: varchar(255)   # output directory of the curated results,
-                                        # relative to root data directory
-    manual_curation: bool               # has manual curation been performed?
-    curation_note='': varchar(2000)
-    """
-
-    @classmethod
-    def create1_from_processing_task(self, key, is_curated=False, curation_note=""):
-        """Given a "ProcessingTask", create a new corresponding "Curation" """
-        if key not in Processing():
-            raise ValueError(
-                f"No corresponding entry in Processing available for: "
-                f"{key}; run `Processing.populate(key)`"
-            )
-
-        output_dir = (ProcessingTask & key).fetch1("processing_output_dir")
-        method, imaging_dataset = get_loader_result(key, ProcessingTask)
-
-        if method == "caiman":
-            caiman_dataset = imaging_dataset
-            curation_time = caiman_dataset.creation_time
-        else:
-            raise NotImplementedError("Unknown method: {}".format(method))
-
-        # Synthesize curation_id
-        curation_id = (
-            dj.U().aggr(self & key, n="ifnull(max(curation_id)+1,1)").fetch1("n")
-        )
-        self.insert1(
-            {
-                **key,
-                "curation_id": curation_id,
-                "curation_time": curation_time,
-                "curation_output_dir": output_dir,
-                "manual_curation": is_curated,
-                "curation_note": curation_note,
-            }
-        )
-
-
 # Motion Correction --------------------------------------------------------------------
 
 
@@ -807,12 +747,12 @@ class MotionCorrection(dj.Imported):
     """Automated table performing motion correction analysis.
 
     Attributes:
-        Curation (foreign key): Curation primary key.
+        Processing (foreign key): Processing primary key.
         Channel.proj(motion_correct_channel='channel'): Channel used for motion correction.
     """
 
     definition = """
-    -> Curation
+    -> Processing
     ---
     -> Channel.proj(motion_correct_channel='channel') # channel used for
                                                       # motion correction
@@ -980,11 +920,11 @@ class Segmentation(dj.Computed):
     """Automated table computes different mask segmentations.
 
     Attributes:
-        Curation (foreign key): Curation primary key.
+        Processing (foreign key): Processing primary key.
     """
 
     definition = """ # Different mask segmentations.
-    -> Curation
+    -> Processing
     """
 
     class Mask(dj.Part):
@@ -1364,7 +1304,6 @@ class ProcessingQualityMetrics(dj.Computed):
 
 _table_attribute_mapper = {
     "ProcessingTask": "processing_output_dir",
-    "Curation": "curation_output_dir",
 }
 
 
