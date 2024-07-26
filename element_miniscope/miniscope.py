@@ -248,7 +248,7 @@ class RecordingInfo(dj.Imported):
         -> master
         channel_id : tinyint
         ---
-        channel_gain=null : float   # channel gain
+        gain=null : float   # channel gain
         led_power=null         : float   # LED power used for the channel
         """
 
