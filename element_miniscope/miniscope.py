@@ -212,7 +212,6 @@ class RecordingInfo(dj.Imported):
         gain (float): Recording gain.
         spatial_downsample (tinyint): Amount of downsampling applied.
         led_power (float): LED power used for the recording.
-        time_stamps (longblob): Time stamps for each frame.
         recording_datetime (datetime): Datetime of the recording.
         recording_duration (float): Total recording duration (seconds).
     """
@@ -223,33 +222,40 @@ class RecordingInfo(dj.Imported):
     ---
     nchannels            : tinyint   # number of channels
     nframes              : int       # number of recorded frames
-    px_height=null       : smallint  # height in pixels
-    px_width=null        : smallint  # width in pixels
-    um_height=null       : float     # height in microns
-    um_width=null        : float     # width in microns
+    ndepths=1            : tinyint   # number of depths
+    px_height            : smallint  # height in pixels
+    px_width             : smallint  # width in pixels
     fps                  : float     # (Hz) frames per second
-    spatial_downsample=1 : tinyint   # e.g. 1, 2, 4, 8. 1 for no downsampling
-    time_stamps          : longblob  # time stamps of each frame
     recording_datetime=null   : datetime  # datetime of the recording
     recording_duration=null   : float     # (seconds) duration of the recording
     """
 
-    class Channel(dj.Part):
-        """Channel information for each recording.
-
+    class Config(dj.Part):
+        """Recording metadata and configuration.
+        
         Attributes:
-            RecordingInfo (foreign key): A primary key from RecordingInfo.
-            channel_id (tinyint): Channel number.
-            channel_gain (float, optional): Channel gain.
-            led_power (float, optional): LED power used for the channel.
+            Recording (foreign key): A primary key from RecordingInfo.
+            config (longblob): Recording metadata and configuration.
         """
 
         definition = """
         -> master
-        channel_id : tinyint
         ---
-        gain=null : float   # channel gain
-        led_power=null         : float   # LED power used for the channel
+        config: longblob  # recording metadata and configuration
+        """
+    
+    class Timestamps(dj.Part):
+        """Recording timestamps for each frame.
+
+        Attributes:
+            Recording (foreign key): A primary key from RecordingInfo.
+            timestamps (longblob): Recording timestamps for each frame.
+        """
+
+        definition = """
+        -> master
+        ---
+        timestamps: longblob
         """
 
     class File(dj.Part):
@@ -310,14 +316,15 @@ class RecordingInfo(dj.Imported):
             fps = video.get(cv2.CAP_PROP_FPS)
 
         elif acq_software == "Miniscope-DAQ-V4":
-            recording_metadata = list(recording_path.glob("metaData.json"))[0]
-            recording_timestamps = list(recording_path.glob("timeStamps.csv"))[0]
-
-            if not recording_metadata.exists():
+            try:
+                recording_metadata = next(recording_path.glob("metaData.json"))
+            except StopIteration:
                 raise FileNotFoundError(
                     f"No .json file found in " f"{recording_directory}"
                 )
-            if not recording_timestamps.exists():
+            try:
+                recording_timestamps = next(recording_path.glob("timeStamps.csv"))
+            except StopIteration:
                 raise FileNotFoundError(
                     f"No timestamp (*.csv) file found in " f"{recording_directory}"
                 )
@@ -333,26 +340,21 @@ class RecordingInfo(dj.Imported):
             px_height = metadata["ROI"]["height"]
             px_width = metadata["ROI"]["width"]
             fps = int(metadata["frameRate"].replace("FPS", ""))
-            gain = metadata["gain"]
-            spatial_downsample = 1  # Assumes no spatial downsampling
-            led_power = metadata["led0"]
             time_stamps = np.array(time_stamps).astype(float)
 
         elif acq_software == "Inscopix":
-            session_metadata = list(recording_path.glob("apply_session.json"))[0]
-            timestamps_file = list(recording_path.glob("*/*timestamps.csv"))[0]
-            inscopix_metadata = json.load(open(session_metadata))
+            session_metadata = next(recording_path.glob("session.json"))
+            timestamps_file = next(recording_path.glob("*/*timestamps.csv"))
+            recording_metadata = json.load(open(session_metadata))
             recording_timestamps = pd.read_csv(timestamps_file)
 
-            nchannels = len(inscopix_metadata["manual"]["mScope"]["ledMaxPower"])
+            nchannels = len(recording_metadata["manual"]["mScope"]["ledMaxPower"])
             nframes = len(recording_timestamps)
-            fps = inscopix_metadata["microscope"]["fps"]["fps"]
-            gain = inscopix_metadata["microscope"]["gain"]
-            led_power = inscopix_metadata["microscope"]["led"]["exPower"]
+            fps = recording_metadata["microscope"]["fps"]["fps"]
             time_stamps = (recording_timestamps[" time (ms)"] / 1000).values
-            px_height = None
-            px_width = None
-            spatial_downsample = None
+            px_height = recording_metadata["microscope"]["fov"]["height"]
+            px_width = recording_metadata["microscope"]["fov"]["width"]
+
         
         else:
             raise NotImplementedError(
@@ -369,10 +371,6 @@ class RecordingInfo(dj.Imported):
                 px_height=px_height,
                 px_width=px_width,
                 fps=fps,
-                gain=gain,
-                spatial_downsample=spatial_downsample,
-                led_power=led_power,
-                time_stamps=time_stamps,
                 recording_duration=nframes / fps,
             )
         )
@@ -391,6 +389,17 @@ class RecordingInfo(dj.Imported):
                 for i, f in enumerate(recording_files)
             ]
         )
+
+        if acq_software == "Inscopix" or acq_software == "Miniscope-DAQ-V4":
+            self.Timestamps.insert1(
+                dict(**key, timestamps=time_stamps)
+            )
+            self.Config.insert1(
+                dict(
+                    **key,
+                    config=recording_metadata,
+                )
+            )
 
 
 # Trigger a processing routine -------------------------------------------------
