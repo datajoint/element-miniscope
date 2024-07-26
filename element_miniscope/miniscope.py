@@ -232,7 +232,7 @@ class RecordingInfo(dj.Imported):
 
     class Config(dj.Part):
         """Recording metadata and configuration.
-        
+
         Attributes:
             Recording (foreign key): A primary key from RecordingInfo.
             config (longblob): Recording metadata and configuration.
@@ -243,7 +243,7 @@ class RecordingInfo(dj.Imported):
         ---
         config: longblob  # recording metadata and configuration
         """
-    
+
     class Timestamps(dj.Part):
         """Recording timestamps for each frame.
 
@@ -285,10 +285,11 @@ class RecordingInfo(dj.Imported):
             get_miniscope_root_data_dir(), recording_directory
         )
 
-        recording_filepaths = [
-            file_path.as_posix() for file_path in recording_path.glob("*.avi")
-        ] if acq_software != "Inscopix" else [
-            file_path.as_posix() for file_path in recording_path.rglob("*.avi")]
+        recording_filepaths = (
+            [file_path.as_posix() for file_path in recording_path.glob("*.avi")]
+            if acq_software != "Inscopix"
+            else [file_path.as_posix() for file_path in recording_path.rglob("*.avi")]
+        )
         if not recording_filepaths:
             raise FileNotFoundError(f"No .avi files found in " f"{recording_directory}")
 
@@ -340,7 +341,7 @@ class RecordingInfo(dj.Imported):
             px_height = metadata["ROI"]["height"]
             px_width = metadata["ROI"]["width"]
             fps = int(metadata["frameRate"].replace("FPS", ""))
-            time_stamps = np.array(time_stamps).astype(float)
+            time_stamps = np.array(time_stamps[1:], dtype=float)[:, 0]
 
         elif acq_software == "Inscopix":
             session_metadata = next(recording_path.glob("session.json"))
@@ -355,7 +356,6 @@ class RecordingInfo(dj.Imported):
             px_height = recording_metadata["microscope"]["fov"]["height"]
             px_width = recording_metadata["microscope"]["fov"]["width"]
 
-        
         else:
             raise NotImplementedError(
                 f"Loading routine not implemented for {acq_software}"
@@ -391,9 +391,7 @@ class RecordingInfo(dj.Imported):
         )
 
         if acq_software == "Inscopix" or acq_software == "Miniscope-DAQ-V4":
-            self.Timestamps.insert1(
-                dict(**key, timestamps=time_stamps)
-            )
+            self.Timestamps.insert1(dict(**key, timestamps=time_stamps))
             self.Config.insert1(
                 dict(
                     **key,
@@ -644,7 +642,7 @@ class Processing(dj.Computed):
     @property
     def key_source(self):
         return ProcessingTask & RecordingInfo
-    
+
     def make(self, key):
         """
         Execute the miniscope analysis defined by the ProcessingTask.
@@ -672,7 +670,7 @@ class Processing(dj.Computed):
                 output_dir.mkdir(parents=True, exist_ok=True)
             else:
                 raise e
-            
+
         if task_mode == "load":
             method, loaded_result = get_loader_result(key, ProcessingTask)
             if method == "caiman":
@@ -966,12 +964,12 @@ class MotionCorrection(dj.Imported):
 
             # -- summary images --
             summary_images = {
-                    **key,
-                    "ref_image": caiman_dataset.ref_image,
-                    "average_image": caiman_dataset.mean_image,
-                    "correlation_image": caiman_dataset.correlation_map,
-                    "max_proj_image": caiman_dataset.max_proj_image,
-                }
+                **key,
+                "ref_image": caiman_dataset.ref_image,
+                "average_image": caiman_dataset.mean_image,
+                "correlation_image": caiman_dataset.correlation_map,
+                "max_proj_image": caiman_dataset.max_proj_image,
+            }
             self.Summary.insert(summary_images)
 
         else:
@@ -1295,9 +1293,9 @@ class Activity(dj.Computed):
                         mask=mask["mask_id"],
                         fluo_channel=segmentation_channel,
                         activity_trace=mask[attr_mapper[key["extraction_method"]]],
-                    ) for mask in caiman_dataset.masks
+                    )
+                    for mask in caiman_dataset.masks
                 )
-                    
 
         else:
             raise NotImplementedError("Unknown/unimplemented method: {}".format(method))
