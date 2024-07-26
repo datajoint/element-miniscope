@@ -468,7 +468,11 @@ class ProcessingParamSet(dj.Lookup):
         """
 
         ProcessingMethod.insert1(
-            {"processing_method": processing_method}, skip_duplicates=True
+            {
+                "processing_method": processing_method,
+                "processing_method_desc": "caiman analysis",
+            },
+            skip_duplicates=True,
         )
         param_dict = {
             "processing_method": processing_method,
