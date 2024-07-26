@@ -12,14 +12,6 @@ with open(path.join(here, "README.md"), "r") as f:
 with open(path.join(here, pkg_name, "version.py")) as f:
     exec(f.read())
 
-with urllib.request.urlopen(
-    "https://raw.githubusercontent.com/flatironinstitute/CaImAn/master/requirements.txt"
-) as f:
-    caiman_requirements = f.read().decode("UTF-8").split("\n")
-
-caiman_requirements.remove("")
-caiman_requirements.append("future")
-
 setup(
     name=pkg_name.replace("_", "-"),
     version=__version__,  # noqa: F821
@@ -39,11 +31,9 @@ setup(
         "ipywidgets",
         "plotly",
         "opencv-python",
-        "element-interface @ git+https://github.com/datajoint/element-interface.git",
+        "element-interface @ git+https://github.com/datajoint/element-interface.git@staging",
     ],
     extras_require={
-        "caiman_requirements": [caiman_requirements],
-        "caiman": ["caiman @ git+https://github.com/datajoint/CaImAn.git"],
         "elements": [
             "element-animal @ git+https://github.com/datajoint/element-animal.git",
             "element-event @ git+https://github.com/datajoint/element-event.git",
