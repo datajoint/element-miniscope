@@ -336,9 +336,7 @@ class RecordingInfo(dj.Imported):
             gain = metadata["gain"]
             spatial_downsample = 1  # Assumes no spatial downsampling
             led_power = metadata["led0"]
-            time_stamps = np.array(
-                [list(map(int, time_stamps[i])) for i in range(1, len(time_stamps))]
-            )
+            time_stamps = np.array(time_stamps).astype(float)
 
         elif acq_software == "Inscopix":
             session_metadata = list(recording_path.glob("apply_session.json"))[0]
