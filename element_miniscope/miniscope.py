@@ -344,17 +344,17 @@ class RecordingInfo(dj.Imported):
             time_stamps = np.array(time_stamps[1:], dtype=float)[:, 0]
 
         elif acq_software == "Inscopix":
-            session_metadata = next(recording_path.glob("session.json"))
+            inscopix_metadata = next(recording_path.glob("session.json"))
             timestamps_file = next(recording_path.glob("*/*timestamps.csv"))
-            recording_metadata = json.load(open(session_metadata))
+            metadata = json.load(open(inscopix_metadata))
             recording_timestamps = pd.read_csv(timestamps_file)
 
-            nchannels = len(recording_metadata["manual"]["mScope"]["ledMaxPower"])
+            nchannels = len(metadata["manual"]["mScope"]["ledMaxPower"])
             nframes = len(recording_timestamps)
-            fps = recording_metadata["microscope"]["fps"]["fps"]
+            fps = metadata["microscope"]["fps"]["fps"]
             time_stamps = (recording_timestamps[" time (ms)"] / 1000).values
-            px_height = recording_metadata["microscope"]["fov"]["height"]
-            px_width = recording_metadata["microscope"]["fov"]["width"]
+            px_height = metadata["microscope"]["fov"]["height"]
+            px_width = metadata["microscope"]["fov"]["width"]
 
         else:
             raise NotImplementedError(
@@ -395,7 +395,7 @@ class RecordingInfo(dj.Imported):
             self.Config.insert1(
                 dict(
                     **key,
-                    config=recording_metadata,
+                    config=metadata,
                 )
             )
 
