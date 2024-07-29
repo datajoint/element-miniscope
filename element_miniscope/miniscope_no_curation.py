@@ -471,7 +471,8 @@ class ProcessingParamSet(dj.Lookup):
             {
                 "processing_method": processing_method,
                 "processing_method_desc": "caiman_analysis",
-            }, skip_duplicates=True
+            },
+            skip_duplicates=True,
         )
         param_dict = {
             "processing_method": processing_method,
@@ -645,7 +646,7 @@ class Processing(dj.Computed):
     @property
     def key_source(self):
         return ProcessingTask & RecordingInfo
-    
+
     def make(self, key):
         """
         Execute the miniscope analysis defined by the ProcessingTask.
@@ -673,7 +674,7 @@ class Processing(dj.Computed):
                 output_dir.mkdir(parents=True, exist_ok=True)
             else:
                 raise e
-            
+
         if task_mode == "load":
             method, loaded_result = get_loader_result(key, ProcessingTask)
             if method == "caiman":
@@ -907,12 +908,12 @@ class MotionCorrection(dj.Imported):
 
             # -- summary images --
             summary_images = {
-                    **key,
-                    "ref_image": caiman_dataset.ref_image.transpose(2, 0, 1),
-                    "average_image": caiman_dataset.mean_image.transpose(2, 0, 1),
-                    "correlation_image": caiman_dataset.correlation_map.transpose(2, 0, 1),
-                    "max_proj_image": caiman_dataset.max_proj_image.transpose(2, 0, 1),
-                }
+                **key,
+                "ref_image": caiman_dataset.ref_image.transpose(2, 0, 1),
+                "average_image": caiman_dataset.mean_image.transpose(2, 0, 1),
+                "correlation_image": caiman_dataset.correlation_map.transpose(2, 0, 1),
+                "max_proj_image": caiman_dataset.max_proj_image.transpose(2, 0, 1),
+            }
             self.Summary.insert(summary_images)
 
         else:
@@ -1236,9 +1237,9 @@ class Activity(dj.Computed):
                         mask=mask["mask_id"],
                         fluo_channel=segmentation_channel,
                         activity_trace=mask[attr_mapper[key["extraction_method"]]],
-                    ) for mask in caiman_dataset.masks
+                    )
+                    for mask in caiman_dataset.masks
                 )
-                    
 
         else:
             raise NotImplementedError("Unknown/unimplemented method: {}".format(method))
