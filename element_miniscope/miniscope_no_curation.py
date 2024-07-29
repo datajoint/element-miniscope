@@ -390,7 +390,7 @@ class RecordingInfo(dj.Imported):
             ]
         )
 
-        if acq_software == "Inscopix" or acq_software == "Miniscope-DAQ-V4":
+        if acq_software in ("Inscopix", "Miniscope-DAQ-V4"):
             self.Timestamps.insert1(dict(**key, timestamps=time_stamps))
             self.Config.insert1(
                 dict(
