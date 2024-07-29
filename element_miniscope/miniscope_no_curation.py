@@ -643,10 +643,6 @@ class Processing(dj.Computed):
     package_version=''  : varchar(16)
     """
 
-    @property
-    def key_source(self):
-        return ProcessingTask & RecordingInfo
-
     def make(self, key):
         """
         Execute the miniscope analysis defined by the ProcessingTask.
