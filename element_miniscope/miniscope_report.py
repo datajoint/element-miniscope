@@ -35,7 +35,7 @@ def activate(
 @schema
 class QualityMetrics(dj.Imported):
     definition = """
-    -> miniscope.Curation
+    -> miniscope.Processing
     ---
     r_values=null  : longblob # space correlation for each component
     snr=null       : longblob # trace SNR for each component
