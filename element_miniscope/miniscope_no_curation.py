@@ -557,7 +557,7 @@ class ProcessingTask(dj.Manual):
         acq_software = (Recording & key).fetch1("acq_software")
         recording_dir = find_full_path(
             get_miniscope_root_data_dir(),
-            get_session_directory(key)[0],
+            get_session_directory(key),
         )
         root_dir = find_root_directory(get_miniscope_root_data_dir(), recording_dir)
 
