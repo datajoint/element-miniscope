@@ -702,31 +702,14 @@ class Processing(dj.Computed):
                     ProcessingTask * Recording * RecordingInfo & key
                 ).fetch1("fps")
 
-                input_hash = dict_to_uuid(dict(**key, **params))
-                input_hash_fp = output_dir / f".{input_hash }.json"
+                run_caiman(
+                    file_paths=avi_files,
+                    parameters=params,
+                    sampling_rate=sampling_rate,
+                    output_dir=output_dir.as_posix(),
+                    is3D=False,
+                )
 
-                if not input_hash_fp.exists():
-                    start_time = datetime.utcnow()
-                    run_caiman(
-                        file_paths=avi_files,
-                        parameters=params,
-                        sampling_rate=sampling_rate,
-                        output_dir=output_dir.as_posix(),
-                        is3D=False,
-                    )
-                    completion_time = datetime.utcnow()
-                    with open(input_hash_fp, "w") as f:
-                        json.dump(
-                            {
-                                "start_time": start_time,
-                                "completion_time": completion_time,
-                                "duration": (
-                                    completion_time - start_time
-                                ).total_seconds(),
-                            },
-                            f,
-                            default=str,
-                        )
 
                 _, imaging_dataset = get_loader_result(key, ProcessingTask)
                 caiman_dataset = imaging_dataset
