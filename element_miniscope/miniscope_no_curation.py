@@ -662,7 +662,7 @@ class Processing(dj.Computed):
         try:
             output_dir = find_full_path(
                 get_miniscope_root_data_dir(), output_dir
-            ).as_posix()
+            )
         except FileNotFoundError as e:
             if task_mode == "trigger":
                 processed_dir = pathlib.Path(get_processed_root_data_dir())
