@@ -893,7 +893,7 @@ class MotionCorrection(dj.Imported):
                 "correlation_image": caiman_dataset.correlation_map.transpose(2, 0, 1),
                 "max_proj_image": caiman_dataset.max_proj_image.transpose(2, 0, 1),
             }
-            self.Summary.insert(summary_images)
+            self.Summary.insert1(summary_images)
 
         else:
             raise NotImplementedError("Unknown/unimplemented method: {}".format(method))
@@ -949,7 +949,7 @@ class Segmentation(dj.Computed):
 
     def make(self, key):
         """Populates table with segmentation data."""
-        method, loaded_result = get_loader_result(key, Curation)
+        method, loaded_result = get_loader_result(key, ProcessingTask)
 
         if method == "caiman":
             caiman_dataset = loaded_result
@@ -1099,7 +1099,7 @@ class Fluorescence(dj.Computed):
 
     def make(self, key):
         """Populates table with fluorescence trace data."""
-        method, loaded_result = get_loader_result(key, Curation)
+        method, loaded_result = get_loader_result(key, ProcessingTask)
 
         if method == "caiman":
             caiman_dataset = loaded_result
@@ -1189,7 +1189,7 @@ class Activity(dj.Computed):
 
     def make(self, key):
         """Populates table with activity trace data."""
-        method, loaded_result = get_loader_result(key, Curation)
+        method, loaded_result = get_loader_result(key, ProcessingTask)
 
         if method == "caiman":
             caiman_dataset = loaded_result
@@ -1298,9 +1298,9 @@ def get_loader_result(key, table) -> tuple:
     """Retrieve the loaded processed imaging results from the loader (e.g. caiman, etc.)
 
     Args:
-        key (dict): the `key` to one entry of ProcessingTask or Curation.
+        key (dict): the `key` to one entry of ProcessingTask.
         table (str): the class defining the table to retrieve
-            the loaded results from (e.g. ProcessingTask, Curation).
+            the loaded results from (e.g. ProcessingTask).
 
     Returns:
         method, loaded_output (tuple): method string and loader object with results (e.g. caiman.CaImAn, etc.)
