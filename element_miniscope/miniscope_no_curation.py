@@ -893,7 +893,7 @@ class MotionCorrection(dj.Imported):
                 "correlation_image": caiman_dataset.correlation_map.transpose(2, 0, 1),
                 "max_proj_image": caiman_dataset.max_proj_image.transpose(2, 0, 1),
             }
-            self.Summary.insert(summary_images)
+            self.Summary.insert1(summary_images)
 
         else:
             raise NotImplementedError("Unknown/unimplemented method: {}".format(method))
