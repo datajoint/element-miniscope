@@ -1116,7 +1116,7 @@ class Fluorescence(dj.Computed):
                     {
                         **key,
                         "mask": mask["mask_id"],
-                        "fluo_channel": segmentation_channel,
+                        "fluorescence_channel": segmentation_channel,
                         "fluorescence": mask["inferred_trace"],
                     }
                 )
@@ -1214,7 +1214,7 @@ class Activity(dj.Computed):
                     dict(
                         key,
                         mask=mask["mask_id"],
-                        fluo_channel=segmentation_channel,
+                        fluorescence_channel=segmentation_channel,
                         activity_trace=mask[attr_mapper[key["extraction_method"]]],
                     )
                     for mask in caiman_dataset.masks
