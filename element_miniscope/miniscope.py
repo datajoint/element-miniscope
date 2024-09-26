@@ -12,7 +12,7 @@ from element_interface.utils import dict_to_uuid, find_full_path, find_root_dire
 
 from . import miniscope_report
 
-schema = dj.Schema()
+schema = dj.schema()
 
 _linking_module = None
 logger = dj.logger
