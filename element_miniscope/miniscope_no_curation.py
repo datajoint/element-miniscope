@@ -643,6 +643,14 @@ class Processing(dj.Computed):
     package_version=''  : varchar(16)
     """
 
+    class File(dj.Part):
+        definition = """
+        -> master
+        file_name: varchar(255)     # file name
+        ---
+        file: filepath@miniscope-processed
+        """
+
     def make(self, key):
         """
         Execute the miniscope analysis defined by the ProcessingTask.
@@ -724,6 +732,17 @@ class Processing(dj.Computed):
             raise ValueError(f"Unknown task mode: {task_mode}")
 
         self.insert1(key)
+        self.File.insert(
+            [
+                {
+                    **key,
+                    "file_name": f.relative_to(output_dir).as_posix(),
+                    "file": f,
+                }
+                for f in output_dir.rglob("*")
+                if f.is_file()
+            ]
+        )
 
 
 # Motion Correction --------------------------------------------------------------------
