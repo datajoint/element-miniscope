@@ -89,16 +89,15 @@ def plot_cell_overlayed_image(
 
 
 def figure_data(miniscope_module, segmentation_key):
-    miniscope = dj.create_virtual_module("miniscope", miniscope_module)
 
     average_image = np.squeeze(
-        (miniscope.MotionCorrection.Summary & segmentation_key).fetch1("average_image")
+        (miniscope_module.MotionCorrection.Summary & segmentation_key).fetch1("average_image")
     )
     max_projection_image = np.squeeze(
-        (miniscope.MotionCorrection.Summary & segmentation_key).fetch1("max_proj_image")
+        (miniscope_module.MotionCorrection.Summary & segmentation_key).fetch1("max_proj_image")
     )
     mask_ids, mask_xpix, mask_ypix = (
-        miniscope.Segmentation.Mask & segmentation_key
+        miniscope_module.Segmentation.Mask & segmentation_key
     ).fetch("mask", "mask_xpix", "mask_ypix")
 
     return average_image, max_projection_image, mask_ids, mask_xpix, mask_ypix
