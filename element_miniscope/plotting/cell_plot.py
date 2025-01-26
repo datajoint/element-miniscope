@@ -63,12 +63,12 @@ def plot_cell_overlayed_image(
             {
                 "buttons": [
                     {
-                        "label": "Average Projection",
+                        "label": "Average Image",
                         "method": "update",
                         "args": [{"visible": [True, False] + [True] * mask_ids.size}],
                     },
                     {
-                        "label": "Max Projection",
+                        "label": "Max Projection Image",
                         "method": "update",
                         "args": [{"visible": [False, True] + [True] * mask_ids.size}],
                     },
