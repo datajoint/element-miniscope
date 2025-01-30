@@ -532,7 +532,7 @@ class ProcessingTask(dj.Manual):
     -> RecordingInfo
     -> ProcessingParamSet
     ---
-    processing_output_dir : varchar(255)    # relative to the root data directory
+    processing_output_dir='': varchar(255)    # relative to the root data directory
     task_mode='load'      : enum('load', 'trigger') # 'load': load existing results
                                                     # 'trigger': trigger procedure
     """
