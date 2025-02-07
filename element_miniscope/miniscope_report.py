@@ -1,12 +1,12 @@
 import datajoint as dj
 
-schema = dj.schema()
+from . import miniscope_no_curation as miniscope
 
-miniscope = None
+schema = dj.schema()
 
 
 def activate(
-    schema_name, miniscope_schema_name, *, create_schema=True, create_tables=True
+    schema_name, *, create_schema=True, create_tables=True
 ):
     """Activate this schema.
 
@@ -15,15 +15,14 @@ def activate(
     Args:
         schema_name (str): schema name on the database server to activate the
             `miniscope_report` schema
-        miniscope_schema_name (str): schema name of the activated miniscope element for
-            which this miniscope_report schema will be downstream from
         create_schema (bool): when True (default), create schema in the database if it
             does not yet exist.
         create_tables (str): when True (default), create schema takes in the database
             if they do not yet exist.
     """
-    global miniscope
-    miniscope = dj.create_virtual_module("miniscope", miniscope_schema_name)
+    if not miniscope.schema.is_activated():
+        raise RuntimeError("Please activate the `miniscope` schema first.")
+
     schema.activate(
         schema_name,
         create_schema=create_schema,

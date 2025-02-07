@@ -12,8 +12,6 @@ import numpy as np
 import pandas as pd
 from element_interface.utils import dict_to_uuid, find_full_path, find_root_directory
 
-from . import miniscope_report
-
 logger = dj.logger
 
 schema = dj.Schema()
@@ -69,7 +67,6 @@ def activate(
         create_tables=create_tables,
         add_objects=_linking_module.__dict__,
     )
-    miniscope_report.activate(f"{miniscope_schema_name}_report", miniscope_schema_name)
 
 
 # Functions required by the element-miniscope  -----------------------------------------
