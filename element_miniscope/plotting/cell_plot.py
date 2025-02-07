@@ -100,11 +100,11 @@ def figure_data(miniscope_module, segmentation_key):
             "max_proj_image"
         )
     )
-    mask_ids, mask_xpix, mask_ypix = (
+    mask_ids, mask_xpix, mask_ypix, mask_weights = (
         miniscope_module.Segmentation.Mask & segmentation_key
-    ).fetch("mask", "mask_xpix", "mask_ypix")
+    ).fetch("mask", "mask_xpix", "mask_ypix", "mask_weights")
 
-    return average_image, max_projection_image, mask_ids, mask_xpix, mask_ypix
+    return average_image, max_projection_image, mask_ids, mask_xpix, mask_ypix, mask_weights
 
 
 def normalize_image(image, low_q=0, high_q=1):
