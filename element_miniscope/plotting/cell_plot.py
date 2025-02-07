@@ -15,7 +15,7 @@ def plot_cell_overlayed_image(
     """Generate a Plotly figure with an overlayed summary image and ROI masks."""
 
     # Fetch data
-    average_image, max_projection_image, mask_ids, mask_xpix, mask_ypix = figure_data(
+    average_image, max_projection_image, mask_ids, mask_xpix, mask_ypix, _ = figure_data(
         miniscope_module, segmentation_key
     )
 
