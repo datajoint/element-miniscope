@@ -11,7 +11,7 @@ detailed documentation on each table, see the API docs for the respective schema
 
 ### `reference` schema
 
-+ For further details see the [reference schema API docs](https://datajoint.com/docs/elements/element-miniscope/latest/api/workflow_miniscope/reference/)
++ For further details see the [reference schema API docs](https://docs.datajoint.com/elements/element-miniscope/0.3/api/workflow_miniscope/reference/)
 
 | Table | Description |
 | --- | --- |
@@ -21,7 +21,7 @@ detailed documentation on each table, see the API docs for the respective schema
 
 + Although not required, most choose to connect the `Session` table to a `Subject` table.
 
-+ For further details see the [subject schema API docs](https://datajoint.com/docs/elements/element-animal/api/element_animal/subject/)
++ For further details see the [subject schema API docs](https://docs.datajoint.com/elements/element-animal/latest/api/element_animal/subject/)
 
 | Table | Description |
 | --- | --- |
@@ -29,7 +29,7 @@ detailed documentation on each table, see the API docs for the respective schema
 
 ### `session` schema
 
-+ For further details see the [session schema API docs](https://datajoint.com/docs/elements/element-session/latest/api/element_session/session_with_datetime/)
++ For further details see the [session schema API docs](https://docs.datajoint.com/elements/element-session/latest/api/element_session/session_with_datetime/)
 
 | Table | Description |
 | --- | --- |
@@ -38,8 +38,6 @@ detailed documentation on each table, see the API docs for the respective schema
 ### `miniscope` schema
 
 + Tables related to importing and analyzing miniscope data.
-
-+ For further details see the [miniscope schema API docs](https://datajoint.com/docs/elements/element-miniscope/latest/api/element_miniscope/miniscope)
 
 | Table | Description |
 | --- | --- |
@@ -77,8 +75,6 @@ detailed documentation on each table, see the API docs for the respective schema
 ### `miniscope_report` schema
 
 + Tables that provide summary reports of the processed miniscope data.
-
-+ For further details see the [miniscope_report API docs](https://datajoint.com/docs/elements/element-miniscope/latest/api/element_miniscope/miniscope_report)
 
 | Table | Description |
 | --- | --- |
