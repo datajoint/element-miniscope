@@ -1,7 +1,7 @@
 # ---------------------- PROJECT SPECIFIC ---------------------------
 
 site_name: DataJoint Documentation
-site_url: http://localhost/docs/elements/element-miniscope
+site_url: https://docs.datajoint.com/elements/element-miniscope/
 repo_url: https://github.com/datajoint/element-miniscope
 repo_name: datajoint/element-miniscope
 nav:
