@@ -1,6 +1,6 @@
 import datajoint as dj
 
-from . import miniscope_no_curation as miniscope
+from . import miniscope
 
 schema = dj.schema()
 
