@@ -5,9 +5,7 @@ from . import miniscope_no_curation as miniscope
 schema = dj.schema()
 
 
-def activate(
-    schema_name, *, create_schema=True, create_tables=True
-):
+def activate(schema_name, *, create_schema=True, create_tables=True):
     """Activate this schema.
 
     The "activation" of miniscope_report should be evoked by the miniscope module

@@ -15,8 +15,8 @@ def plot_cell_overlayed_image(
     """Generate a Plotly figure with an overlayed summary image and ROI masks."""
 
     # Fetch data
-    average_image, max_projection_image, mask_ids, mask_xpix, mask_ypix, _ = figure_data(
-        miniscope_module, segmentation_key
+    average_image, max_projection_image, mask_ids, mask_xpix, mask_ypix, _ = (
+        figure_data(miniscope_module, segmentation_key)
     )
 
     average_image = normalize_image(average_image, **kwargs)
@@ -104,12 +104,19 @@ def figure_data(miniscope_module, segmentation_key):
         miniscope_module.Segmentation.Mask & segmentation_key
     ).fetch("mask", "mask_xpix", "mask_ypix", "mask_weights")
 
-    return average_image, max_projection_image, mask_ids, mask_xpix, mask_ypix, mask_weights
+    return (
+        average_image,
+        max_projection_image,
+        mask_ids,
+        mask_xpix,
+        mask_ypix,
+        mask_weights,
+    )
 
 
 def normalize_image(image, low_q=0, high_q=1):
     """Normalize image to [0,1] based on quantile clipping."""
     q_min, q_max = np.quantile(image, [low_q, high_q])
     image = np.clip(image, q_min, q_max)
-    
+
     return ((image - q_min) / (q_max - q_min) * 255).astype(np.uint8)

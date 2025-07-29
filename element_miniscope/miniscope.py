@@ -665,9 +665,7 @@ class Processing(dj.Computed):
                 {**key, "processing_output_dir": output_dir.as_posix()}
             )
         try:
-            output_dir = find_full_path(
-                get_miniscope_root_data_dir(), output_dir
-            )
+            output_dir = find_full_path(get_miniscope_root_data_dir(), output_dir)
         except FileNotFoundError as e:
             if task_mode == "trigger":
                 processed_dir = pathlib.Path(get_processed_root_data_dir())
@@ -715,7 +713,6 @@ class Processing(dj.Computed):
                     is3D=False,
                 )
 
-
                 _, imaging_dataset = get_loader_result(key, ProcessingTask)
                 caiman_dataset = imaging_dataset
                 key["processing_time"] = caiman_dataset.creation_time
@@ -738,7 +735,8 @@ class Processing(dj.Computed):
                 }
                 for f in output_dir.rglob("*")
                 if f.is_file()
-            ], ignore_extra_fields=True,
+            ],
+            ignore_extra_fields=True,
         )
 
 
