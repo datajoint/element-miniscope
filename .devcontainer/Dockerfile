@@ -1,7 +1,7 @@
-FROM python:3.9-slim@sha256:5f0192a4f58a6ce99f732fe05e3b3d00f12ae62e183886bca3ebe3d202686c7f
+FROM python:3.10-slim@sha256:5f0192a4f58a6ce99f732fe05e3b3d00f12ae62e183886bca3ebe3d202686c7f
 
 ENV PATH /usr/local/bin:$PATH
-ENV PYTHON_VERSION 3.9.17
+ENV PYTHON_VERSION 3.10.13
 
 RUN \
     adduser --system --disabled-password --shell /bin/bash vscode && \
@@ -32,11 +32,13 @@ COPY ./ /tmp/element-miniscope/
 RUN \
     # pipeline dependencies
     apt-get install gcc g++ ffmpeg libsm6 libxext6 -y && \
-    pip install numpy Cython && \
-    pip install --no-cache-dir -e /tmp/element-miniscope[elements,caiman_requirements,caiman] && \
-    caimanmanager.py install && \
+    pip install --no-cache-dir -e /tmp/element-miniscope[elements]
+RUN cd ./tmp && git clone https://github.com/datajoint/CaImAn.git && cd ./CaImAn && \
+    pip install -r requirements.txt && pip install -e . && \
+    caimanmanager install --inplace && cd ~ && \
     # clean up
     rm -rf /tmp/element-miniscope && \
+    rm -rf /tmp/CaImAn && \
     apt-get clean
 
 ENV DJ_HOST fakeservices.datajoint.io

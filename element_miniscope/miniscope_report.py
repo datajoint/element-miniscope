@@ -1,13 +1,11 @@
 import datajoint as dj
 
+from . import miniscope
+
 schema = dj.schema()
 
-miniscope = None
 
-
-def activate(
-    schema_name, miniscope_schema_name, *, create_schema=True, create_tables=True
-):
+def activate(schema_name, *, create_schema=True, create_tables=True):
     """Activate this schema.
 
     The "activation" of miniscope_report should be evoked by the miniscope module
@@ -15,15 +13,14 @@ def activate(
     Args:
         schema_name (str): schema name on the database server to activate the
             `miniscope_report` schema
-        miniscope_schema_name (str): schema name of the activated miniscope element for
-            which this miniscope_report schema will be downstream from
         create_schema (bool): when True (default), create schema in the database if it
             does not yet exist.
         create_tables (str): when True (default), create schema takes in the database
             if they do not yet exist.
     """
-    global miniscope
-    miniscope = dj.create_virtual_module("miniscope", miniscope_schema_name)
+    if not miniscope.schema.is_activated():
+        raise RuntimeError("Please activate the `miniscope` schema first.")
+
     schema.activate(
         schema_name,
         create_schema=create_schema,
@@ -35,7 +32,7 @@ def activate(
 @schema
 class QualityMetrics(dj.Imported):
     definition = """
-    -> miniscope.Curation
+    -> miniscope.Processing
     ---
     r_values=null  : longblob # space correlation for each component
     snr=null       : longblob # trace SNR for each component
