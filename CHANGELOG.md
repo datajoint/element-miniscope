@@ -3,6 +3,12 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+## [0.5.0] - 2024-02-05
+
++ Add - New visualization for plotting ROI masks over motion-corrected summary images
++ Remove - `Curation` table from `miniscope.py`
++ Update - `CaImAn` installation management
+
 ## [0.4.2] - 2024-01-29
 
 + Fix - `element-interface` required during package installation
@@ -68,6 +74,7 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 + Add - Load data acquired with Miniscope-DAQ-V3
 + Add - Load data analyzed with MiniscopeAnalysis
 
+[0.5.0]: https://github.com/datajoint/element-miniscope/releases/tag/0.5.0
 [0.4.0]: https://github.com/datajoint/element-miniscope/releases/tag/0.4.0
 [0.3.2]: https://github.com/datajoint/element-miniscope/releases/tag/0.3.2
 [0.3.1]: https://github.com/datajoint/element-miniscope/releases/tag/0.3.1
