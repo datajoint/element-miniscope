@@ -41,5 +41,12 @@ setup(
             "element-session @ git+https://github.com/datajoint/element-session.git",
         ],
         "tests": ["pytest", "pytest-cov", "shutils"],
+        "minian": [
+            "dask==2022.5.0",
+            "xarray==2022.3.0",
+            "pandas==1.5.3",
+            "distributed==2022.5.0",
+            "minian @ git+https://github.com/kushalbakshi/minian.git",
+        ]
     },
 )
